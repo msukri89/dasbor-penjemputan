@@ -32,7 +32,7 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); }
 .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-top: 5px solid transparent; }
 .card h3 { font-size: 11px; color: #6B7280; margin-bottom: 5px; text-transform: uppercase; }
 .card h2 { font-size: 18px; font-weight: 800; }
-.card-petrol { border-top-color: var(--biru-petrol); }
+.card-petrol { border-top-color: var(--biru-muda); }
 .card-muda { border-top-color: var(--biru-muda); }
 .card-lime { border-top-color: var(--hijau-lime); }
 
