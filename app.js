@@ -5,7 +5,7 @@ let grafikUtama = null;
 let grafikInsidental = null;
 let dataBelumBerdonasi = []; 
 
-// Navigasi (Sama seperti sebelumnya)
+// Navigasi
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
 const btnBuka = document.getElementById('openSidebar');
@@ -74,75 +74,76 @@ function kalkulasiDasbor() {
     
     dataBelumBerdonasi = [];
     let totalPemasukan = 0;
+    let bR = 0, bIKP = 0, bIIP = 0, bInsidental = 0;
 
-    // Filter Terima Orang (Termasuk Insidental)
+    // --- PROSES DATA ORANG (Rutin & Insidental) ---
     let tOrangFilter = dataMaster.terima_orang.filter(b => 
         (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && 
         (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka)
     );
     
-    // Hitung Pemasukan & ID Berhasil
     let idRutinBerhasil = new Set();
-    let jumlahInsidental = 0;
-
     tOrangFilter.forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
-        let jenis = String(b["Jenis Donatur"] || "").toUpperCase();
-        if (jenis.includes("RUTIN")) {
+        let jenis = String(b["Jenis Donatur"] || "").toUpperCase().trim();
+        if (jenis === "RUTIN") {
             idRutinBerhasil.add(String(b["Kode Donatur"]).trim());
-        } else {
-            jumlahInsidental++; // Hitung transaksi Insidental
+        } else if (jenis === "INSIDENTAL") {
+            bInsidental++;
         }
     });
+    bR = idRutinBerhasil.size;
 
-    // Filter Master Rutin
-    let mRutinFilter = dataMaster.master_orang.filter(b => 
-        (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && 
-        (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka)
-    );
-
-    // Filter Kotak
-    let mKotakFilter = dataMaster.master_kotak.filter(b => 
-        (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && 
-        (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka)
-    );
+    // --- PROSES DATA KOTAK ---
     let tKotakFilter = dataMaster.terima_kotak.filter(b => 
         (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && 
         (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka)
     );
-
-    let idIKP = new Set(), idIIP = new Set();
+    let idIKPBerhasil = new Set(), idIIPBerhasil = new Set();
     tKotakFilter.forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
-        let sp = String(b.Spesifikasi || "").toUpperCase();
-        if (sp === "IKP") idIKP.add(String(b["Kode Donatur"]).trim());
-        if (sp === "IIP") idIIP.add(String(b["Kode Donatur"]).trim());
+        let sp = String(b.Spesifikasi || "").toUpperCase().trim();
+        if (sp === "IKP") idIKPBerhasil.add(String(b["Kode Donatur"]).trim());
+        if (sp === "IIP") idIIPBerhasil.add(String(b["Kode Donatur"]).trim());
     });
+    bIKP = idIKPBerhasil.size;
+    bIIP = idIIPBerhasil.size;
 
-    // List Belum Berdonasi
-    mRutinFilter.forEach(b => { if (!idRutinBerhasil.has(String(b["Nomor Register"]).trim())) dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: "RUTIN", alamat: b.Alamat, hp: b.Hp, badge: 'badge-rutin' }); });
-    mKotakFilter.forEach(b => {
-        let idReg = String(b["Nomor Register"]).trim();
-        let jenis = String(b.Spesifikasi || "").toUpperCase();
-        let sudah = (jenis === "IKP" && idIKP.has(idReg)) || (jenis === "IIP" && idIIP.has(idReg));
-        if (!sudah) dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: jenis, alamat: b.Alamat, hp: b.Hp, badge: jenis === 'IKP' ? 'badge-ikp' : 'badge-iip' });
-    });
-
-    // Angka Berhasil (Sekarang Termasuk Insidental)
-    let bR = idRutinBerhasil.size;
-    let bIKP = idIKP.size;
-    let bIIP = idIIP.size;
+    // --- MASTER DATA UNTUK KEWAJIBAN ---
+    let mR = dataMaster.master_orang.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
+    let mK = dataMaster.master_kotak.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
     
-    let totalBerhasilRiil = bR + bIKP + bIIP + jumlahInsidental; // INI KUNCI PERBAIKANNYA
-    let totalKewajiban = mRutinFilter.length + mKotakFilter.length;
+    let kR = mR.length;
+    let kIKP = mK.filter(b => String(b.Spesifikasi).toUpperCase() === "IKP").length;
+    let kIIP = mK.filter(b => String(b.Spesifikasi).toUpperCase() === "IIP").length;
 
-    document.getElementById('teksPersentase').innerText = totalKewajiban > 0 ? Math.round((totalBerhasilRiil / totalKewajiban) * 100) + "%" : "0%";
-    document.getElementById('teksKewajiban').innerText = totalKewajiban;
-    document.getElementById('teksBerhasil').innerText = totalBerhasilRiil;
+    // --- DAFTAR BELUM BERDONASI ---
+    mR.forEach(b => {
+        if (!idRutinBerhasil.has(String(b["Nomor Register"]).trim())) {
+            dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: "RUTIN", alamat: b.Alamat, hp: b.Hp, badge: 'badge-rutin' });
+        }
+    });
+    mK.forEach(b => {
+        let idReg = String(b["Nomor Register"]).trim();
+        let jenis = String(b.Spesifikasi).toUpperCase().trim();
+        let sudah = (jenis === "IKP" && idIKPBerhasil.has(idReg)) || (jenis === "IIP" && idIIPBerhasil.has(idReg));
+        if (!sudah) {
+            dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: jenis, alamat: b.Alamat, hp: b.Hp, badge: jenis === 'IKP' ? 'badge-ikp' : 'badge-iip' });
+        }
+    });
+
+    // --- UPDATE UI ---
+    let totalK = kR + kIKP + kIIP;
+    let totalB = bR + bIKP + bIIP + bInsidental;
+    let persentase = totalK > 0 ? Math.round(((bR + bIKP + bIIP) / totalK) * 100) : 0;
+
+    document.getElementById('teksPersentase').innerText = persentase + "%";
+    document.getElementById('teksKewajiban').innerText = totalK;
+    document.getElementById('teksBerhasil').innerText = totalB;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalPemasukan.toLocaleString('id-ID');
 
-    renderGrafikStacked(bR, mRutinFilter.length, bIKP, mKotakFilter.filter(b=>b.Spesifikasi==="IKP").length, bIIP, mKotakFilter.filter(b=>b.Spesifikasi==="IIP").length);
-    renderGrafikInsidental(jumlahInsidental);
+    renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP);
+    renderGrafikInsidental(bInsidental);
 }
 
 function renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP) {
@@ -154,7 +155,7 @@ function renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP) {
             labels: ['Rutin', 'IKP', 'IIP'],
             datasets: [
                 { label: 'Berhasil', data: [bR, bIKP, bIIP], backgroundColor: ['#2E5B72', '#B2C330', '#4FB0C6'], borderWidth: 2, borderColor: '#FFFFFF' },
-                { label: 'Sisa', data: [Math.max(0, kR - bR), Math.max(0, kIKP - bIKP), Math.max(0, kIIP - bIIP)], backgroundColor: '#E5E7EB', borderWidth: 2, borderColor: '#FFFFFF' }
+                { label: 'Sisa', data: [Math.max(0, kR-bR), Math.max(0, kIKP-bIKP), Math.max(0, kIIP-bIIP)], backgroundColor: '#E5E7EB', borderWidth: 2, borderColor: '#FFFFFF' }
             ]
         },
         options: {
@@ -174,10 +175,10 @@ function renderGrafikInsidental(jumlah) {
             labels: ['Insidental'],
             datasets: [{
                 data: [jumlah],
-                backgroundColor: ['#2E5B72'], // Menggunakan Biru Petrol agar elegan
+                backgroundColor: ['#2E5B72'],
                 borderWidth: 2,
                 borderColor: '#FFFFFF',
-                barThickness: 50
+                barThickness: 40
             }]
         },
         options: {
