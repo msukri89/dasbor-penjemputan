@@ -56,13 +56,13 @@ async function mulaiAplikasi() {
         const respons = await fetch(SCRIPT_URL);
         const hasilJson = await respons.json();
         dataMaster = hasilJson.data;
-        console.log("Data berhasil diterima dari Google Sheets");
+        console.log("Data diterima");
         isiDropdownPetugas();
         kalkulasiDasbor();
     } catch (error) {
         console.error("Gagal menarik data:", error);
         document.getElementById('teksPersentase').innerText = "ERROR";
-        alert("Gagal terhubung ke Google Sheets. Pastikan koneksi internet stabil.");
+        alert("Gagal terhubung ke Google Sheets.");
     }
 }
 
@@ -72,7 +72,6 @@ function isiDropdownPetugas() {
     dataMaster.master_orang.forEach(b => { if(b.Kolektor) daftarPetugas.add(String(b.Kolektor).trim()); });
     dataMaster.master_kotak.forEach(b => { if(b.Kolektor) daftarPetugas.add(String(b.Kolektor).trim()); });
     
-    // Bersihkan dropdown sebelum mengisi
     dropdown.innerHTML = '<option value="Semua">Semua Petugas</option>';
     daftarPetugas.forEach(nama => {
         let opsi = document.createElement('option'); 
@@ -82,7 +81,7 @@ function isiDropdownPetugas() {
     });
 }
 
-// MESIN PENDETEKSI TANGGAL -> PEKAN
+// MESIN PENDETEKSI TANGGAL -> PEKAN (1-7=P1, 8-14=P2, 15-21=P3, 22-31=P4)
 function tentukanPekanTransaksi(tglStr) {
     if (!tglStr) return "0";
     let str = String(tglStr);
@@ -92,7 +91,6 @@ function tentukanPekanTransaksi(tglStr) {
         if (str.includes('/')) {
             hari = parseInt(str.split('/')[0], 10);
         } else if (str.includes('-')) {
-            // Cek jika format YYYY-MM-DD
             let parts = str.split('T')[0].split('-');
             hari = parseInt(parts[parts.length - 1], 10);
         } else {
@@ -194,13 +192,11 @@ function kalkulasiDasbor() {
     let kewajibanOrang = masterOrangFilter.length;
     let kewajibanIKP = masterKotakFilter.filter(b => b.Spesifikasi === "IKP").length;
     let kewajibanIIP = masterKotakFilter.filter(b => b.Spesifikasi === "IIP").length;
-    
     totalKewajiban = kewajibanOrang + kewajibanIKP + kewajibanIIP;
     
     let berhasilOrang = 0; 
     let berhasilIKP = 0; 
     let berhasilIIP = 0;
-    
     masterOrangFilter.forEach(b => { if (idUnikOrang.has(String(b["Nomor Register"]).trim())) berhasilOrang++; });
     masterKotakFilter.forEach(b => {
         let id = String(b["Nomor Register"]).trim();
@@ -211,7 +207,6 @@ function kalkulasiDasbor() {
     totalBerhasil = berhasilOrang + berhasilIKP + berhasilIIP;
     let persentase = totalKewajiban === 0 ? 0 : Math.round((totalBerhasil / totalKewajiban) * 100);
 
-    // Update Layar
     document.getElementById('teksPersentase').innerText = persentase + "%";
     document.getElementById('teksKewajiban').innerText = totalKewajiban;
     document.getElementById('teksBerhasil').innerText = totalBerhasil;
@@ -227,7 +222,7 @@ function tampilkanDaftarBelum() {
     wadah.innerHTML = ""; 
 
     if (dataBelumBerdonasi.length === 0) {
-        wadah.innerHTML = "<p style='text-align:center; color:#9CA3AF; margin-top:20px;'>Semua donatur pada periode/petugas ini sudah berdonasi. Hebat!</p>";
+        wadah.innerHTML = "<p style='text-align:center; color:#9CA3AF; margin-top:20px;'>Semua donatur pada periode ini sudah berdonasi.</p>";
         return;
     }
 
@@ -257,14 +252,7 @@ function gambarGrafikOrang(berhasil, sisa) {
     if (grafikOrang) grafikOrang.destroy();
     grafikOrang = new Chart(ctx, {
         type: 'doughnut',
-        data: { 
-            labels: ['Sudah', 'Belum'], 
-            datasets: [{ 
-                data: [berhasil, sisa > 0 ? sisa : 0], 
-                backgroundColor: ['#2563EB', '#E5E7EB'], 
-                borderWidth: 0 
-            }] 
-        },
+        data: { labels: ['Sudah', 'Belum'], datasets: [{ data: [berhasil, sisa > 0 ? sisa : 0], backgroundColor: ['#2563EB', '#E5E7EB'], borderWidth: 0 }] },
         options: { cutout: '70%', responsive: true }
     });
 }
@@ -288,5 +276,4 @@ function gambarGrafikKotak(bIKP, tIKP, bIIP, tIIP) {
 document.getElementById('filterPetugas').addEventListener('change', kalkulasiDasbor);
 document.getElementById('filterPekan').addEventListener('change', kalkulasiDasbor);
 
-// Jalankan aplikasi
 mulaiAplikasi();
