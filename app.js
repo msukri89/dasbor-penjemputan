@@ -81,12 +81,11 @@ function isiDropdownPetugas() {
     });
 }
 
-// MESIN PENDETEKSI TANGGAL -> PEKAN (1-7=P1, 8-14=P2, 15-21=P3, 22-31=P4)
+// MESIN PENDETEKSI TANGGAL -> PEKAN
 function tentukanPekanTransaksi(tglStr) {
     if (!tglStr) return "0";
     let str = String(tglStr);
     let hari = 0;
-    
     try {
         if (str.includes('/')) {
             hari = parseInt(str.split('/')[0], 10);
@@ -142,7 +141,8 @@ function kalkulasiDasbor() {
                 kategori: b["Jenis Donatur"] || "RUTIN",
                 alamat: b.Alamat || "-",
                 nominal: b.Nominal ? "Rp " + Number(b.Nominal).toLocaleString('id-ID') : "-",
-                hp: b.Hp ? String(b.Hp) : ""
+                hp: b.Hp ? String(b.Hp) : "",
+                badgeClass: "badge-rutin" // Warna Biru
             });
         }
     });
@@ -166,8 +166,10 @@ function kalkulasiDasbor() {
     terimaKotakFilter.forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
         let id = String(b["Kode Donatur"]).trim();
-        if (b["Jenis.1"] === "IKP") idUnikIKP.add(id);
-        if (b["Jenis.1"] === "IIP") idUnikIIP.add(id);
+        // PERBAIKAN: Membaca dari kolom 'Spesifikasi'
+        let jenisKotak = String(b.Spesifikasi).toUpperCase();
+        if (jenisKotak === "IKP") idUnikIKP.add(id);
+        if (jenisKotak === "IIP") idUnikIIP.add(id);
     });
 
     masterKotakFilter.forEach(b => {
@@ -184,7 +186,8 @@ function kalkulasiDasbor() {
                 kategori: b.Spesifikasi || "-",
                 alamat: b.Alamat || "-",
                 nominal: "Kotak Amal",
-                hp: b.Hp ? String(b.Hp) : ""
+                hp: b.Hp ? String(b.Hp) : "",
+                badgeClass: "badge-kotak" // Warna Olive
             });
         }
     });
@@ -234,7 +237,7 @@ function tampilkanDaftarBelum() {
         let htmlKartu = `
             <div class="kartu-belum">
                 <div class="info-teks">
-                    <h4>${donatur.nama} <span class="badge">${donatur.kategori}</span></h4>
+                    <h4>${donatur.nama} <span class="badge ${donatur.badgeClass}">${donatur.kategori}</span></h4>
                     <p class="alamat-teks"><i class="fas fa-map-marker-alt"></i> ${donatur.alamat}</p>
                     <p class="nominal-teks">${donatur.nominal}</p>
                 </div>
@@ -265,7 +268,7 @@ function gambarGrafikKotak(bIKP, tIKP, bIIP, tIIP) {
         data: {
             labels: ['IKP', 'IIP'],
             datasets: [
-                { label: 'Berhasil', data: [bIKP, bIIP], backgroundColor: '#2563EB' },
+                { label: 'Berhasil', data: [bIKP, bIIP], backgroundColor: '#808000' }, // WARNA HIJAU OLIVE
                 { label: 'Target', data: [tIKP, tIIP], backgroundColor: '#E5E7EB' }
             ]
         },
