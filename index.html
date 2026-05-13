@@ -7,8 +7,8 @@
     
     <meta name="theme-color" content="#2E5B72">
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
 
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,6 +20,7 @@
         <div class="sidebar-header">
             <div style="display: flex; align-items: center;">
                 <img src="logo.png" alt="Logo" style="height: 35px; margin-right: 10px;">
+                <h2 style="font-size: 16px;">LAZ Sidogiri</h2>
             </div>
             <button id="closeSidebar" class="close-btn"><i class="fas fa-times"></i></button>
         </div>
@@ -72,12 +73,9 @@
             
             <div class="charts-area">
                 <div class="chart-container">
-                    <h3>Performa Terpadu</h3>
-                    <p style="font-size: 10px; text-align: center; color: #6B7280; margin-bottom: 10px;">
-                        Luar: Rutin | Tengah: IKP | Dalam: IIP
-                    </p>
-                    <div style="position: relative; height: 300px;">
-                        <canvas id="grafikMultiLevel"></canvas>
+                    <h3>Performa Realisasi</h3>
+                    <div style="height: 320px;">
+                        <canvas id="grafikUtama"></canvas>
                     </div>
                 </div>
             </div>
