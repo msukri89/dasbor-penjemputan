@@ -1,7 +1,7 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Dcig9_jLXMp5z2cAjqE5hssYFC02QyrFg4sUaeUG1crik9LwRY54EnVgwIDMwaw/exec";
 
 let dataMaster = null;
-let grafikMultiLevel = null;
+let grafikUtama = null;
 let dataBelumBerdonasi = []; 
 
 // Navigasi
@@ -30,7 +30,7 @@ menuBelum.addEventListener('click', (e) => {
     tampilkanDaftarBelum();
 });
 
-// Jalankan Aplikasi
+// Mulai Aplikasi
 async function mulaiAplikasi() {
     try {
         const respons = await fetch(SCRIPT_URL);
@@ -39,7 +39,7 @@ async function mulaiAplikasi() {
         isiDropdownPetugas();
         kalkulasiDasbor();
     } catch (error) {
-        document.getElementById('teksPersentase').innerText = "ERR";
+        console.error(error);
     }
 }
 
@@ -79,36 +79,31 @@ function kalkulasiDasbor() {
     dataBelumBerdonasi = [];
     let totalPemasukan = 0;
 
-    let mOrang = dataMaster.master_orang.filter(b => 
-        (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka)
-    );
-    let tOrang = dataMaster.terima_orang.filter(b => 
-        (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka)
-    );
-    let idUnikOrang = new Set(tOrang.map(b => String(b["Kode Donatur"]).trim()));
-    tOrang.forEach(b => totalPemasukan += Number(b.Nominal || 0));
+    // Rutin
+    let mR = dataMaster.master_orang.filter(b => (filterPetugas === "Semua" || b.Kolektor === filterPetugas) && (filterPekan === "Total" || String(b.Pekan) === pekanAngka));
+    let tR = dataMaster.terima_orang.filter(b => (filterPetugas === "Semua" || b["Nama User"] === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka));
+    let idR = new Set(tR.map(b => String(b["Kode Donatur"]).trim()));
+    tR.forEach(b => totalPemasukan += Number(b.Nominal || 0));
 
-    let mKotak = dataMaster.master_kotak.filter(b => 
-        (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka)
-    );
-    let tKotak = dataMaster.terima_kotak.filter(b => 
-        (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka)
-    );
+    // Kotak
+    let mK = dataMaster.master_kotak.filter(b => (filterPetugas === "Semua" || b.Kolektor === filterPetugas) && (filterPekan === "Total" || String(b.Pekan) === pekanAngka));
+    let tK = dataMaster.terima_kotak.filter(b => (filterPetugas === "Semua" || b["Nama User"] === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka));
 
     let idIKP = new Set(), idIIP = new Set();
-    tKotak.forEach(b => {
+    tK.forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
-        let spesifikasi = String(b.Spesifikasi).toUpperCase();
-        if (spesifikasi === "IKP") idIKP.add(String(b["Kode Donatur"]).trim());
-        if (spesifikasi === "IIP") idIIP.add(String(b["Kode Donatur"]).trim());
+        let sp = String(b.Spesifikasi).toUpperCase();
+        if (sp === "IKP") idIKP.add(String(b["Kode Donatur"]).trim());
+        if (sp === "IIP") idIIP.add(String(b["Kode Donatur"]).trim());
     });
 
-    mOrang.forEach(b => {
-        if (!idUnikOrang.has(String(b["Nomor Register"]).trim())) {
+    // Belum Berdonasi
+    mR.forEach(b => {
+        if (!idR.has(String(b["Nomor Register"]).trim())) {
             dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: "RUTIN", alamat: b.Alamat, hp: b.Hp, badge: 'badge-rutin' });
         }
     });
-    mKotak.forEach(b => {
+    mK.forEach(b => {
         let idReg = String(b["Nomor Register"]).trim();
         let jenis = String(b.Spesifikasi).toUpperCase();
         let sudah = (jenis === "IKP" && idIKP.has(idReg)) || (jenis === "IIP" && idIIP.has(idReg));
@@ -117,23 +112,18 @@ function kalkulasiDasbor() {
         }
     });
 
-    let bR = mOrang.filter(b => idUnikOrang.has(String(b["Nomor Register"]).trim())).length;
-    let kR = mOrang.length;
-    let bIKP = mKotak.filter(b => b.Spesifikasi === "IKP" && idIKP.has(String(b["Nomor Register"]).trim())).length;
-    let kIKP = mKotak.filter(b => b.Spesifikasi === "IKP").length;
-    let bIIP = mKotak.filter(b => b.Spesifikasi === "IIP" && idIIP.has(String(b["Nomor Register"]).trim())).length;
-    let kIIP = mKotak.filter(b => b.Spesifikasi === "IIP").length;
+    let bR = mR.filter(b => idR.has(String(b["Nomor Register"]).trim())).length;
+    let bIKP = mK.filter(b => b.Spesifikasi === "IKP" && idIKP.has(String(b["Nomor Register"]).trim())).length;
+    let bIIP = mK.filter(b => b.Spesifikasi === "IIP" && idIIP.has(String(b["Nomor Register"]).trim())).length;
+    
+    let kR = mR.length, kIKP = mK.filter(b => b.Spesifikasi === "IKP").length, kIIP = mK.filter(b => b.Spesifikasi === "IIP").length;
 
-    let tK = kR + kIKP + kIIP;
-    let tB = bR + bIKP + bIIP;
-    let persentase = tK === 0 ? 0 : Math.round((tB / tK) * 100);
-
-    document.getElementById('teksPersentase').innerText = persentase + "%";
-    document.getElementById('teksKewajiban').innerText = tK;
-    document.getElementById('teksBerhasil').innerText = tB;
+    document.getElementById('teksPersentase').innerText = Math.round(((bR+bIKP+bIIP)/(kR+kIKP+kIIP || 1))*100) + "%";
+    document.getElementById('teksKewajiban').innerText = kR + kIKP + kIIP;
+    document.getElementById('teksBerhasil').innerText = bR + bIKP + bIIP;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalPemasukan.toLocaleString('id-ID');
 
-    renderGrafikTerpadu(bR, kR, bIKP, kIKP, bIIP, kIIP);
+    renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP);
 }
 
 function tampilkanDaftarBelum() {
@@ -149,40 +139,34 @@ function tampilkanDaftarBelum() {
             <div class="kartu-belum" style="border-left: 5px solid ${warnaB}">
                 <div class="info-teks">
                     <h4>${donatur.nama} <span class="badge ${donatur.badge}">${donatur.kategori}</span></h4>
-                    <p class="alamat-teks"><i class="fas fa-map-marker-alt"></i> ${donatur.alamat}</p>
+                    <p class="alamat-teks">${donatur.alamat}</p>
                 </div>
                 <a href="${noHp ? 'https://wa.me/'+noHp : '#'}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
             </div>`;
     });
 }
 
-function renderGrafikTerpadu(bR, kR, bIKP, kIKP, bIIP, kIIP) {
-    const ctx = document.getElementById('grafikMultiLevel').getContext('2d');
-    if (grafikMultiLevel) grafikMultiLevel.destroy();
+function renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP) {
+    const ctx = document.getElementById('grafikUtama').getContext('2d');
+    if (grafikUtama) grafikUtama.destroy();
     
-    grafikMultiLevel = new Chart(ctx, {
-        type: 'doughnut',
+    grafikUtama = new Chart(ctx, {
+        type: 'bar',
         data: {
+            labels: ['Rutin', 'IKP', 'IIP'],
             datasets: [
                 {
-                    label: 'Rutin',
-                    data: [bR, kR - bR],
-                    backgroundColor: ['#2E5B72', '#E5E7EB'],
-                    borderWidth: 3, // Garis putih tipis (tebal)
+                    label: 'Berhasil',
+                    data: [bR, bIKP, bIIP],
+                    backgroundColor: ['#2E5B72', '#B2C330', '#4FB0C6'],
+                    borderWidth: 2,
                     borderColor: '#FFFFFF'
                 },
                 {
-                    label: 'IKP',
-                    data: [bIKP, kIKP - bIKP],
-                    backgroundColor: ['#B2C330', '#E5E7EB'],
-                    borderWidth: 3,
-                    borderColor: '#FFFFFF'
-                },
-                {
-                    label: 'IIP',
-                    data: [bIIP, kIIP - bIIP],
-                    backgroundColor: ['#4FB0C6', '#E5E7EB'],
-                    borderWidth: 3,
+                    label: 'Sisa',
+                    data: [kR - bR, kIKP - bIKP, kIIP - bIIP],
+                    backgroundColor: '#E5E7EB',
+                    borderWidth: 2,
                     borderColor: '#FFFFFF'
                 }
             ]
@@ -190,17 +174,8 @@ function renderGrafikTerpadu(bR, kR, bIKP, kIKP, bIIP, kIIP) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '30%',
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(item) {
-                            let status = item.dataIndex === 0 ? "Berhasil" : "Sisa";
-                            return item.dataset.label + " (" + status + "): " + item.raw;
-                        }
-                    }
-                }
-            }
+            scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+            plugins: { legend: { display: false } }
         }
     });
 }
@@ -208,5 +183,4 @@ function renderGrafikTerpadu(bR, kR, bIKP, kIKP, bIIP, kIIP) {
 document.getElementById('filterPetugas').addEventListener('change', kalkulasiDasbor);
 document.getElementById('filterPekan').addEventListener('change', kalkulasiDasbor);
 document.getElementById('filterJenisDonatur').addEventListener('change', tampilkanDaftarBelum);
-
 mulaiAplikasi();
