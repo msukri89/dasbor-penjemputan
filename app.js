@@ -4,7 +4,7 @@ let dataMaster = null;
 let grafikUtama = null;
 let dataBelumBerdonasi = []; 
 
-// Navigasi
+// Setup Navigasi
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
 const btnBuka = document.getElementById('openSidebar');
@@ -30,7 +30,7 @@ menuBelum.addEventListener('click', (e) => {
     tampilkanDaftarBelum();
 });
 
-// Mulai Aplikasi
+// Jalankan Aplikasi
 async function mulaiAplikasi() {
     try {
         const respons = await fetch(SCRIPT_URL);
@@ -39,7 +39,7 @@ async function mulaiAplikasi() {
         isiDropdownPetugas();
         kalkulasiDasbor();
     } catch (error) {
-        console.error(error);
+        document.getElementById('teksPersentase').innerText = "ERR";
     }
 }
 
@@ -63,11 +63,7 @@ function tentukanPekanTransaksi(tglStr) {
         else if (str.includes('-')) { hari = parseInt(str.split('T')[0].split('-')[2], 10); } 
         else { let d = new Date(str); hari = d.getDate(); }
     } catch(e) { return "0"; }
-    if (hari >= 1 && hari <= 7) return "1";
-    if (hari >= 8 && hari <= 14) return "2";
-    if (hari >= 15 && hari <= 21) return "3";
-    if (hari >= 22) return "4";
-    return "0";
+    return (hari >= 1 && hari <= 7) ? "1" : (hari >= 8 && hari <= 14) ? "2" : (hari >= 15 && hari <= 21) ? "3" : (hari >= 22) ? "4" : "0";
 }
 
 function kalkulasiDasbor() {
@@ -79,48 +75,45 @@ function kalkulasiDasbor() {
     dataBelumBerdonasi = [];
     let totalPemasukan = 0;
 
-    // Rutin
-    let mR = dataMaster.master_orang.filter(b => (filterPetugas === "Semua" || b.Kolektor === filterPetugas) && (filterPekan === "Total" || String(b.Pekan) === pekanAngka));
-    let tR = dataMaster.terima_orang.filter(b => (filterPetugas === "Semua" || b["Nama User"] === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka));
+    // Filter Data Rutin
+    let mR = dataMaster.master_orang.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
+    let tR = dataMaster.terima_orang.filter(b => (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka));
     let idR = new Set(tR.map(b => String(b["Kode Donatur"]).trim()));
     tR.forEach(b => totalPemasukan += Number(b.Nominal || 0));
 
-    // Kotak
-    let mK = dataMaster.master_kotak.filter(b => (filterPetugas === "Semua" || b.Kolektor === filterPetugas) && (filterPekan === "Total" || String(b.Pekan) === pekanAngka));
-    let tK = dataMaster.terima_kotak.filter(b => (filterPetugas === "Semua" || b["Nama User"] === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka));
-
+    // Filter Data Kotak
+    let mK = dataMaster.master_kotak.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
+    let tK = dataMaster.terima_kotak.filter(b => (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka));
     let idIKP = new Set(), idIIP = new Set();
     tK.forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
-        let sp = String(b.Spesifikasi).toUpperCase();
+        let sp = String(b.Spesifikasi || "").toUpperCase();
         if (sp === "IKP") idIKP.add(String(b["Kode Donatur"]).trim());
         if (sp === "IIP") idIIP.add(String(b["Kode Donatur"]).trim());
     });
 
-    // Belum Berdonasi
-    mR.forEach(b => {
-        if (!idR.has(String(b["Nomor Register"]).trim())) {
-            dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: "RUTIN", alamat: b.Alamat, hp: b.Hp, badge: 'badge-rutin' });
-        }
-    });
+    // List Belum Berdonasi
+    mR.forEach(b => { if (!idR.has(String(b["Nomor Register"]).trim())) dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: "RUTIN", alamat: b.Alamat, hp: b.Hp, badge: 'badge-rutin' }); });
     mK.forEach(b => {
         let idReg = String(b["Nomor Register"]).trim();
-        let jenis = String(b.Spesifikasi).toUpperCase();
+        let jenis = String(b.Spesifikasi || "").toUpperCase();
         let sudah = (jenis === "IKP" && idIKP.has(idReg)) || (jenis === "IIP" && idIIP.has(idReg));
-        if (!sudah) {
-            dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: jenis, alamat: b.Alamat, hp: b.Hp, badge: jenis === 'IKP' ? 'badge-ikp' : 'badge-iip' });
-        }
+        if (!sudah) dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: jenis, alamat: b.Alamat, hp: b.Hp, badge: jenis === 'IKP' ? 'badge-ikp' : 'badge-iip' });
     });
 
+    // Statistik
     let bR = mR.filter(b => idR.has(String(b["Nomor Register"]).trim())).length;
     let bIKP = mK.filter(b => b.Spesifikasi === "IKP" && idIKP.has(String(b["Nomor Register"]).trim())).length;
     let bIIP = mK.filter(b => b.Spesifikasi === "IIP" && idIIP.has(String(b["Nomor Register"]).trim())).length;
-    
     let kR = mR.length, kIKP = mK.filter(b => b.Spesifikasi === "IKP").length, kIIP = mK.filter(b => b.Spesifikasi === "IIP").length;
 
-    document.getElementById('teksPersentase').innerText = Math.round(((bR+bIKP+bIIP)/(kR+kIKP+kIIP || 1))*100) + "%";
-    document.getElementById('teksKewajiban').innerText = kR + kIKP + kIIP;
-    document.getElementById('teksBerhasil').innerText = bR + bIKP + bIIP;
+    let totalK = kR + kIKP + kIIP;
+    let totalB = bR + bIKP + bIIP;
+    let persentase = totalK > 0 ? Math.round((totalB / totalK) * 100) : 0;
+
+    document.getElementById('teksPersentase').innerText = persentase + "%";
+    document.getElementById('teksKewajiban').innerText = totalK;
+    document.getElementById('teksBerhasil').innerText = totalB;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalPemasukan.toLocaleString('id-ID');
 
     renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP);
@@ -149,31 +142,17 @@ function tampilkanDaftarBelum() {
 function renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP) {
     const ctx = document.getElementById('grafikUtama').getContext('2d');
     if (grafikUtama) grafikUtama.destroy();
-    
     grafikUtama = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['Rutin', 'IKP', 'IIP'],
             datasets: [
-                {
-                    label: 'Berhasil',
-                    data: [bR, bIKP, bIIP],
-                    backgroundColor: ['#2E5B72', '#B2C330', '#4FB0C6'],
-                    borderWidth: 2,
-                    borderColor: '#FFFFFF'
-                },
-                {
-                    label: 'Sisa',
-                    data: [kR - bR, kIKP - bIKP, kIIP - bIIP],
-                    backgroundColor: '#E5E7EB',
-                    borderWidth: 2,
-                    borderColor: '#FFFFFF'
-                }
+                { label: 'Berhasil', data: [bR, bIKP, bIIP], backgroundColor: ['#2E5B72', '#B2C330', '#4FB0C6'], borderWidth: 2, borderColor: '#FFFFFF' },
+                { label: 'Sisa', data: [kR - bR, kIKP - bIKP, kIIP - bIIP], backgroundColor: '#E5E7EB', borderWidth: 2, borderColor: '#FFFFFF' }
             ]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
             plugins: { legend: { display: false } }
         }
