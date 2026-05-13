@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dasbor Penjemputan</title>
+    
+    <meta name="theme-color" content="#2563EB">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3204/3204005.png">
+
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -32,12 +37,13 @@
         <div class="filter-area">
             <select id="filterPetugas" class="dropdown-biru">
                 <option value="Semua">Semua Petugas</option>
-                <option value="MUHAMMAD HASYIM">MUHAMMAD HASYIM</option>
-                </select>
+            </select>
             <select id="filterPekan" class="dropdown-biru">
                 <option value="Total">Total Bulan Ini</option>
                 <option value="Pekan 1">Pekan 1</option>
                 <option value="Pekan 2">Pekan 2</option>
+                <option value="Pekan 3">Pekan 3</option>
+                <option value="Pekan 4">Pekan 4</option>
             </select>
         </div>
 
@@ -73,5 +79,15 @@
     </div>
 
     <script src="app.js"></script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('PWA Siap!'))
+            .catch(err => console.log('PWA Gagal', err));
+        });
+      }
+    </script>
 </body>
 </html>
