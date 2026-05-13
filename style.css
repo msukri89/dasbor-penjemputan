@@ -1,74 +1,57 @@
 :root {
-    --warna-putih: #F8F9FA;      /* 60% Latar Belakang Utama */
+    --warna-putih: #F8F9FA;      /* 60% Latar belakang */
     --warna-putih-kartu: #FFFFFF; 
-    --warna-biru: #2563EB;       /* 15% Untuk Perorangan/Rutin */
-    --warna-olive: #808000;      /* 15% Untuk Kotak IKP/IIP */
-    --warna-hitam: #111827;      /* 10% Teks Utama & Ikon */
-    --warna-abu: #9CA3AF;        /* Sisa/Target Grafik */
+    --biru-petrol: #2E5B72;      /* 15% Warna Perorangan */
+    --hijau-lime: #B2C330;       /* 15% Warna Kotak */
+    --warna-hitam: #1A1A1A;      /* 10% Teks tegas */
+    --warna-abu: #E5E7EB;        /* Warna target/sisa */
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-body { background-color: var(--warna-putih); color: var(--warna-hitam); line-height: 1.5; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+body { background-color: var(--warna-putih); color: var(--warna-hitam); }
 
 /* Sidebar */
-.sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100vh; background-color: var(--warna-putih-kartu); box-shadow: 4px 0 10px rgba(0,0,0,0.1); transition: 0.3s ease; z-index: 1000; }
+.sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100vh; background: white; box-shadow: 4px 0 10px rgba(0,0,0,0.1); transition: 0.3s; z-index: 1000; }
 .sidebar.terbuka { left: 0; }
-.sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #e5e7eb; }
-.sidebar-header h2 { color: var(--warna-hitam); font-size: 18px;}
-.close-btn { background: none; border: none; font-size: 20px; color: var(--warna-hitam); cursor: pointer;}
-.menu-list { list-style: none; padding: 20px 0;}
+.sidebar-header { display: flex; align-items: center; padding: 20px; border-bottom: 1px solid #eee; justify-content: space-between; }
+.menu-list { list-style: none; padding: 20px 0; }
 .menu-list li a { display: block; padding: 15px 20px; text-decoration: none; color: var(--warna-hitam); font-weight: 500; }
-.menu-list li a i { margin-right: 10px; }
-/* Warna Biru saat Menu Aktif */
-.menu-list li a.aktif { background-color: var(--warna-biru); color: var(--warna-putih-kartu); }
-.menu-list li a.aktif i { color: var(--warna-putih-kartu); }
+.menu-list li a.aktif { background: var(--biru-petrol); color: white; }
 
-/* Overlay & Topbar */
 .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
 .overlay.terbuka { display: block; }
-.topbar { display: flex; align-items: center; padding: 15px 20px; background-color: var(--warna-putih-kartu); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-.burger-btn { background: none; border: none; font-size: 24px; color: var(--warna-hitam); cursor: pointer; margin-right: 15px; }
-.page-title { font-size: 20px; font-weight: bold; color: var(--warna-hitam); }
 
-/* Main Content & Filter */
-.main-content { padding: 20px; max-width: 800px; margin: auto; }
-.filter-area { display: flex; gap: 10px; margin-bottom: 20px; }
-/* Dropdown tetap Biru sebagai warna aksi utama */
-.dropdown-biru { flex: 1; padding: 12px; background-color: var(--warna-biru); color: var(--warna-putih-kartu); border: none; border-radius: 8px; font-size: 14px; font-weight: bold; outline: none; cursor: pointer; }
+/* Topbar & Filter */
+.topbar { display: flex; align-items: center; padding: 15px 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.burger-btn { background: none; border: none; font-size: 24px; cursor: pointer; margin-right: 15px; color: var(--biru-petrol); }
+.page-title { font-size: 18px; font-weight: bold; }
 
-/* Dashboard Cards & Charts */
-.summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-.card { background: var(--warna-putih-kartu); padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--warna-biru); }
-/* Variasi kartu: Kartu kedua dan keempat kita beri aksen Olive agar seimbang */
-.summary-cards .card:nth-child(even) { border-bottom: 4px solid var(--warna-olive); }
+.filter-area { display: flex; gap: 10px; margin: 20px; }
+.dropdown-aksen { flex: 1; padding: 12px; background: var(--biru-petrol); color: white; border: none; border-radius: 8px; font-weight: bold; }
 
-.card h3 { font-size: 13px; color: var(--warna-abu); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-.card h2 { font-size: 22px; color: var(--warna-hitam); font-weight: 800; }
+/* Summary Cards */
+.main-content { padding-bottom: 50px; }
+.summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px; margin-bottom: 25px; }
+.card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+.card h3 { font-size: 12px; color: #6B7280; margin-bottom: 5px; }
+.card h2 { font-size: 20px; font-weight: 800; }
+.card-biru { border-top: 4px solid var(--biru-petrol); }
+.card-hijau { border-top: 4px solid var(--hijau-lime); }
 
-.charts-area { display: flex; flex-direction: column; gap: 20px; }
-.chart-container { background: var(--warna-putih-kartu); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-.chart-container h3 { margin-bottom: 15px; font-size: 16px; text-align: center; color: var(--warna-hitam); }
+/* Charts */
+.charts-area { padding: 0 20px; display: flex; flex-direction: column; gap: 20px; }
+.chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+.chart-container h3 { margin-bottom: 15px; font-size: 15px; text-align: center; color: var(--biru-petrol); }
 
-/* Kartu Daftar Belum Berdonasi */
-.kartu-belum {
-    background: var(--warna-putih-kartu); padding: 15px; border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 12px;
-    display: flex; justify-content: space-between; align-items: center;
-}
-.info-teks h4 { font-size: 15px; color: var(--warna-hitam); margin-bottom: 4px; display: flex; align-items: center; gap: 8px;}
+/* Halaman Belum Berdonasi */
+.header-halaman { padding: 0 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+.dropdown-kecil { padding: 5px 10px; border-radius: 5px; border: 1px solid var(--biru-petrol); color: var(--biru-petrol); font-weight: bold; }
+#wadahDaftarBelum { padding: 0 20px; }
 
-/* Badge Kategori */
-.badge { font-size: 10px; padding: 3px 10px; border-radius: 20px; color: white; font-weight: bold; text-transform: uppercase; }
-.badge-rutin { background-color: var(--warna-biru); }
-.badge-kotak { background-color: var(--warna-olive); }
-
-.alamat-teks { font-size: 12px; color: var(--warna-abu); margin-bottom: 4px; }
-.nominal-teks { font-size: 14px; font-weight: bold; color: var(--warna-hitam); }
-
-.btn-wa {
-    background-color: #25D366; color: white; width: 45px; height: 45px; border-radius: 50%;
-    display: flex; justify-content: center; align-items: center; text-decoration: none;
-    font-size: 22px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); flex-shrink: 0;
-    transition: transform 0.2s;
-}
-.btn-wa:active { transform: scale(0.9); }
+.kartu-belum { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--biru-petrol); }
+.info-teks h4 { font-size: 14px; margin-bottom: 4px; }
+.badge { font-size: 9px; padding: 2px 8px; border-radius: 10px; color: white; font-weight: bold; }
+.badge-rutin { background: var(--biru-petrol); }
+.badge-kotak { background: var(--hijau-lime); }
+.alamat-teks { font-size: 12px; color: #6B7280; }
+.btn-wa { background: #25D366; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 20px; }
