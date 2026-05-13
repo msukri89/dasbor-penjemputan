@@ -1,0 +1,15 @@
+{
+  "name": "Dasbor Penjemputan Donasi",
+  "short_name": "Dasbor",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F8F9FA",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3204/3204005.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
