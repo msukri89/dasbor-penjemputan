@@ -75,13 +75,11 @@ function kalkulasiDasbor() {
     dataBelumBerdonasi = [];
     let totalPemasukan = 0;
 
-    // Filter Data Rutin
     let mR = dataMaster.master_orang.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
     let tR = dataMaster.terima_orang.filter(b => (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka));
     let idR = new Set(tR.map(b => String(b["Kode Donatur"]).trim()));
     tR.forEach(b => totalPemasukan += Number(b.Nominal || 0));
 
-    // Filter Data Kotak
     let mK = dataMaster.master_kotak.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
     let tK = dataMaster.terima_kotak.filter(b => (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka));
     let idIKP = new Set(), idIIP = new Set();
@@ -92,7 +90,6 @@ function kalkulasiDasbor() {
         if (sp === "IIP") idIIP.add(String(b["Kode Donatur"]).trim());
     });
 
-    // List Belum Berdonasi
     mR.forEach(b => { if (!idR.has(String(b["Nomor Register"]).trim())) dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: "RUTIN", alamat: b.Alamat, hp: b.Hp, badge: 'badge-rutin' }); });
     mK.forEach(b => {
         let idReg = String(b["Nomor Register"]).trim();
@@ -101,7 +98,6 @@ function kalkulasiDasbor() {
         if (!sudah) dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: jenis, alamat: b.Alamat, hp: b.Hp, badge: jenis === 'IKP' ? 'badge-ikp' : 'badge-iip' });
     });
 
-    // Statistik
     let bR = mR.filter(b => idR.has(String(b["Nomor Register"]).trim())).length;
     let bIKP = mK.filter(b => b.Spesifikasi === "IKP" && idIKP.has(String(b["Nomor Register"]).trim())).length;
     let bIIP = mK.filter(b => b.Spesifikasi === "IIP" && idIIP.has(String(b["Nomor Register"]).trim())).length;
@@ -124,17 +120,24 @@ function tampilkanDaftarBelum() {
     const filterJenis = document.getElementById('filterJenisDonatur').value;
     wadah.innerHTML = ""; 
     let dataF = (filterJenis === "Semua") ? dataBelumBerdonasi : dataBelumBerdonasi.filter(d => d.kategori === filterJenis);
+    
     dataF.forEach(donatur => {
         let noHp = String(donatur.hp || "").replace(/[^0-9]/g, '');
         if (noHp.startsWith('0')) noHp = '62' + noHp.substring(1); 
+        
+        // --- PESAN OTOMATIS WHATSAPP ---
+        let pesan = `Assalamu'alaikum Warahmatullah, Bapak/Ibu *${donatur.nama}*. Semoga Allah senantiasa memberikan kesehatan pada Bapak/Ibu sekeluarga, dan dianugerahi rizki yang halal dan berkah. Amiin... Mohon maaf mengganggu waktunya, kami dari petugas LAZ Sidogiri bermaksud untuk melakukan penjemputan donasi. Apakah ada waktu luang hari ini? Jazakumullah Khairan.`;
+        let linkWa = noHp ? `https://wa.me/${noHp}?text=${encodeURIComponent(pesan)}` : '#';
+        
         let warnaB = donatur.kategori === 'RUTIN' ? '#2E5B72' : (donatur.kategori === 'IKP' ? '#B2C330' : '#4FB0C6');
+        
         wadah.innerHTML += `
             <div class="kartu-belum" style="border-left: 5px solid ${warnaB}">
                 <div class="info-teks">
                     <h4>${donatur.nama} <span class="badge ${donatur.badge}">${donatur.kategori}</span></h4>
                     <p class="alamat-teks">${donatur.alamat}</p>
                 </div>
-                <a href="${noHp ? 'https://wa.me/'+noHp : '#'}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
+                <a href="${linkWa}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
             </div>`;
     });
 }
