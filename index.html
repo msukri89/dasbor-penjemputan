@@ -7,7 +7,8 @@
     
     <meta name="theme-color" content="#2E5B72">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
 
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,7 +19,7 @@
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <div style="display: flex; align-items: center;">
-                <img src="icon.png" alt="Logo" style="height: 35px; margin-right: 10px;">
+                <img src="logo.png" alt="Logo" style="height: 35px; margin-right: 10px;">
                 <h2 style="font-size: 16px;">LAZ Sidogiri</h2>
             </div>
             <button id="closeSidebar" class="close-btn"><i class="fas fa-times"></i></button>
@@ -52,19 +53,19 @@
 
         <div id="areaDasbor">
             <div class="summary-cards">
-                <div class="card card-biru">
+                <div class="card card-petrol">
                     <h3>Persentase</h3>
                     <h2 id="teksPersentase">0%</h2>
                 </div>
-                <div class="card card-hijau">
+                <div class="card card-muda">
                     <h3>Kewajiban</h3>
                     <h2 id="teksKewajiban">0</h2>
                 </div>
-                <div class="card card-biru">
+                <div class="card card-lime">
                     <h3>Berhasil</h3>
                     <h2 id="teksBerhasil">0</h2>
                 </div>
-                <div class="card card-hijau">
+                <div class="card card-lime">
                     <h3>Pemasukan</h3>
                     <h2 id="teksPemasukan">Rp 0</h2>
                 </div>
@@ -76,11 +77,10 @@
                     <p style="font-size: 10px; text-align: center; color: #6B7280; margin-bottom: 10px;">
                         Luar: Rutin | Tengah: IKP | Dalam: IIP
                     </p>
-                    <div style="position: relative; height: 280px;">
+                    <div style="position: relative; height: 300px;">
                         <canvas id="grafikMultiLevel"></canvas>
                     </div>
                 </div>
-                <canvas id="grafikKotak" style="display: none;"></canvas>
             </div>
         </div>
 
@@ -96,16 +96,8 @@
             </div>
             <div id="wadahDaftarBelum"></div>
         </div>
-
     </div>
 
     <script src="app.js"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
-        });
-      }
-    </script>
 </body>
 </html>
