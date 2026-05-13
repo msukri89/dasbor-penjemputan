@@ -5,7 +5,7 @@ let grafikUtama = null;
 let grafikInsidental = null;
 let dataBelumBerdonasi = []; 
 
-// Navigasi
+// --- NAVIGASI ---
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
 const btnBuka = document.getElementById('openSidebar');
@@ -76,7 +76,7 @@ function kalkulasiDasbor() {
     let totalPemasukan = 0;
     let bR = 0, bIKP = 0, bIIP = 0, bInsidental = 0;
 
-    // --- TERIMA ORANG (Rutin & Insidental) ---
+    // --- 1. PROSES TERIMA_ORANG (Rutin & Insidental) ---
     let tOrangFilter = dataMaster.terima_orang.filter(b => 
         (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && 
         (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka)
@@ -86,8 +86,6 @@ function kalkulasiDasbor() {
     tOrangFilter.forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
         let jenis = String(b["Jenis Donatur"] || "").toUpperCase();
-        
-        // Menggunakan "includes" agar lebih fleksibel terhadap ejaan di Excel
         if (jenis.includes("RUTIN")) {
             idRutinBerhasil.add(String(b["Kode Donatur"]).trim());
         } else if (jenis.includes("INSIDEN")) {
@@ -96,7 +94,7 @@ function kalkulasiDasbor() {
     });
     bR = idRutinBerhasil.size;
 
-    // --- TERIMA KOTAK ---
+    // --- 2. PROSES TERIMA_KOTAK (IKP & IIP) ---
     let tKotakFilter = dataMaster.terima_kotak.filter(b => 
         (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && 
         (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka)
@@ -104,22 +102,22 @@ function kalkulasiDasbor() {
     let idIKPBerhasil = new Set(), idIIPBerhasil = new Set();
     tKotakFilter.forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
-        let sp = String(b.Spesifikasi || "").toUpperCase();
+        let sp = String(b["Spesifikasi"] || "").toUpperCase(); // Fokus ke header Spesifikasi
         if (sp.includes("IKP")) idIKPBerhasil.add(String(b["Kode Donatur"]).trim());
         if (sp.includes("IIP")) idIIPBerhasil.add(String(b["Kode Donatur"]).trim());
     });
     bIKP = idIKPBerhasil.size;
     bIIP = idIIPBerhasil.size;
 
-    // --- MASTER DATA ---
+    // --- 3. PROSES MASTER DATA ---
     let mR = dataMaster.master_orang.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
     let mK = dataMaster.master_kotak.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
     
     let kR = mR.length;
-    let kIKP = mK.filter(b => String(b.Spesifikasi).toUpperCase().includes("IKP")).length;
-    let kIIP = mK.filter(b => String(b.Spesifikasi).toUpperCase().includes("IIP")).length;
+    let kIKP = mK.filter(b => String(b["Spesifikasi"] || "").toUpperCase().includes("IKP")).length;
+    let kIIP = mK.filter(b => String(b["Spesifikasi"] || "").toUpperCase().includes("IIP")).length;
 
-    // --- DAFTAR BELUM BERDONASI ---
+    // --- 4. DAFTAR BELUM BERDONASI ---
     mR.forEach(b => {
         if (!idRutinBerhasil.has(String(b["Nomor Register"]).trim())) {
             dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: "RUTIN", alamat: b.Alamat, hp: b.Hp, badge: 'badge-rutin' });
@@ -127,19 +125,17 @@ function kalkulasiDasbor() {
     });
     mK.forEach(b => {
         let idReg = String(b["Nomor Register"]).trim();
-        let jenis = String(b.Spesifikasi).toUpperCase();
-        let sudah = (jenis.includes("IKP") && idIKPBerhasil.has(idReg)) || (jenis.includes("IIP") && idIIPBerhasil.has(idReg));
+        let sp = String(b["Spesifikasi"] || "").toUpperCase();
+        let sudah = (sp.includes("IKP") && idIKPBerhasil.has(idReg)) || (sp.includes("IIP") && idIIPBerhasil.has(idReg));
         if (!sudah) {
-            let label = jenis.includes("IKP") ? "IKP" : "IIP";
+            let label = sp.includes("IKP") ? "IKP" : "IIP";
             dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: label, alamat: b.Alamat, hp: b.Hp, badge: label === 'IKP' ? 'badge-ikp' : 'badge-iip' });
         }
     });
 
-    // --- UPDATE UI ---
+    // --- 5. UPDATE UI ---
     let totalK = kR + kIKP + kIIP;
     let totalB = bR + bIKP + bIIP + bInsidental;
-    
-    // Persentase hanya menghitung pencapaian dari target (Rutin, IKP, IIP)
     let pencapaianTarget = bR + bIKP + bIIP;
     let persentase = totalK > 0 ? Math.round((pencapaianTarget / totalK) * 100) : 0;
 
