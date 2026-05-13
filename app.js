@@ -55,15 +55,17 @@ async function mulaiAplikasi() {
         kalkulasiDasbor();
     } catch (error) {
         document.getElementById('teksPersentase').innerText = "ERROR";
-        alert("Gagal terhubung ke Google Sheets.");
+        alert("Gagal terhubung ke Google Sheets. Pastikan URL sudah benar.");
     }
 }
 
 function isiDropdownPetugas() {
     const dropdown = document.getElementById('filterPetugas');
     let daftarPetugas = new Set();
-    dataMaster.master_orang.forEach(b => { if(b.Kolektor) daftarPetugas.add(b.Kolektor.trim()); });
-    dataMaster.master_kotak.forEach(b => { if(b.Kolektor) daftarPetugas.add(b.Kolektor.trim()); });
+    // Ambil Kolektor dari struktur Master yang baru
+    dataMaster.master_orang.forEach(b => { if(b.Kolektor) daftarPetugas.add(String(b.Kolektor).trim()); });
+    dataMaster.master_kotak.forEach(b => { if(b.Kolektor) daftarPetugas.add(String(b.Kolektor).trim()); });
+    
     daftarPetugas.forEach(nama => {
         let opsi = document.createElement('option'); opsi.value = nama; opsi.text = nama;
         dropdown.appendChild(opsi);
@@ -74,65 +76,97 @@ function kalkulasiDasbor() {
     if (!dataMaster) return;
     const filterPetugas = document.getElementById('filterPetugas').value;
     const filterPekan = document.getElementById('filterPekan').value;
+    
+    // Ubah "Pekan 1" menjadi "1" untuk dicocokkan dengan angka di data Master Anda
+    const pekanAngka = filterPekan.replace("Pekan ", ""); 
+    
     dataBelumBerdonasi = []; // Kosongkan daftar sisa setiap kali filter berubah
 
     let totalKewajiban = 0; let totalBerhasil = 0; let totalPemasukan = 0;
 
-    // HITUNG ORANG
-    let masterOrangFilter = dataMaster.master_orang.filter(b => b.Status === "Aktif" && (filterPetugas === "Semua" || b.Kolektor === filterPetugas));
-    let terimaOrangFilter = dataMaster.terima_orang.filter(b => (filterPetugas === "Semua" || b["Nama User"] === filterPetugas));
-    let idUnikOrang = new Set(terimaOrangFilter.map(b => b["Kode Donatur"]));
+    // --- HITUNG ORANG ---
+    let masterOrangFilter = dataMaster.master_orang.filter(b => {
+        let cocokPetugas = (filterPetugas === "Semua" || b.Kolektor === filterPetugas);
+        let cocokPekan = (filterPekan === "Total" || String(b.Pekan) === pekanAngka);
+        return cocokPetugas && cocokPekan;
+    });
+
+    let terimaOrangFilter = dataMaster.terima_orang.filter(b => {
+        return (filterPetugas === "Semua" || b["Nama User"] === filterPetugas);
+    });
     
+    // Ambil ID dari Laporan Penerimaan
+    let idUnikOrang = new Set(terimaOrangFilter.map(b => b["Kode Donatur"]));
     terimaOrangFilter.forEach(b => { totalPemasukan += Number(b.Nominal || 0); });
 
-    // Cek Siapa Orang yang belum
+    // Cek Siapa Orang yang belum (Struktur Baru)
     masterOrangFilter.forEach(b => {
-        if (!idUnikOrang.has(b.Nomor_Register)) {
+        if (!idUnikOrang.has(b["Nomor Register"])) {
             dataBelumBerdonasi.push({
-                nama: b.Nama,
-                kategori: "RUTIN",
-                alamat: b["Dusun/Jl._Pengambilan"] || b["Dusun/Jl._Donatur"] || "-",
+                nama: b["Nama Donatur"] || "-",
+                kategori: b["Jenis Donatur"] || "RUTIN",
+                alamat: b.Alamat || "-",
                 nominal: b.Nominal ? "Rp " + Number(b.Nominal).toLocaleString('id-ID') : "-",
-                hp: b["Hp_Pengambilan"] || b["Hp_Donatur"] || ""
+                hp: b.Hp ? String(b.Hp) : ""
             });
         }
     });
 
-    // HITUNG KOTAK
-    let masterKotakFilter = dataMaster.master_kotak.filter(b => b.Status === "Aktif" && (filterPetugas === "Semua" || b.Kolektor === filterPetugas));
-    let terimaKotakFilter = dataMaster.terima_kotak.filter(b => (filterPetugas === "Semua" || b["Nama User"] === filterPetugas));
-    let idUnikIKP = new Set(); let idUnikIIP = new Set();
+    // --- HITUNG KOTAK ---
+    let masterKotakFilter = dataMaster.master_kotak.filter(b => {
+        let cocokPetugas = (filterPetugas === "Semua" || b.Kolektor === filterPetugas);
+        let cocokPekan = (filterPekan === "Total" || String(b.Pekan) === pekanAngka);
+        return cocokPetugas && cocokPekan;
+    });
+
+    let terimaKotakFilter = dataMaster.terima_kotak.filter(b => {
+        return (filterPetugas === "Semua" || b["Nama User"] === filterPetugas);
+    });
     
+    let idUnikIKP = new Set(); let idUnikIIP = new Set();
     terimaKotakFilter.forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
         if (b["Jenis.1"] === "IKP") idUnikIKP.add(b["Kode Donatur"]);
         if (b["Jenis.1"] === "IIP") idUnikIIP.add(b["Kode Donatur"]);
     });
 
-    // Cek Siapa Kotak yang belum
+    // Cek Siapa Kotak yang belum (Struktur Baru)
     masterKotakFilter.forEach(b => {
         let isIKP = b.Spesifikasi === "IKP"; let isIIP = b.Spesifikasi === "IIP";
         let sudah = false;
-        if (isIKP && idUnikIKP.has(b.Nomor_Register)) sudah = true;
-        if (isIIP && idUnikIIP.has(b.Nomor_Register)) sudah = true;
+        
+        // Pengecekan silang ID Register Master dengan ID Kode Donatur Penerimaan
+        if (isIKP && idUnikIKP.has(b["Nomor Register"])) sudah = true;
+        if (isIIP && idUnikIIP.has(b["Nomor Register"])) sudah = true;
 
         if (!sudah) {
             dataBelumBerdonasi.push({
-                nama: b.Nama,
-                kategori: b.Spesifikasi, // IKP atau IIP
-                alamat: b["Dusun/Jl."] || "-",
+                nama: b["Nama Donatur"] || "-",
+                kategori: b.Spesifikasi || "-",
+                alamat: b.Alamat || "-",
                 nominal: "Kotak Amal",
-                hp: b.Hp || ""
+                hp: b.Hp ? String(b.Hp) : ""
             });
         }
     });
 
+    // Rekapitulasi Akhir
     let kewajibanOrang = masterOrangFilter.length;
     let kewajibanIKP = masterKotakFilter.filter(b => b.Spesifikasi === "IKP").length;
     let kewajibanIIP = masterKotakFilter.filter(b => b.Spesifikasi === "IIP").length;
     
     totalKewajiban = kewajibanOrang + kewajibanIKP + kewajibanIIP;
-    totalBerhasil = idUnikOrang.size + idUnikIKP.size + idUnikIIP.size;
+    
+    // Perbaikan Logika Realisasi: Hanya menghitung berhasil JIKA donatur tersebut ada di dalam daftar Kewajiban filter saat ini
+    let berhasilOrang = 0; let berhasilIKP = 0; let berhasilIIP = 0;
+    
+    masterOrangFilter.forEach(b => { if (idUnikOrang.has(b["Nomor Register"])) berhasilOrang++; });
+    masterKotakFilter.forEach(b => {
+        if (b.Spesifikasi === "IKP" && idUnikIKP.has(b["Nomor Register"])) berhasilIKP++;
+        if (b.Spesifikasi === "IIP" && idUnikIIP.has(b["Nomor Register"])) berhasilIIP++;
+    });
+
+    totalBerhasil = berhasilOrang + berhasilIKP + berhasilIIP;
     let persentase = totalKewajiban === 0 ? 0 : Math.round((totalBerhasil / totalKewajiban) * 100);
 
     // Update Layar
@@ -141,8 +175,8 @@ function kalkulasiDasbor() {
     document.getElementById('teksBerhasil').innerText = totalBerhasil;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalPemasukan.toLocaleString('id-ID');
 
-    gambarGrafikOrang(idUnikOrang.size, kewajibanOrang - idUnikOrang.size);
-    gambarGrafikKotak(idUnikIKP.size, kewajibanIKP, idUnikIIP.size, kewajibanIIP);
+    gambarGrafikOrang(berhasilOrang, kewajibanOrang - berhasilOrang);
+    gambarGrafikKotak(berhasilIKP, kewajibanIKP, berhasilIIP, kewajibanIIP);
     
     // Perbarui daftar di background
     tampilkanDaftarBelum();
@@ -154,14 +188,14 @@ function tampilkanDaftarBelum() {
     wadah.innerHTML = ""; // Bersihkan layar
 
     if (dataBelumBerdonasi.length === 0) {
-        wadah.innerHTML = "<p style='text-align:center; color:#9CA3AF;'>Semua donatur sudah berdonasi. Hebat!</p>";
+        wadah.innerHTML = "<p style='text-align:center; color:#9CA3AF; margin-top:20px;'>Semua donatur pada periode/petugas ini sudah berdonasi. Hebat!</p>";
         return;
     }
 
     dataBelumBerdonasi.forEach(donatur => {
         // Bersihkan nomor HP agar bisa dipakai link WhatsApp
         let noHp = donatur.hp.replace(/[^0-9]/g, '');
-        if (noHp.startsWith('0')) noHp = '62' + noHp.substring(1); // Ubah 08 jadi 628
+        if (noHp.startsWith('0')) noHp = '62' + noHp.substring(1); 
         let linkWa = noHp ? `https://wa.me/${noHp}` : '#';
 
         let htmlKartu = `
