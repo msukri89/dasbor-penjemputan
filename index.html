@@ -17,7 +17,10 @@
 
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
-            <img src="icon.png" alt="Logo LAZ Sidogiri" style="height: 40px; margin-right: 10px;">
+            <div style="display: flex; align-items: center;">
+                <img src="icon.png" alt="Logo" style="height: 35px; margin-right: 10px;">
+                <h2 style="font-size: 16px;">LAZ Sidogiri</h2>
+            </div>
             <button id="closeSidebar" class="close-btn"><i class="fas fa-times"></i></button>
         </div>
         <ul class="menu-list">
@@ -66,21 +69,24 @@
                     <h2 id="teksPemasukan">Rp 0</h2>
                 </div>
             </div>
+            
             <div class="charts-area">
                 <div class="chart-container">
-                    <h3>Perorangan (Rutin)</h3>
-                    <canvas id="grafikOrang"></canvas>
+                    <h3>Performa Terpadu</h3>
+                    <p style="font-size: 10px; text-align: center; color: #6B7280; margin-bottom: 10px;">
+                        Luar: Rutin | Tengah: IKP | Dalam: IIP
+                    </p>
+                    <div style="position: relative; height: 280px;">
+                        <canvas id="grafikMultiLevel"></canvas>
+                    </div>
                 </div>
-                <div class="chart-container">
-                    <h3>Kotak (IKP vs IIP)</h3>
-                    <canvas id="grafikKotak"></canvas>
-                </div>
+                <canvas id="grafikKotak" style="display: none;"></canvas>
             </div>
         </div>
 
         <div id="areaBelum" style="display: none;">
             <div class="header-halaman">
-                <h2>Daftar Sisa Penjemputan</h2>
+                <h2 style="font-size: 16px;">Sisa Penjemputan</h2>
                 <select id="filterJenisDonatur" class="dropdown-kecil">
                     <option value="Semua">Semua Jenis</option>
                     <option value="RUTIN">Rutin</option>
@@ -97,7 +103,7 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js');
+          navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
         });
       }
     </script>
