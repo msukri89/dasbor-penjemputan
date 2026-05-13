@@ -84,31 +84,32 @@ function kalkulasiDasbor() {
     dataBelumBerdonasi = [];
     let totalKewajiban = 0; let totalBerhasil = 0; let totalPemasukan = 0;
 
-    // --- HITUNG ORANG (HANYA RUTIN & AKTIF) ---
+    // --- HITUNG ORANG ---
+    // Master hanya berisi Rutin (karena Insidental sudah Anda hapus di Sheets)
     let masterOrangFilter = dataMaster.master_orang.filter(b => {
-        let isRutin = String(b["Jenis Donatur"]).toUpperCase().includes("RUTIN");
         let cocokPetugas = (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas);
         let cocokPekan = (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka);
-        return isRutin && cocokPetugas && cocokPekan;
+        return cocokPetugas && cocokPekan;
     });
 
+    // Terima Orang MENGHITUNG SEMUA (Rutin + Insidental) untuk nominal uang
     let terimaOrangFilter = dataMaster.terima_orang.filter(b => {
-        let isRutin = String(b["Jenis Donatur"]).toUpperCase().includes("RUTIN");
         let cocokPetugas = (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas);
         let pekanTrx = tentukanPekanTransaksi(b.Tanggal);
         let cocokPekanTrx = (filterPekan === "Total" || pekanTrx === pekanAngka);
-        return isRutin && cocokPetugas && cocokPekanTrx;
+        return cocokPetugas && cocokPekanTrx;
     });
     
-    let idUnikOrang = new Set(terimaOrangFilter.map(b => String(b["Kode Donatur"]).trim()));
+    let idUnikOrangTerima = new Set(terimaOrangFilter.map(b => String(b["Kode Donatur"]).trim()));
     terimaOrangFilter.forEach(b => { totalPemasukan += Number(b.Nominal || 0); });
 
+    // Daftar Belum Berdonasi (Hanya membandingkan Master Rutin dengan Yang Diterima)
     masterOrangFilter.forEach(b => {
         let idReg = String(b["Nomor Register"]).trim();
-        if (!idUnikOrang.has(idReg)) {
+        if (!idUnikOrangTerima.has(idReg)) {
             dataBelumBerdonasi.push({
                 nama: b["Nama Donatur"] || "-",
-                kategori: "RUTIN",
+                kategori: b["Jenis Donatur"] || "RUTIN",
                 alamat: b.Alamat || "-",
                 nominal: b.Nominal ? "Rp " + Number(b.Nominal).toLocaleString('id-ID') : "-",
                 hp: b.Hp ? String(b.Hp) : "",
@@ -155,7 +156,7 @@ function kalkulasiDasbor() {
     });
 
     let kewajibanOrang = masterOrangFilter.length;
-    let berhasilOrang = masterOrangFilter.filter(b => idUnikOrang.has(String(b["Nomor Register"]).trim())).length;
+    let berhasilOrang = masterOrangFilter.filter(b => idUnikOrangTerima.has(String(b["Nomor Register"]).trim())).length;
     let kewajibanIKP = masterKotakFilter.filter(b => b.Spesifikasi === "IKP").length;
     let berhasilIKP = masterKotakFilter.filter(b => b.Spesifikasi === "IKP" && idUnikIKP.has(String(b["Nomor Register"]).trim())).length;
     let kewajibanIIP = masterKotakFilter.filter(b => b.Spesifikasi === "IIP").length;
@@ -178,7 +179,7 @@ function tampilkanDaftarBelum() {
     const wadah = document.getElementById('wadahDaftarBelum');
     wadah.innerHTML = ""; 
     if (dataBelumBerdonasi.length === 0) {
-        wadah.innerHTML = "<p style='text-align:center; color:#9CA3AF; margin-top:20px;'>Semua donatur rutin sudah berdonasi.</p>";
+        wadah.innerHTML = "<p style='text-align:center; color:#9CA3AF; margin-top:20px;'>Semua donatur rutin sudah lunas.</p>";
         return;
     }
     dataBelumBerdonasi.forEach(donatur => {
