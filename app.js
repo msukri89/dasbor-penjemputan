@@ -2,9 +2,10 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Dcig9_jLXMp5z2cAj
 
 let dataMaster = null;
 let grafikUtama = null;
+let grafikInsidental = null;
 let dataBelumBerdonasi = []; 
 
-// Setup Navigasi
+// Navigasi (Sama seperti sebelumnya)
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
 const btnBuka = document.getElementById('openSidebar');
@@ -30,7 +31,6 @@ menuBelum.addEventListener('click', (e) => {
     tampilkanDaftarBelum();
 });
 
-// Jalankan Aplikasi
 async function mulaiAplikasi() {
     try {
         const respons = await fetch(SCRIPT_URL);
@@ -75,71 +75,74 @@ function kalkulasiDasbor() {
     dataBelumBerdonasi = [];
     let totalPemasukan = 0;
 
-    let mR = dataMaster.master_orang.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
-    let tR = dataMaster.terima_orang.filter(b => (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka));
-    let idR = new Set(tR.map(b => String(b["Kode Donatur"]).trim()));
-    tR.forEach(b => totalPemasukan += Number(b.Nominal || 0));
+    // Filter Terima Orang (Termasuk Insidental)
+    let tOrangFilter = dataMaster.terima_orang.filter(b => 
+        (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && 
+        (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka)
+    );
+    
+    // Hitung Pemasukan & ID Berhasil
+    let idRutinBerhasil = new Set();
+    let jumlahInsidental = 0;
 
-    let mK = dataMaster.master_kotak.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
-    let tK = dataMaster.terima_kotak.filter(b => (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka));
+    tOrangFilter.forEach(b => {
+        totalPemasukan += Number(b.Nominal || 0);
+        let jenis = String(b["Jenis Donatur"] || "").toUpperCase();
+        if (jenis.includes("RUTIN")) {
+            idRutinBerhasil.add(String(b["Kode Donatur"]).trim());
+        } else {
+            jumlahInsidental++; // Hitung transaksi Insidental
+        }
+    });
+
+    // Filter Master Rutin
+    let mRutinFilter = dataMaster.master_orang.filter(b => 
+        (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && 
+        (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka)
+    );
+
+    // Filter Kotak
+    let mKotakFilter = dataMaster.master_kotak.filter(b => 
+        (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && 
+        (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka)
+    );
+    let tKotakFilter = dataMaster.terima_kotak.filter(b => 
+        (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && 
+        (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka)
+    );
+
     let idIKP = new Set(), idIIP = new Set();
-    tK.forEach(b => {
+    tKotakFilter.forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
         let sp = String(b.Spesifikasi || "").toUpperCase();
         if (sp === "IKP") idIKP.add(String(b["Kode Donatur"]).trim());
         if (sp === "IIP") idIIP.add(String(b["Kode Donatur"]).trim());
     });
 
-    mR.forEach(b => { if (!idR.has(String(b["Nomor Register"]).trim())) dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: "RUTIN", alamat: b.Alamat, hp: b.Hp, badge: 'badge-rutin' }); });
-    mK.forEach(b => {
+    // List Belum Berdonasi
+    mRutinFilter.forEach(b => { if (!idRutinBerhasil.has(String(b["Nomor Register"]).trim())) dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: "RUTIN", alamat: b.Alamat, hp: b.Hp, badge: 'badge-rutin' }); });
+    mKotakFilter.forEach(b => {
         let idReg = String(b["Nomor Register"]).trim();
         let jenis = String(b.Spesifikasi || "").toUpperCase();
         let sudah = (jenis === "IKP" && idIKP.has(idReg)) || (jenis === "IIP" && idIIP.has(idReg));
         if (!sudah) dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: jenis, alamat: b.Alamat, hp: b.Hp, badge: jenis === 'IKP' ? 'badge-ikp' : 'badge-iip' });
     });
 
-    let bR = mR.filter(b => idR.has(String(b["Nomor Register"]).trim())).length;
-    let bIKP = mK.filter(b => b.Spesifikasi === "IKP" && idIKP.has(String(b["Nomor Register"]).trim())).length;
-    let bIIP = mK.filter(b => b.Spesifikasi === "IIP" && idIIP.has(String(b["Nomor Register"]).trim())).length;
-    let kR = mR.length, kIKP = mK.filter(b => b.Spesifikasi === "IKP").length, kIIP = mK.filter(b => b.Spesifikasi === "IIP").length;
+    // Angka Berhasil (Sekarang Termasuk Insidental)
+    let bR = idRutinBerhasil.size;
+    let bIKP = idIKP.size;
+    let bIIP = idIIP.size;
+    
+    let totalBerhasilRiil = bR + bIKP + bIIP + jumlahInsidental; // INI KUNCI PERBAIKANNYA
+    let totalKewajiban = mRutinFilter.length + mKotakFilter.length;
 
-    let totalK = kR + kIKP + kIIP;
-    let totalB = bR + bIKP + bIIP;
-    let persentase = totalK > 0 ? Math.round((totalB / totalK) * 100) : 0;
-
-    document.getElementById('teksPersentase').innerText = persentase + "%";
-    document.getElementById('teksKewajiban').innerText = totalK;
-    document.getElementById('teksBerhasil').innerText = totalB;
+    document.getElementById('teksPersentase').innerText = totalKewajiban > 0 ? Math.round((totalBerhasilRiil / totalKewajiban) * 100) + "%" : "0%";
+    document.getElementById('teksKewajiban').innerText = totalKewajiban;
+    document.getElementById('teksBerhasil').innerText = totalBerhasilRiil;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalPemasukan.toLocaleString('id-ID');
 
-    renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP);
-}
-
-function tampilkanDaftarBelum() {
-    const wadah = document.getElementById('wadahDaftarBelum');
-    const filterJenis = document.getElementById('filterJenisDonatur').value;
-    wadah.innerHTML = ""; 
-    let dataF = (filterJenis === "Semua") ? dataBelumBerdonasi : dataBelumBerdonasi.filter(d => d.kategori === filterJenis);
-    
-    dataF.forEach(donatur => {
-        let noHp = String(donatur.hp || "").replace(/[^0-9]/g, '');
-        if (noHp.startsWith('0')) noHp = '62' + noHp.substring(1); 
-        
-        // --- PESAN OTOMATIS WHATSAPP ---
-        let pesan = `Assalamu'alaikum Warahmatullah, Bapak/Ibu *${donatur.nama}*. Semoga Allah senantiasa memberikan kesehatan pada Bapak/Ibu sekeluarga, dan dianugerahi rizki yang halal dan berkah. Amiin... Mohon maaf mengganggu waktunya, kami dari petugas LAZ Sidogiri bermaksud untuk melakukan penjemputan donasi. Apakah ada waktu luang hari ini? Jazakumullah Khairan.`;
-        let linkWa = noHp ? `https://wa.me/${noHp}?text=${encodeURIComponent(pesan)}` : '#';
-        
-        let warnaB = donatur.kategori === 'RUTIN' ? '#2E5B72' : (donatur.kategori === 'IKP' ? '#B2C330' : '#4FB0C6');
-        
-        wadah.innerHTML += `
-            <div class="kartu-belum" style="border-left: 5px solid ${warnaB}">
-                <div class="info-teks">
-                    <h4>${donatur.nama} <span class="badge ${donatur.badge}">${donatur.kategori}</span></h4>
-                    <p class="alamat-teks">${donatur.alamat}</p>
-                </div>
-                <a href="${linkWa}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
-            </div>`;
-    });
+    renderGrafikStacked(bR, mRutinFilter.length, bIKP, mKotakFilter.filter(b=>b.Spesifikasi==="IKP").length, bIIP, mKotakFilter.filter(b=>b.Spesifikasi==="IIP").length);
+    renderGrafikInsidental(jumlahInsidental);
 }
 
 function renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP) {
@@ -151,7 +154,7 @@ function renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP) {
             labels: ['Rutin', 'IKP', 'IIP'],
             datasets: [
                 { label: 'Berhasil', data: [bR, bIKP, bIIP], backgroundColor: ['#2E5B72', '#B2C330', '#4FB0C6'], borderWidth: 2, borderColor: '#FFFFFF' },
-                { label: 'Sisa', data: [kR - bR, kIKP - bIKP, kIIP - bIIP], backgroundColor: '#E5E7EB', borderWidth: 2, borderColor: '#FFFFFF' }
+                { label: 'Sisa', data: [Math.max(0, kR - bR), Math.max(0, kIKP - bIKP), Math.max(0, kIIP - bIIP)], backgroundColor: '#E5E7EB', borderWidth: 2, borderColor: '#FFFFFF' }
             ]
         },
         options: {
@@ -159,6 +162,53 @@ function renderGrafikStacked(bR, kR, bIKP, kIKP, bIIP, kIIP) {
             scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
             plugins: { legend: { display: false } }
         }
+    });
+}
+
+function renderGrafikInsidental(jumlah) {
+    const ctx = document.getElementById('grafikInsidental').getContext('2d');
+    if (grafikInsidental) grafikInsidental.destroy();
+    grafikInsidental = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Insidental'],
+            datasets: [{
+                data: [jumlah],
+                backgroundColor: ['#2E5B72'], // Menggunakan Biru Petrol agar elegan
+                borderWidth: 2,
+                borderColor: '#FFFFFF',
+                barThickness: 50
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+function tampilkanDaftarBelum() {
+    const wadah = document.getElementById('wadahDaftarBelum');
+    const filterJenis = document.getElementById('filterJenisDonatur').value;
+    wadah.innerHTML = ""; 
+    let dataF = (filterJenis === "Semua") ? dataBelumBerdonasi : dataBelumBerdonasi.filter(d => d.kategori === filterJenis);
+    dataF.forEach(donatur => {
+        let noHp = String(donatur.hp || "").replace(/[^0-9]/g, '');
+        if (noHp.startsWith('0')) noHp = '62' + noHp.substring(1); 
+        let pesan = `Assalamu'alaikum Warahmatullah, Bapak/Ibu *${donatur.nama}*. Mohon maaf mengganggu waktunya, kami dari petugas LAZ Sidogiri bermaksud untuk melakukan penjemputan donasi. Apakah ada waktu luang hari ini? Jazakumullah Khairan.`;
+        let linkWa = noHp ? `https://wa.me/${noHp}?text=${encodeURIComponent(pesan)}` : '#';
+        let warnaB = donatur.kategori === 'RUTIN' ? '#2E5B72' : (donatur.kategori === 'IKP' ? '#B2C330' : '#4FB0C6');
+        wadah.innerHTML += `
+            <div class="kartu-belum" style="border-left: 5px solid ${warnaB}">
+                <div class="info-teks">
+                    <h4>${donatur.nama} <span class="badge ${donatur.badge}">${donatur.kategori}</span></h4>
+                    <p class="alamat-teks">${donatur.alamat}</p>
+                </div>
+                <a href="${linkWa}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
+            </div>`;
     });
 }
 
