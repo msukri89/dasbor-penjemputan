@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dasbor Penjemputan</title>
+    <title>Dasbor Penjemputan - LAZ Sidogiri</title>
     
-    <meta name="theme-color" content="#2563EB">
+    <meta name="theme-color" content="#2E5B72">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3204/3204005.png">
+    <link rel="apple-touch-icon" href="icon.png">
 
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,7 +17,7 @@
 
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
-            <h2>Menu Dasbor</h2>
+            <img src="icon.png" alt="Logo LAZ Sidogiri" style="height: 40px; margin-right: 10px;">
             <button id="closeSidebar" class="close-btn"><i class="fas fa-times"></i></button>
         </div>
         <ul class="menu-list">
@@ -35,10 +35,10 @@
         </header>
 
         <div class="filter-area">
-            <select id="filterPetugas" class="dropdown-biru">
+            <select id="filterPetugas" class="dropdown-aksen">
                 <option value="Semua">Semua Petugas</option>
             </select>
-            <select id="filterPekan" class="dropdown-biru">
+            <select id="filterPekan" class="dropdown-aksen">
                 <option value="Total">Total Bulan Ini</option>
                 <option value="Pekan 1">Pekan 1</option>
                 <option value="Pekan 2">Pekan 2</option>
@@ -49,19 +49,19 @@
 
         <div id="areaDasbor">
             <div class="summary-cards">
-                <div class="card">
+                <div class="card card-biru">
                     <h3>Persentase</h3>
                     <h2 id="teksPersentase">0%</h2>
                 </div>
-                <div class="card">
+                <div class="card card-hijau">
                     <h3>Kewajiban</h3>
                     <h2 id="teksKewajiban">0</h2>
                 </div>
-                <div class="card">
+                <div class="card card-biru">
                     <h3>Berhasil</h3>
                     <h2 id="teksBerhasil">0</h2>
                 </div>
-                <div class="card">
+                <div class="card card-hijau">
                     <h3>Pemasukan</h3>
                     <h2 id="teksPemasukan">Rp 0</h2>
                 </div>
@@ -79,9 +79,16 @@
         </div>
 
         <div id="areaBelum" style="display: none;">
-            <h2 style="margin-bottom: 15px; font-size: 18px; color: #1F2937;">Daftar Sisa Penjemputan</h2>
-            <div id="wadahDaftarBelum">
-                </div>
+            <div class="header-halaman">
+                <h2>Daftar Sisa Penjemputan</h2>
+                <select id="filterJenisDonatur" class="dropdown-kecil">
+                    <option value="Semua">Semua Jenis</option>
+                    <option value="RUTIN">Rutin</option>
+                    <option value="IKP">IKP</option>
+                    <option value="IIP">IIP</option>
+                </select>
+            </div>
+            <div id="wadahDaftarBelum"></div>
         </div>
 
     </div>
