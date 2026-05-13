@@ -1,189 +1,212 @@
-// 1. MASUKKAN LINK JEMBATAN GOOGLE SHEETS ANDA DI SINI
+// 1. MASUKKAN LINK JEMBATAN GOOGLE SHEETS ANDA DI BAWAH INI
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Dcig9_jLXMp5z2cAjqE5hssYFC02QyrFg4sUaeUG1crik9LwRY54EnVgwIDMwaw/exec";
 
-// Variabel untuk menyimpan data agar tidak perlu ditarik berkali-kali
 let dataMaster = null;
 let grafikOrang = null;
 let grafikKotak = null;
+let dataBelumBerdonasi = []; // Menyimpan daftar sisa
 
-// Mengatur Navigasi Burger Menu (Sidebar)
+// Navigasi & Sidebar
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
 const btnBuka = document.getElementById('openSidebar');
 const btnTutup = document.getElementById('closeSidebar');
 
-btnBuka.addEventListener('click', () => {
-    sidebar.classList.add('terbuka');
-    overlay.classList.add('terbuka');
-});
+const menuDasbor = document.getElementById('menuDasbor');
+const menuBelum = document.getElementById('menuBelum');
+const areaDasbor = document.getElementById('areaDasbor');
+const areaBelum = document.getElementById('areaBelum');
 
-function tutupSidebar() {
-    sidebar.classList.remove('terbuka');
-    overlay.classList.remove('terbuka');
-}
+function tutupSidebar() { sidebar.classList.remove('terbuka'); overlay.classList.remove('terbuka'); }
+btnBuka.addEventListener('click', () => { sidebar.classList.add('terbuka'); overlay.classList.add('terbuka'); });
 btnTutup.addEventListener('click', tutupSidebar);
 overlay.addEventListener('click', tutupSidebar);
 
-// Fungsi Utama: Menarik Data saat Aplikasi Dibuka
+// Pindah ke Halaman Dasbor
+menuDasbor.addEventListener('click', (e) => {
+    e.preventDefault();
+    areaDasbor.style.display = 'block';
+    areaBelum.style.display = 'none';
+    menuDasbor.classList.add('aktif');
+    menuBelum.classList.remove('aktif');
+    tutupSidebar();
+});
+
+// Pindah ke Halaman Daftar Belum
+menuBelum.addEventListener('click', (e) => {
+    e.preventDefault();
+    areaDasbor.style.display = 'none';
+    areaBelum.style.display = 'block';
+    menuBelum.classList.add('aktif');
+    menuDasbor.classList.remove('aktif');
+    tutupSidebar();
+    tampilkanDaftarBelum(); // Panggil fungsi cetak kartu
+});
+
+// Mulai Aplikasi
 async function mulaiAplikasi() {
     document.getElementById('teksPersentase').innerText = "Loading...";
-    
+    menuDasbor.classList.add('aktif');
     try {
         const respons = await fetch(SCRIPT_URL);
         const hasilJson = await respons.json();
         dataMaster = hasilJson.data;
-        
-        // Memasukkan nama-nama petugas ke Dropdown
         isiDropdownPetugas();
-        
-        // Menghitung angka untuk pertama kalinya (Semua Petugas, Total Bulan)
         kalkulasiDasbor();
-        
     } catch (error) {
         document.getElementById('teksPersentase').innerText = "ERROR";
-        alert("Gagal terhubung ke Google Sheets. Pastikan URL sudah benar.");
+        alert("Gagal terhubung ke Google Sheets.");
     }
 }
 
-// Fungsi Mengisi Dropdown Petugas secara otomatis dari Data Master
 function isiDropdownPetugas() {
     const dropdown = document.getElementById('filterPetugas');
     let daftarPetugas = new Set();
-    
-    // Ambil nama dari master orang
-    dataMaster.master_orang.forEach(baris => {
-        if(baris.Kolektor) daftarPetugas.add(baris.Kolektor.trim());
-    });
-    
-    // Ambil nama dari master kotak
-    dataMaster.master_kotak.forEach(baris => {
-        if(baris.Kolektor) daftarPetugas.add(baris.Kolektor.trim());
-    });
-
+    dataMaster.master_orang.forEach(b => { if(b.Kolektor) daftarPetugas.add(b.Kolektor.trim()); });
+    dataMaster.master_kotak.forEach(b => { if(b.Kolektor) daftarPetugas.add(b.Kolektor.trim()); });
     daftarPetugas.forEach(nama => {
-        let opsi = document.createElement('option');
-        opsi.value = nama;
-        opsi.text = nama;
+        let opsi = document.createElement('option'); opsi.value = nama; opsi.text = nama;
         dropdown.appendChild(opsi);
     });
 }
 
-// Fungsi Menghitung Angka & Grafik sesuai Filter yang dipilih
 function kalkulasiDasbor() {
     if (!dataMaster) return;
-
     const filterPetugas = document.getElementById('filterPetugas').value;
     const filterPekan = document.getElementById('filterPekan').value;
+    dataBelumBerdonasi = []; // Kosongkan daftar sisa setiap kali filter berubah
 
-    let totalKewajiban = 0;
-    let totalBerhasil = 0;
-    let totalPemasukan = 0;
+    let totalKewajiban = 0; let totalBerhasil = 0; let totalPemasukan = 0;
 
-    // --- LOGIKA HITUNG PERORANGAN ---
-    let kewajibanOrang = dataMaster.master_orang.filter(baris => 
-        baris.Status === "Aktif" && 
-        (filterPetugas === "Semua" || baris.Kolektor === filterPetugas)
-    ).length;
-    
-    let terimaOrangFilter = dataMaster.terima_orang.filter(baris => 
-        (filterPetugas === "Semua" || baris["Nama User"] === filterPetugas)
-    );
-    // Kita anggap satu donatur bayar 1 kali, kita hitung ID Uniknya
+    // HITUNG ORANG
+    let masterOrangFilter = dataMaster.master_orang.filter(b => b.Status === "Aktif" && (filterPetugas === "Semua" || b.Kolektor === filterPetugas));
+    let terimaOrangFilter = dataMaster.terima_orang.filter(b => (filterPetugas === "Semua" || b["Nama User"] === filterPetugas));
     let idUnikOrang = new Set(terimaOrangFilter.map(b => b["Kode Donatur"]));
-    let berhasilOrang = idUnikOrang.size;
-
-    // Hitung Uang
-    terimaOrangFilter.forEach(baris => { totalPemasukan += Number(baris.Nominal || 0); });
-
-    // --- LOGIKA HITUNG KOTAK ---
-    let masterKotakFilter = dataMaster.master_kotak.filter(baris => 
-        baris.Status === "Aktif" && 
-        (filterPetugas === "Semua" || baris.Kolektor === filterPetugas)
-    );
     
+    terimaOrangFilter.forEach(b => { totalPemasukan += Number(b.Nominal || 0); });
+
+    // Cek Siapa Orang yang belum
+    masterOrangFilter.forEach(b => {
+        if (!idUnikOrang.has(b.Nomor_Register)) {
+            dataBelumBerdonasi.push({
+                nama: b.Nama,
+                kategori: "RUTIN",
+                alamat: b["Dusun/Jl._Pengambilan"] || b["Dusun/Jl._Donatur"] || "-",
+                nominal: b.Nominal ? "Rp " + Number(b.Nominal).toLocaleString('id-ID') : "-",
+                hp: b["Hp_Pengambilan"] || b["Hp_Donatur"] || ""
+            });
+        }
+    });
+
+    // HITUNG KOTAK
+    let masterKotakFilter = dataMaster.master_kotak.filter(b => b.Status === "Aktif" && (filterPetugas === "Semua" || b.Kolektor === filterPetugas));
+    let terimaKotakFilter = dataMaster.terima_kotak.filter(b => (filterPetugas === "Semua" || b["Nama User"] === filterPetugas));
+    let idUnikIKP = new Set(); let idUnikIIP = new Set();
+    
+    terimaKotakFilter.forEach(b => {
+        totalPemasukan += Number(b.Nominal || 0);
+        if (b["Jenis.1"] === "IKP") idUnikIKP.add(b["Kode Donatur"]);
+        if (b["Jenis.1"] === "IIP") idUnikIIP.add(b["Kode Donatur"]);
+    });
+
+    // Cek Siapa Kotak yang belum
+    masterKotakFilter.forEach(b => {
+        let isIKP = b.Spesifikasi === "IKP"; let isIIP = b.Spesifikasi === "IIP";
+        let sudah = false;
+        if (isIKP && idUnikIKP.has(b.Nomor_Register)) sudah = true;
+        if (isIIP && idUnikIIP.has(b.Nomor_Register)) sudah = true;
+
+        if (!sudah) {
+            dataBelumBerdonasi.push({
+                nama: b.Nama,
+                kategori: b.Spesifikasi, // IKP atau IIP
+                alamat: b["Dusun/Jl."] || "-",
+                nominal: "Kotak Amal",
+                hp: b.Hp || ""
+            });
+        }
+    });
+
+    let kewajibanOrang = masterOrangFilter.length;
     let kewajibanIKP = masterKotakFilter.filter(b => b.Spesifikasi === "IKP").length;
     let kewajibanIIP = masterKotakFilter.filter(b => b.Spesifikasi === "IIP").length;
     
-    let terimaKotakFilter = dataMaster.terima_kotak.filter(baris => 
-        (filterPetugas === "Semua" || baris["Nama User"] === filterPetugas)
-    );
-    
-    let idUnikIKP = new Set();
-    let idUnikIIP = new Set();
-    
-    terimaKotakFilter.forEach(baris => {
-        totalPemasukan += Number(baris.Nominal || 0);
-        if (baris["Jenis.1"] === "IKP") idUnikIKP.add(baris["Kode Donatur"]);
-        if (baris["Jenis.1"] === "IIP") idUnikIIP.add(baris["Kode Donatur"]);
-    });
-
-    let berhasilIKP = idUnikIKP.size;
-    let berhasilIIP = idUnikIIP.size;
-
-    // --- REKAP TOTAL ---
     totalKewajiban = kewajibanOrang + kewajibanIKP + kewajibanIIP;
-    totalBerhasil = berhasilOrang + berhasilIKP + berhasilIIP;
+    totalBerhasil = idUnikOrang.size + idUnikIKP.size + idUnikIIP.size;
     let persentase = totalKewajiban === 0 ? 0 : Math.round((totalBerhasil / totalKewajiban) * 100);
 
-    // Update Teks di Layar
+    // Update Layar
     document.getElementById('teksPersentase').innerText = persentase + "%";
     document.getElementById('teksKewajiban').innerText = totalKewajiban;
     document.getElementById('teksBerhasil').innerText = totalBerhasil;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalPemasukan.toLocaleString('id-ID');
 
-    // Update Grafik Visual
-    gambarGrafikOrang(berhasilOrang, kewajibanOrang - berhasilOrang);
-    gambarGrafikKotak(berhasilIKP, kewajibanIKP, berhasilIIP, kewajibanIIP);
+    gambarGrafikOrang(idUnikOrang.size, kewajibanOrang - idUnikOrang.size);
+    gambarGrafikKotak(idUnikIKP.size, kewajibanIKP, idUnikIIP.size, kewajibanIIP);
+    
+    // Perbarui daftar di background
+    tampilkanDaftarBelum();
 }
 
-// Fungsi Menggambar Grafik Perorangan (Bentuk Donut)
-function gambarGrafikOrang(berhasil, sisa) {
-    const ctx = document.getElementById('grafikOrang').getContext('2d');
-    if (grafikOrang) grafikOrang.destroy(); // Hapus grafik lama jika ada
-    
-    grafikOrang = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Sudah Bayar', 'Belum'],
-            datasets: [{
-                data: [berhasil, sisa > 0 ? sisa : 0],
-                backgroundColor: ['#2563EB', '#E5E7EB'], // 30% Biru, 60% Abu terang
-                borderWidth: 0
-            }]
-        },
-        options: { cutout: '70%', responsive: true }
+// Fungsi Cetak Kartu "Belum Berdonasi" ke Layar
+function tampilkanDaftarBelum() {
+    const wadah = document.getElementById('wadahDaftarBelum');
+    wadah.innerHTML = ""; // Bersihkan layar
+
+    if (dataBelumBerdonasi.length === 0) {
+        wadah.innerHTML = "<p style='text-align:center; color:#9CA3AF;'>Semua donatur sudah berdonasi. Hebat!</p>";
+        return;
+    }
+
+    dataBelumBerdonasi.forEach(donatur => {
+        // Bersihkan nomor HP agar bisa dipakai link WhatsApp
+        let noHp = donatur.hp.replace(/[^0-9]/g, '');
+        if (noHp.startsWith('0')) noHp = '62' + noHp.substring(1); // Ubah 08 jadi 628
+        let linkWa = noHp ? `https://wa.me/${noHp}` : '#';
+
+        let htmlKartu = `
+            <div class="kartu-belum">
+                <div class="info-teks">
+                    <h4>${donatur.nama} <span class="badge">${donatur.kategori}</span></h4>
+                    <p class="alamat-teks"><i class="fas fa-map-marker-alt"></i> ${donatur.alamat}</p>
+                    <p class="nominal-teks">${donatur.nominal}</p>
+                </div>
+                <a href="${linkWa}" target="_blank" class="btn-wa" ${noHp === '' ? 'style="background:#ccc; pointer-events:none;"' : ''}>
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+            </div>
+        `;
+        wadah.innerHTML += htmlKartu;
     });
 }
 
-// Fungsi Menggambar Grafik Kotak (Bentuk Batang Samping)
+// Fungsi Grafik
+function gambarGrafikOrang(berhasil, sisa) {
+    const ctx = document.getElementById('grafikOrang').getContext('2d');
+    if (grafikOrang) grafikOrang.destroy();
+    grafikOrang = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels: ['Sudah', 'Belum'], datasets: [{ data: [berhasil, sisa > 0 ? sisa : 0], backgroundColor: ['#2563EB', '#E5E7EB'], borderWidth: 0 }] },
+        options: { cutout: '70%', responsive: true }
+    });
+}
 function gambarGrafikKotak(bIKP, tIKP, bIIP, tIIP) {
     const ctx = document.getElementById('grafikKotak').getContext('2d');
     if (grafikKotak) grafikKotak.destroy();
-    
     grafikKotak = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Kotak IKP', 'Kotak IIP'],
+            labels: ['IKP', 'IIP'],
             datasets: [
-                {
-                    label: 'Berhasil Ditarik',
-                    data: [bIKP, bIIP],
-                    backgroundColor: '#2563EB' // Biru
-                },
-                {
-                    label: 'Target Kewajiban',
-                    data: [tIKP, tIIP],
-                    backgroundColor: '#E5E7EB' // Abu terang
-                }
+                { label: 'Berhasil', data: [bIKP, bIIP], backgroundColor: '#2563EB' },
+                { label: 'Target', data: [tIKP, tIIP], backgroundColor: '#E5E7EB' }
             ]
         },
         options: { indexAxis: 'y', responsive: true }
     });
 }
 
-// Deteksi jika Dropdown Filter diubah, langsung hitung ulang!
 document.getElementById('filterPetugas').addEventListener('change', kalkulasiDasbor);
 document.getElementById('filterPekan').addEventListener('change', kalkulasiDasbor);
 
-// Nyalakan mesinnya!
 mulaiAplikasi();
