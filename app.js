@@ -5,7 +5,7 @@ let grafikUtama = null;
 let grafikInsidental = null;
 let dataBelumBerdonasi = []; 
 
-// --- NAVIGASI ---
+// --- FUNGSI NAVIGASI ---
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
 const btnBuka = document.getElementById('openSidebar');
@@ -76,40 +76,42 @@ function kalkulasiDasbor() {
     let totalPemasukan = 0;
     let bR = 0, bIKP = 0, bIIP = 0, bInsidental = 0;
 
-    // --- 1. PROSES TERIMA_ORANG (Rutin & Insidental) ---
-    let tOrangFilter = dataMaster.terima_orang.filter(b => 
+    // --- 1. PROSES TERIMA_ORANG & TERIMA_KOTAK ---
+    // Kita gabung pengecekan ID Berhasil
+    let idRutinBerhasil = new Set();
+    let idIKPBerhasil = new Set();
+    let idIIPBerhasil = new Set();
+
+    // Proses Transaksi Orang
+    dataMaster.terima_orang.filter(b => 
         (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && 
         (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka)
-    );
-    
-    let idRutinBerhasil = new Set();
-    tOrangFilter.forEach(b => {
+    ).forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
-        let jenis = String(b["Jenis Donatur"] || "").toUpperCase();
-        if (jenis.includes("RUTIN")) {
+        let sp = String(b["Spesifikasi"] || "").toUpperCase(); // GUNAKAN SPESIFIKASI
+        if (sp.includes("RUTIN")) {
             idRutinBerhasil.add(String(b["Kode Donatur"]).trim());
-        } else if (jenis.includes("INSIDEN")) {
+        } else if (sp.includes("INSIDEN")) {
             bInsidental++;
         }
     });
-    bR = idRutinBerhasil.size;
 
-    // --- 2. PROSES TERIMA_KOTAK (IKP & IIP) ---
-    let tKotakFilter = dataMaster.terima_kotak.filter(b => 
+    // Proses Transaksi Kotak
+    dataMaster.terima_kotak.filter(b => 
         (filterPetugas === "Semua" || String(b["Nama User"]).trim() === filterPetugas) && 
         (filterPekan === "Total" || tentukanPekanTransaksi(b.Tanggal) === pekanAngka)
-    );
-    let idIKPBerhasil = new Set(), idIIPBerhasil = new Set();
-    tKotakFilter.forEach(b => {
+    ).forEach(b => {
         totalPemasukan += Number(b.Nominal || 0);
-        let sp = String(b["Spesifikasi"] || "").toUpperCase(); // Fokus ke header Spesifikasi
+        let sp = String(b["Spesifikasi"] || "").toUpperCase(); // GUNAKAN SPESIFIKASI
         if (sp.includes("IKP")) idIKPBerhasil.add(String(b["Kode Donatur"]).trim());
         if (sp.includes("IIP")) idIIPBerhasil.add(String(b["Kode Donatur"]).trim());
     });
+
+    bR = idRutinBerhasil.size;
     bIKP = idIKPBerhasil.size;
     bIIP = idIIPBerhasil.size;
 
-    // --- 3. PROSES MASTER DATA ---
+    // --- 2. MASTER DATA (KEWAJIBAN) ---
     let mR = dataMaster.master_orang.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
     let mK = dataMaster.master_kotak.filter(b => (filterPetugas === "Semua" || String(b.Kolektor).trim() === filterPetugas) && (filterPekan === "Total" || String(b.Pekan).trim() === pekanAngka));
     
@@ -117,7 +119,7 @@ function kalkulasiDasbor() {
     let kIKP = mK.filter(b => String(b["Spesifikasi"] || "").toUpperCase().includes("IKP")).length;
     let kIIP = mK.filter(b => String(b["Spesifikasi"] || "").toUpperCase().includes("IIP")).length;
 
-    // --- 4. DAFTAR BELUM BERDONASI ---
+    // --- 3. LIST BELUM BERDONASI ---
     mR.forEach(b => {
         if (!idRutinBerhasil.has(String(b["Nomor Register"]).trim())) {
             dataBelumBerdonasi.push({ nama: b["Nama Donatur"], kategori: "RUTIN", alamat: b.Alamat, hp: b.Hp, badge: 'badge-rutin' });
@@ -133,11 +135,10 @@ function kalkulasiDasbor() {
         }
     });
 
-    // --- 5. UPDATE UI ---
+    // --- 4. UPDATE UI ---
     let totalK = kR + kIKP + kIIP;
     let totalB = bR + bIKP + bIIP + bInsidental;
-    let pencapaianTarget = bR + bIKP + bIIP;
-    let persentase = totalK > 0 ? Math.round((pencapaianTarget / totalK) * 100) : 0;
+    let persentase = totalK > 0 ? Math.round(((bR + bIKP + bIIP) / totalK) * 100) : 0;
 
     document.getElementById('teksPersentase').innerText = persentase + "%";
     document.getElementById('teksKewajiban').innerText = totalK;
