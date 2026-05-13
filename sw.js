@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dasbor-v1';
+const CACHE_NAME = 'dasbor-v2';
 const urlsToCache = [
   './',
   './index.html',
