@@ -20,12 +20,12 @@
         <div class="sidebar-header">
             <div style="display: flex; align-items: center;">
                 <img src="logo.png" alt="Logo" style="height: 35px; margin-right: 10px;">
-                <h2 style="font-size: 16px;">LAZ Sidogiri</h2>
+                <h2 style="font-size: 16px;"></h2>
             </div>
             <button id="closeSidebar" class="close-btn"><i class="fas fa-times"></i></button>
         </div>
         <ul class="menu-list">
-            <li><a href="#" id="menuDasbor"><i class="fas fa-chart-pie"></i> Dasbor Utama</a></li>
+            <li><a href="#" id="menuDasbor" class="aktif"><i class="fas fa-chart-pie"></i> Dasbor Utama</a></li>
             <li><a href="#" id="menuBelum"><i class="fas fa-list-ul"></i> Belum Berdonasi</a></li>
         </ul>
     </div>
@@ -73,9 +73,16 @@
             
             <div class="charts-area">
                 <div class="chart-container">
-                    <h3>Performa Realisasi</h3>
-                    <div style="height: 320px; position: relative;">
+                    <h3>Realisasi Target (Rutin, IKP, IIP)</h3>
+                    <div style="height: 300px; position: relative;">
                         <canvas id="grafikUtama"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container" style="margin-top: 20px;">
+                    <h3>Donasi Insidental (Non-Target)</h3>
+                    <div style="height: 150px; position: relative;">
+                        <canvas id="grafikInsidental"></canvas>
                     </div>
                 </div>
             </div>
@@ -91,7 +98,7 @@
                     <option value="IIP">IIP</option>
                 </select>
             </div>
-            <div id="wadahDaftarBelum"></div>
+            <div id="wadahDaftarBelum" style="padding: 0 20px;"></div>
         </div>
     </div>
 
