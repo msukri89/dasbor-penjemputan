@@ -50,9 +50,9 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 /* Posisi dan Desain Watermark */
 .watermark-icon {
     position: absolute;
-    right: -8px;
-    bottom: -10px;
-    font-size: 55px; /* Ukuran Ikon */
+    right: 0px;
+    bottom: -2px;
+    font-size: 40px; /* Ukuran Ikon */
     opacity: 0.12; /* Transparansi (sangat pudar) */
     pointer-events: none; /* Mencegah ikon menghalangi tombol klik di atasnya */
     z-index: 1;
