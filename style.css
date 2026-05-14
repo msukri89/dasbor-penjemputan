@@ -5,7 +5,7 @@
     --hijau-lime: #B2C330;
     --warna-hitam: #1A1A1A;
     --warna-abu: #E5E7EB;
-    --merah-bata: #DC2626; /* Warna khusus untuk angka sisa minus */
+    --merah-bata: #DC2626; 
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -32,18 +32,23 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .filter-area { display: flex; gap: 8px; padding: 10px 15px; }
 .dropdown-aksen { flex: 1; padding: 8px; background: var(--biru-petrol); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 11px; outline: none; }
 
-/* Grid 3 Kolom untuk 6 Kartu */
-.summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 15px; margin-bottom: 15px; }
+.summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 15px; margin-bottom: 10px; }
 .card { background: white; padding: 10px 5px; border-radius: 8px; text-align: center; border-top: 4px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 .card h3 { font-size: 9px; color: #6B7280; text-transform: uppercase; margin-bottom: 4px; letter-spacing: -0.5px; }
 .card h2 { font-size: 13px; font-weight: 800; word-break: break-word; }
-
-/* Gaya baru untuk angka sisa minus */
 .teks-sisa { font-size: 11px; font-weight: bold; color: var(--merah-bata); margin-top: 2px; }
 
 .card-petrol { border-top-color: var(--hijau-lime); }
 .card-muda { border-top-color: var(--biru-muda); }
 .card-lime { border-top-color: var(--hijau-lime); }
+
+/* Desain untuk Insight Box Baru */
+.insight-box {
+    background: white; margin: 0 15px 15px 15px; padding: 10px 12px;
+    border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex; align-items: center; gap: 12px;
+    border-left: 4px solid var(--hijau-lime);
+}
 
 .charts-area { padding: 0 15px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
 .chart-container { background: white; padding: 15px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
