@@ -86,19 +86,27 @@ function kalkulasi() {
     let kR=mR.length, kK1=mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IKP")).length, kK2=mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IIP")).length;
 
     let totalKewajiban = kR + kK1 + kK2;
-    // Berhasil ditarik semua termasuk insidental
     let totalBerhasil = bR + bK1 + bK2 + bIns;
 
-    // Update UI 6 Kartu
+    // Perhitungan Angka Sisa (Minus)
+    let sisaRutin = Math.max(0, kR - bR);
+    let sisaIKP = Math.max(0, kK1 - bK1);
+    let sisaIIP = Math.max(0, kK2 - bK2);
+
+    // Update UI
     document.getElementById('teksPersentase').innerText = totalKewajiban > 0 ? Math.round(((bR + bK1 + bK2) / totalKewajiban) * 100) + "%" : "0%";
     document.getElementById('teksBerhasil').innerText = totalBerhasil;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalRp.toLocaleString('id-ID');
     
     document.getElementById('teksRutin').innerText = kR;
-    document.getElementById('teksIKP').innerText = kK1;
-    document.getElementById('teksIIP').innerText = kK2;
+    document.getElementById('teksSisaRutin').innerText = "-" + sisaRutin;
 
-    // Panggil Grafik Tunggal dengan parameter Insidental
+    document.getElementById('teksIKP').innerText = kK1;
+    document.getElementById('teksSisaIKP').innerText = "-" + sisaIKP;
+
+    document.getElementById('teksIIP').innerText = kK2;
+    document.getElementById('teksSisaIIP').innerText = "-" + sisaIIP;
+
     drawGrafik(bR, kR, bK1, kK1, bK2, kK2, bIns); 
 }
 
@@ -108,20 +116,17 @@ function drawGrafik(bR, kR, b1, k1, b2, k2, bIns) {
     grafikUtama = new Chart(ctx, {
         type:'bar', 
         data:{ 
-            // Tambahkan Insidental sebagai label ke-4
             labels:['Rutin','IKP','IIP', 'Insidental'], 
             datasets:[
                 {
                     label:'Berhasil', 
                     data:[bR, b1, b2, bIns], 
-                    // Warna Insidental disamakan dengan Rutin (Biru Petrol) agar konsisten
                     backgroundColor:['#2E5B72','#B2C330','#4FB0C6', '#2E5B72'], 
                     borderWidth:1, 
                     borderColor:'#fff'
                 },
                 {
                     label:'Sisa', 
-                    // Insidental tidak memiliki sisa (Kewajiban = 0)
                     data:[Math.max(0,kR-bR), Math.max(0,k1-b1), Math.max(0,k2-b2), 0], 
                     backgroundColor:'#E5E7EB', 
                     borderWidth:1, 
