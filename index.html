@@ -9,8 +9,8 @@
     /* Skema Warna Utama */
     --green-plus: #28a745;
     --red-minus: #dc3545;
-    --blue-dark: #1e3a8a;  /* Biru Tua untuk Insidental eksisting */
-    --blue-light: #3b82f6; /* Biru Muda untuk tambahan Insidental */
+    --blue-dark: #1e3a8a;  
+    --blue-light: #3b82f6; 
     --card-bg: #ffffff;
     --text-main: #333333;
     --text-muted: #666666;
@@ -20,36 +20,36 @@
   body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-body);
-    padding: 20px;
+    padding: 15px; /* Disesuaikan untuk layar mobile */
     margin: 0;
   }
 
-  /* Grid Container untuk Kartu */
+  /* Grid Container - FIX: minmax diturunkan jadi 140px agar responsif jadi 2 kolom di HP */
   .dashboard-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 24px;
-    margin-bottom: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px; /* Jarak antar kartu dirapatkan */
+    margin-bottom: 25px;
   }
 
-  /* Desain Kartu Makro (Diperbesar untuk mengisi ruang) */
+  /* Desain Kartu Makro */
   .card {
     position: relative;
-    overflow: hidden; /* Menjaga watermark tetap di dalam kartu */
+    overflow: hidden; 
     background: var(--card-bg);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+    border-radius: 12px;
+    padding: 16px; /* Padding dikurangi agar proporsional di HP */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.04);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 140px; 
+    min-height: 110px; /* Tinggi disesuaikan */
     border: 1px solid rgba(0,0,0,0.02);
   }
 
   /* Tipografi Judul & Angka */
   .card-title {
-    font-size: 1.1rem;
+    font-size: 0.85rem; /* Ukuran font judul disesuaikan agar muat */
     color: var(--text-muted);
     z-index: 2;
     font-weight: 700;
@@ -58,48 +58,48 @@
   }
 
   .card-value {
-    font-size: 2.6rem;
+    font-size: 1.8rem; /* Ukuran angka utama diturunkan sedikit */
     font-weight: 800;
     color: var(--text-main);
     z-index: 2;
-    margin-top: 10px;
+    margin-top: 8px;
   }
 
   .card-subtitle {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    margin-top: 8px;
+    margin-top: 4px;
     z-index: 2;
   }
 
-  /* Utilitas Warna Berdasarkan Rencana Data */
+  /* Utilitas Warna */
   .text-green { color: var(--green-plus); }
   .text-red { color: var(--red-minus); }
   .text-darkblue { color: var(--blue-dark); }
   .text-lightblue { color: var(--blue-light); }
 
-  /* Implementasi Watermark Tipografi Makro */
+  /* Implementasi Watermark Tipografi Makro - FIX: Ukuran dikecilkan */
   .card::after {
     content: attr(data-watermark);
     position: absolute;
-    bottom: -20px;
-    right: -10px;
-    font-size: 8rem;
+    bottom: -15px;
+    right: -5px;
+    font-size: 5rem; /* Diperkecil agar proporsional dengan kartu baru */
     font-weight: 900;
     line-height: 1;
     color: #000;
-    opacity: 0.04; /* Opasitas sangat rendah agar tidak mendistorsi data */
+    opacity: 0.04; 
     z-index: 1;
     pointer-events: none;
     user-select: none;
   }
 
-  /* Judul Seksi untuk Pemisah Logis */
+  /* Judul Seksi */
   .section-title {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-muted);
-    margin: 10px 0 20px 0;
+    margin: 10px 0 15px 0;
     border-bottom: 2px solid #e2e8f0;
     padding-bottom: 8px;
   }
@@ -107,22 +107,19 @@
 </head>
 <body>
 
-<!-- SEKSI 1: Alur Logis Donatur Rutin (Master & Baru) -->
+<!-- SEKSI 1: Alur Logis Donatur Rutin -->
 <div class="section-title">Alur Donatur Rutin</div>
 <div class="dashboard-container">
-  <!-- Kartu Target Utama -->
   <div class="card" data-watermark="T">
     <div class="card-title">Target Donatur</div>
     <div class="card-value">500</div>
   </div>
 
-  <!-- Kartu Donatur Baru (Di Tengah, Hijau, Simbol +) -->
   <div class="card" data-watermark="+">
     <div class="card-title">Donatur Baru</div>
     <div class="card-value text-green">+ 45</div>
   </div>
 
-  <!-- Kartu Sisa Target (Simbol Minus) -->
   <div class="card" data-watermark="-">
     <div class="card-title">Sisa Target</div>
     <div class="card-value text-red">- 120</div>
@@ -132,20 +129,17 @@
 <!-- SEKSI 2: Insidental & Operasional -->
 <div class="section-title">Status Insidental & Operasional</div>
 <div class="dashboard-container">
-  <!-- Kartu Insidental (Biru Tua eksisting & Biru Muda tambahan) -->
   <div class="card" data-watermark="IN">
     <div class="card-title">Insidental</div>
     <div class="card-value text-darkblue">85</div>
     <div class="card-subtitle text-lightblue">+ 12 Baru</div>
   </div>
 
-  <!-- Kartu Persentase -->
   <div class="card" data-watermark="%">
     <div class="card-title">Persentase</div>
     <div class="card-value">85%</div>
   </div>
 
-  <!-- Kartu Terjemput -->
   <div class="card" data-watermark="TJ">
     <div class="card-title">Terjemput</div>
     <div class="card-value">120</div>
@@ -155,25 +149,21 @@
 <!-- SEKSI 3: Keuangan & Indikator Kinerja -->
 <div class="section-title">Keuangan & Indikator</div>
 <div class="dashboard-container">
-  <!-- Kartu Pemasukan (Simbol Rp) -->
   <div class="card" data-watermark="Rp">
     <div class="card-title">Pemasukan</div>
     <div class="card-value text-green">+ 5.000.000</div>
   </div>
 
-  <!-- Kartu Kewajiban Rutin (Simbol Minus) -->
   <div class="card" data-watermark="-">
     <div class="card-title">Kewajiban Rutin</div>
     <div class="card-value text-red">- 1.500.000</div>
   </div>
 
-  <!-- Kartu IKP -->
   <div class="card" data-watermark="IKP">
     <div class="card-title">IKP</div>
     <div class="card-value">45</div>
   </div>
 
-  <!-- Kartu IIP -->
   <div class="card" data-watermark="IIP">
     <div class="card-title">IIP</div>
     <div class="card-value">30</div>
