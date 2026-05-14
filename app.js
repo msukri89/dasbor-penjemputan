@@ -1,45 +1,28 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Dcig9_jLXMp5z2cAjqE5hssYFC02QyrFg4sUaeUG1crik9LwRY54EnVgwIDMwaw/exec";
-let dataMaster = null; let grafikUtama = null; let grafikInsidental = null; let dataBelumBerdonasi = [];
+let dataMaster = null; let grafikUtama = null; let dataBelumBerdonasi = [];
 
 const sidebar = document.getElementById('sidebar'); 
 const overlay = document.getElementById('overlay');
 const areaDasbor = document.getElementById('areaDasbor'); 
 const areaBelum = document.getElementById('areaBelum');
 
-// --- FUNGSI NAVIGASI SIDEBAR ---
-function tutupSidebar() { 
-    sidebar.classList.remove('terbuka'); 
-    overlay.classList.remove('terbuka'); 
-}
-
-document.getElementById('openSidebar').addEventListener('click', () => { 
-    sidebar.classList.add('terbuka'); 
-    overlay.classList.add('terbuka'); 
-});
-
+function tutupSidebar() { sidebar.classList.remove('terbuka'); overlay.classList.remove('terbuka'); }
+document.getElementById('openSidebar').addEventListener('click', () => { sidebar.classList.add('terbuka'); overlay.classList.add('terbuka'); });
 document.getElementById('closeSidebar').addEventListener('click', tutupSidebar);
 overlay.addEventListener('click', tutupSidebar);
 
 document.getElementById('menuDasbor').addEventListener('click', (e) => {
-    e.preventDefault(); 
-    areaDasbor.style.display = 'block'; 
-    areaBelum.style.display = 'none';
-    document.getElementById('menuDasbor').classList.add('aktif');
-    document.getElementById('menuBelum').classList.remove('aktif');
+    e.preventDefault(); areaDasbor.style.display = 'block'; areaBelum.style.display = 'none';
+    document.getElementById('menuDasbor').classList.add('aktif'); document.getElementById('menuBelum').classList.remove('aktif');
     tutupSidebar();
 });
 
 document.getElementById('menuBelum').addEventListener('click', (e) => {
-    e.preventDefault(); 
-    areaDasbor.style.display = 'none'; 
-    areaBelum.style.display = 'block';
-    document.getElementById('menuBelum').classList.add('aktif');
-    document.getElementById('menuDasbor').classList.remove('aktif');
-    tutupSidebar(); 
-    tampilkanDaftarBelum();
+    e.preventDefault(); areaDasbor.style.display = 'none'; areaBelum.style.display = 'block';
+    document.getElementById('menuBelum').classList.add('aktif'); document.getElementById('menuDasbor').classList.remove('aktif');
+    tutupSidebar(); tampilkanDaftarBelum();
 });
 
-// --- LOGIKA DATA ---
 async function mulaiAplikasi() {
     try {
         const res = await fetch(SCRIPT_URL); const json = await res.json(); dataMaster = json.data;
@@ -71,7 +54,6 @@ function kalkulasi() {
     
     dataBelumBerdonasi = []; let totalRp = 0, bIns = 0;
 
-    // 1. Terima Orang (Realitas Transaksi)
     let tO = dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek));
     let idR = new Set();
     tO.forEach(b => {
@@ -81,7 +63,6 @@ function kalkulasi() {
         else if(sp.includes("INSIDEN")) bIns++;
     });
 
-    // 2. Terima Kotak (Realitas Transaksi)
     let tK = dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek));
     let idIKP = new Set(), idIIP = new Set();
     tK.forEach(b => {
@@ -91,11 +72,9 @@ function kalkulasi() {
         if(sp.includes("IIP")) idIIP.add(String(b["Kode Donatur"]).trim());
     });
 
-    // 3. Master (KEWAJIBAN - Difilter Petugas & Pekan)
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
 
-    // List Belum Berdonasi
     mR.forEach(b => { if(!idR.has(String(b["Nomor Register"]).trim())) dataBelumBerdonasi.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, b:'badge-rutin'}); });
     mK.forEach(b => {
         let id=String(b["Nomor Register"]).trim(), sp=String(b.Spesifikasi).toUpperCase();
@@ -103,43 +82,59 @@ function kalkulasi() {
         if(!s) dataBelumBerdonasi.push({n:b["Nama Donatur"], k:sp.includes("IKP")?"IKP":"IIP", a:b.Alamat, h:b.Hp, b:sp.includes("IKP")?'badge-ikp':'badge-iip'});
     });
 
-    // 4. Hitung Statistik Akhir
     let bR=idR.size, bK1=idIKP.size, bK2=idIIP.size;
-    let kR=mR.length;
-    let kK1=mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IKP")).length;
-    let kK2=mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IIP")).length;
+    let kR=mR.length, kK1=mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IKP")).length, kK2=mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IIP")).length;
 
     let totalKewajiban = kR + kK1 + kK2;
+    // Berhasil ditarik semua termasuk insidental
     let totalBerhasil = bR + bK1 + bK2 + bIns;
 
-    // UI Update
+    // Update UI 6 Kartu
     document.getElementById('teksPersentase').innerText = totalKewajiban > 0 ? Math.round(((bR + bK1 + bK2) / totalKewajiban) * 100) + "%" : "0%";
-    document.getElementById('teksKewajiban').innerText = totalKewajiban;
     document.getElementById('teksBerhasil').innerText = totalBerhasil;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalRp.toLocaleString('id-ID');
+    
+    document.getElementById('teksRutin').innerText = kR;
+    document.getElementById('teksIKP').innerText = kK1;
+    document.getElementById('teksIIP').innerText = kK2;
 
-    drawGrafik(bR, kR, bK1, kK1, bK2, kK2); 
-    drawIns(bIns);
+    // Panggil Grafik Tunggal dengan parameter Insidental
+    drawGrafik(bR, kR, bK1, kK1, bK2, kK2, bIns); 
 }
 
-function drawGrafik(bR, kR, b1, k1, b2, k2) {
+function drawGrafik(bR, kR, b1, k1, b2, k2, bIns) {
     const ctx = document.getElementById('grafikUtama').getContext('2d');
     if(grafikUtama) grafikUtama.destroy();
     grafikUtama = new Chart(ctx, {
-        type:'bar', data:{ labels:['Rutin','IKP','IIP'], datasets:[
-            {label:'B', data:[bR, b1, b2], backgroundColor:['#2E5B72','#B2C330','#4FB0C6'], borderWidth:1, borderColor:'#fff'},
-            {label:'S', data:[Math.max(0,kR-bR), Math.max(0,k1-b1), Math.max(0,k2-b2)], backgroundColor:'#E5E7EB', borderWidth:1, borderColor:'#fff'}
-        ]},
-        options:{ responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true}, y:{stacked:true, beginAtZero:true}}, plugins:{legend:{display:false}}}
-    });
-}
-
-function drawIns(j) {
-    const ctx = document.getElementById('grafikInsidental').getContext('2d');
-    if(grafikInsidental) grafikInsidental.destroy();
-    grafikInsidental = new Chart(ctx, {
-        type:'bar', data:{ labels:['Insidental'], datasets:[{data:[j], backgroundColor:'#2E5B72', borderWidth:1, borderColor:'#fff', barThickness:20}]},
-        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, scales:{x:{beginAtZero:true, ticks:{stepSize:1}}}, plugins:{legend:{display:false}}}
+        type:'bar', 
+        data:{ 
+            // Tambahkan Insidental sebagai label ke-4
+            labels:['Rutin','IKP','IIP', 'Insidental'], 
+            datasets:[
+                {
+                    label:'Berhasil', 
+                    data:[bR, b1, b2, bIns], 
+                    // Warna Insidental disamakan dengan Rutin (Biru Petrol) agar konsisten
+                    backgroundColor:['#2E5B72','#B2C330','#4FB0C6', '#2E5B72'], 
+                    borderWidth:1, 
+                    borderColor:'#fff'
+                },
+                {
+                    label:'Sisa', 
+                    // Insidental tidak memiliki sisa (Kewajiban = 0)
+                    data:[Math.max(0,kR-bR), Math.max(0,k1-b1), Math.max(0,k2-b2), 0], 
+                    backgroundColor:'#E5E7EB', 
+                    borderWidth:1, 
+                    borderColor:'#fff'
+                }
+            ]
+        },
+        options:{ 
+            responsive:true, 
+            maintainAspectRatio:false, 
+            scales:{x:{stacked:true}, y:{stacked:true, beginAtZero:true}}, 
+            plugins:{legend:{display:false}}
+        }
     });
 }
 
