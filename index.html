@@ -48,15 +48,27 @@
                 <div class="card card-lime"><h3>TERJEMPUT</h3><h2 id="teksBerhasil">0</h2></div>
                 <div class="card card-lime"><h3>PEMASUKAN</h3><h2 id="teksPemasukan">Rp 0</h2></div>
                 
-                <div class="card card-muda"><h3>KEWAJIBAN RUTIN</h3><h2 id="teksRutin">0</h2></div>
-                <div class="card card-muda"><h3>KEWAJIBAN IKP</h3><h2 id="teksIKP">0</h2></div>
-                <div class="card card-muda"><h3>KEWAJIBAN IIP</h3><h2 id="teksIIP">0</h2></div>
+                <div class="card card-muda">
+                    <h3>KEWAJIBAN RUTIN</h3>
+                    <h2 id="teksRutin">0</h2>
+                    <div id="teksSisaRutin" class="teks-sisa">-0</div>
+                </div>
+                <div class="card card-muda">
+                    <h3>KEWAJIBAN IKP</h3>
+                    <h2 id="teksIKP">0</h2>
+                    <div id="teksSisaIKP" class="teks-sisa">-0</div>
+                </div>
+                <div class="card card-muda">
+                    <h3>KEWAJIBAN IIP</h3>
+                    <h2 id="teksIIP">0</h2>
+                    <div id="teksSisaIIP" class="teks-sisa">-0</div>
+                </div>
             </div>
             
             <div class="charts-area">
                 <div class="chart-container">
                     <h3>Realisasi Target & Insidental</h3>
-                    <div style="height: 380px; position: relative;"><canvas id="grafikUtama"></canvas></div>
+                    <div style="height: 420px; position: relative;"><canvas id="grafikUtama"></canvas></div>
                 </div>
             </div>
         </div>
