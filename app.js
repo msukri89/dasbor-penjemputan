@@ -202,7 +202,15 @@ function tampilkanDaftarBelum() {
     dataF.forEach(donatur => {
         let noHp = String(donatur.hp || "").replace(/[^0-9]/g, '');
         if (noHp.startsWith('0')) noHp = '62' + noHp.substring(1); 
-        let pesan = `Assalamu'alaikum Warahmatullah, Bapak/Ibu *${donatur.nama}*. Mohon maaf mengganggu waktunya, kami dari petugas LAZ Sidogiri bermaksud untuk melakukan penjemputan donasi. Apakah ada waktu luang hari ini? Jazakumullah Khairan.`;
+        let pesan = `_Assalamu'alaikum Warahmatullah_
+
+Bapak/Ibu *${donatur.nama}*.
+
+Mohon maaf mengganggu waktunya, kami dari petugas LAZ Sidogiri bermaksud untuk melakukan penjemputan donasi.
+
+Apakah ada waktu luang hari ini?
+
+_Jazakumullah Khairan._`;
         let linkWa = noHp ? `https://wa.me/${noHp}?text=${encodeURIComponent(pesan)}` : '#';
         let warnaB = donatur.kategori === 'RUTIN' ? '#2E5B72' : (donatur.kategori === 'IKP' ? '#B2C330' : '#4FB0C6');
         wadah.innerHTML += `
