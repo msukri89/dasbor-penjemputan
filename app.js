@@ -34,7 +34,7 @@ function isiPetugas() {
     const d = document.getElementById('filterPetugas'); let s = new Set();
     dataMaster.master_orang.forEach(b => { if(b.Kolektor) s.add(String(b.Kolektor).trim()); });
     dataMaster.master_kotak.forEach(b => { if(b.Kolektor) s.add(String(b.Kolektor).trim()); });
-    d.innerHTML = '<option value="Semua">Semua Petugas</option>';
+    d.innerHTML = '<option value="Semua">SEMUA PETUGAS</option>';
     s.forEach(n => { if(n && n!=="undefined"){ let o=document.createElement('option'); o.value=n; o.text=n; d.appendChild(o); }});
 }
 
@@ -54,6 +54,7 @@ function kalkulasi() {
     
     dataBelumBerdonasi = []; let totalRp = 0, bIns = 0;
 
+    // --- PROSES TERIMA (REALISASI) ---
     let tO = dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek));
     let idR = new Set();
     tO.forEach(b => {
@@ -72,6 +73,7 @@ function kalkulasi() {
         if(sp.includes("IIP")) idIIP.add(String(b["Kode Donatur"]).trim());
     });
 
+    // --- PROSES MASTER (KEWAJIBAN) ---
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
 
@@ -82,30 +84,59 @@ function kalkulasi() {
         if(!s) dataBelumBerdonasi.push({n:b["Nama Donatur"], k:sp.includes("IKP")?"IKP":"IIP", a:b.Alamat, h:b.Hp, b:sp.includes("IKP")?'badge-ikp':'badge-iip'});
     });
 
+    // --- PROSES DONATUR BARU ---
+    let dBaruRutin = 0, dBaruIns = 0, dBaruIKP = 0, dBaruIIP = 0;
+    
+    // Keamanan jika sheet baru kosong atau belum sinkron
+    if(dataMaster.baru_orang) {
+        dataMaster.baru_orang.forEach(b => {
+            let pet = String(b.Kolektor || b["Nama User"] || "").trim();
+            let pek = b.Pekan ? String(b.Pekan).trim() : getPekan(b.Tanggal);
+            if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) {
+                let sp = String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase();
+                if(sp.includes("RUTIN")) dBaruRutin++;
+                else if(sp.includes("INSIDEN")) dBaruIns++;
+            }
+        });
+    }
+
+    if(dataMaster.baru_kotak) {
+        dataMaster.baru_kotak.forEach(b => {
+            let pet = String(b.Kolektor || b["Nama User"] || "").trim();
+            let pek = b.Pekan ? String(b.Pekan).trim() : getPekan(b.Tanggal);
+            if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) {
+                let sp = String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase();
+                if(sp.includes("IKP")) dBaruIKP++;
+                if(sp.includes("IIP")) dBaruIIP++;
+            }
+        });
+    }
+
+    // --- STATISTIK AKHIR & UPDATE UI ---
     let bR=idR.size, bK1=idIKP.size, bK2=idIIP.size;
     let kR=mR.length, kK1=mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IKP")).length, kK2=mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IIP")).length;
 
     let totalKewajiban = kR + kK1 + kK2;
     let totalBerhasil = bR + bK1 + bK2 + bIns;
 
-    // Perhitungan Angka Sisa (Minus)
-    let sisaRutin = Math.max(0, kR - bR);
-    let sisaIKP = Math.max(0, kK1 - bK1);
-    let sisaIIP = Math.max(0, kK2 - bK2);
-
-    // Update UI
     document.getElementById('teksPersentase').innerText = totalKewajiban > 0 ? Math.round(((bR + bK1 + bK2) / totalKewajiban) * 100) + "%" : "0%";
     document.getElementById('teksBerhasil').innerText = totalBerhasil;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalRp.toLocaleString('id-ID');
     
     document.getElementById('teksRutin').innerText = kR;
-    document.getElementById('teksSisaRutin').innerText = "-" + sisaRutin;
+    document.getElementById('teksSisaRutin').innerText = "-" + Math.max(0, kR - bR);
 
     document.getElementById('teksIKP').innerText = kK1;
-    document.getElementById('teksSisaIKP').innerText = "-" + sisaIKP;
+    document.getElementById('teksSisaIKP').innerText = "-" + Math.max(0, kK1 - bK1);
 
     document.getElementById('teksIIP').innerText = kK2;
-    document.getElementById('teksSisaIIP').innerText = "-" + sisaIIP;
+    document.getElementById('teksSisaIIP').innerText = "-" + Math.max(0, kK2 - bK2);
+
+    // Update Angka Donatur Baru
+    document.getElementById('infoBaruRutin').innerText = dBaruRutin;
+    document.getElementById('infoBaruIns').innerText = dBaruIns;
+    document.getElementById('infoBaruIKP').innerText = dBaruIKP;
+    document.getElementById('infoBaruIIP').innerText = dBaruIIP;
 
     drawGrafik(bR, kR, bK1, kK1, bK2, kK2, bIns); 
 }
