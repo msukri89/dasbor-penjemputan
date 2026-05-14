@@ -38,7 +38,7 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 /* Ukuran font angka diturunkan ke 13px agar "Rp 9.000.000" muat di 1 kolom */
 .card h2 { font-size: 13px; font-weight: 800; word-break: break-word; }
 
-.card-petrol { border-top-color: var(--biru-petrol); }
+.card-petrol { border-top-color: var(--hijau-lime); }
 .card-muda { border-top-color: var(--biru-muda); }
 .card-lime { border-top-color: var(--hijau-lime); }
 
