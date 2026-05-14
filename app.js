@@ -85,9 +85,8 @@ function kalkulasi() {
     });
 
     // --- PROSES DONATUR BARU ---
-    let dBaruRutin = 0, dBaruIns = 0, dBaruIKP = 0, dBaruIIP = 0;
+    let dBaruRutin = 0, dBaruIKP = 0, dBaruIIP = 0;
     
-    // Keamanan jika sheet baru kosong atau belum sinkron
     if(dataMaster.baru_orang) {
         dataMaster.baru_orang.forEach(b => {
             let pet = String(b.Kolektor || b["Nama User"] || "").trim();
@@ -95,7 +94,6 @@ function kalkulasi() {
             if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) {
                 let sp = String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase();
                 if(sp.includes("RUTIN")) dBaruRutin++;
-                else if(sp.includes("INSIDEN")) dBaruIns++;
             }
         });
     }
@@ -112,31 +110,30 @@ function kalkulasi() {
         });
     }
 
-    // --- STATISTIK AKHIR & UPDATE UI ---
+    // --- STATISTIK AKHIR ---
     let bR=idR.size, bK1=idIKP.size, bK2=idIIP.size;
     let kR=mR.length, kK1=mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IKP")).length, kK2=mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IIP")).length;
 
     let totalKewajiban = kR + kK1 + kK2;
     let totalBerhasil = bR + bK1 + bK2 + bIns;
 
+    // Update Kartu Utama
     document.getElementById('teksPersentase').innerText = totalKewajiban > 0 ? Math.round(((bR + bK1 + bK2) / totalKewajiban) * 100) + "%" : "0%";
     document.getElementById('teksBerhasil').innerText = totalBerhasil;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalRp.toLocaleString('id-ID');
     
+    // Update Kartu Kewajiban 3 Tingkat
     document.getElementById('teksRutin').innerText = kR;
+    document.getElementById('teksBaruRutin').innerText = "+" + dBaruRutin;
     document.getElementById('teksSisaRutin').innerText = "-" + Math.max(0, kR - bR);
 
     document.getElementById('teksIKP').innerText = kK1;
+    document.getElementById('teksBaruIKP').innerText = "+" + dBaruIKP;
     document.getElementById('teksSisaIKP').innerText = "-" + Math.max(0, kK1 - bK1);
 
     document.getElementById('teksIIP').innerText = kK2;
+    document.getElementById('teksBaruIIP').innerText = "+" + dBaruIIP;
     document.getElementById('teksSisaIIP').innerText = "-" + Math.max(0, kK2 - bK2);
-
-    // Update Angka Donatur Baru
-    document.getElementById('infoBaruRutin').innerText = dBaruRutin;
-    document.getElementById('infoBaruIns').innerText = dBaruIns;
-    document.getElementById('infoBaruIKP').innerText = dBaruIKP;
-    document.getElementById('infoBaruIIP').innerText = dBaruIIP;
 
     drawGrafik(bR, kR, bK1, kK1, bK2, kK2, bIns); 
 }
@@ -196,6 +193,43 @@ function tampilkanDaftarBelum() {
                 <a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
             </div>`;
     });
+}
+
+// --- FUNGSI DOWNLOAD OTOMATIS EXCEL/CSV ---
+function downloadDataSisa(kategori) {
+    let dataF = dataBelumBerdonasi.filter(d => d.k === kategori);
+    if(dataF.length === 0) {
+        alert("Pekerjaan Tuntas! Tidak ada sisa penjemputan untuk " + kategori + ".");
+        return;
+    }
+
+    // Header CSV
+    let csvContent = "Nama Donatur,Kategori,Alamat,No HP\n";
+    
+    dataF.forEach(d => {
+        // Mencegah error jika ada tanda koma (,) di dalam teks alamat
+        let nama = `"${String(d.n).replace(/"/g, '""')}"`;
+        let kat = `"${String(d.k).replace(/"/g, '""')}"`;
+        let alamat = `"${String(d.a).replace(/"/g, '""')}"`;
+        let hp = `"${String(d.h || "").replace(/"/g, '""')}"`;
+        csvContent += `${nama},${kat},${alamat},${hp}\n`;
+    });
+
+    // Membuat file Blob dengan encoding uFEFF (BOM) agar terbuka sempurna di Microsoft Excel
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    
+    let fPet = document.getElementById('filterPetugas').value;
+    let fPek = document.getElementById('filterPekan').value;
+    let namaFile = `Sisa_${kategori}_${fPet}_${fPek}.csv`.replace(/ /g, "_");
+
+    link.setAttribute("href", url);
+    link.setAttribute("download", namaFile);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 document.getElementById('filterPetugas').addEventListener('change', kalkulasi);
