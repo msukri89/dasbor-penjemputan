@@ -6,7 +6,7 @@
     --warna-hitam: #1A1A1A;
     --warna-abu: #E5E7EB;
     --merah-bata: #DC2626; 
-    --hijau-baru: #16A34A; /* Hijau cerah untuk donatur baru */
+    --hijau-baru: #16A34A;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -33,20 +33,41 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .filter-area { display: flex; gap: 8px; padding: 10px 15px; }
 .dropdown-aksen { flex: 1; padding: 8px; background: var(--biru-petrol); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 11px; outline: none; }
 
-/* Pembesaran Ukuran dan Bantalan Kartu (Mengisi ruang 20% kosong) */
 .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 15px; margin-bottom: 20px; }
-.card { background: white; padding: 15px 5px; border-radius: 10px; text-align: center; border-top: 4px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.card h3 { font-size: 10px; color: #6B7280; text-transform: uppercase; margin-bottom: 6px; letter-spacing: -0.5px; }
-.card h2 { font-size: 16px; font-weight: 800; word-break: break-word; }
+.card { 
+    background: white; 
+    padding: 15px 5px; 
+    border-radius: 10px; 
+    text-align: center; 
+    border-top: 4px solid transparent; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    position: relative; /* Penting untuk watermark */
+    overflow: hidden; /* Penting agar watermark tidak keluar batas kotak */
+}
+.card h3 { position: relative; z-index: 2; font-size: 10px; color: #6B7280; text-transform: uppercase; margin-bottom: 6px; letter-spacing: -0.5px; }
+.card h2 { position: relative; z-index: 2; font-size: 16px; font-weight: 800; word-break: break-word; }
 
-/* Gaya untuk Teks Baru & Sisa */
-.teks-baru { font-size: 12px; font-weight: bold; color: var(--hijau-baru); margin-top: 4px; }
-.teks-sisa { font-size: 12px; font-weight: bold; color: var(--merah-bata); margin-top: 2px; padding: 3px 0; border-radius: 4px; cursor: pointer; transition: 0.2s; }
-.teks-sisa:active { background-color: #fee2e2; } /* Efek kedip saat angka minus ditekan */
+/* Posisi dan Desain Watermark */
+.watermark-icon {
+    position: absolute;
+    right: -8px;
+    bottom: -10px;
+    font-size: 55px; /* Ukuran Ikon */
+    opacity: 0.12; /* Transparansi (sangat pudar) */
+    pointer-events: none; /* Mencegah ikon menghalangi tombol klik di atasnya */
+    z-index: 1;
+}
 
-.card-petrol { border-top-color: var(--hijau-lime); }
+/* Penyesuaian Warna Card & Watermark */
 .card-muda { border-top-color: var(--biru-muda); }
+.card-muda .watermark-icon { color: var(--biru-muda); }
+
 .card-lime { border-top-color: var(--hijau-lime); }
+.card-lime .watermark-icon { color: var(--hijau-lime); }
+
+.teks-baru { position: relative; z-index: 2; font-size: 12px; font-weight: bold; color: var(--hijau-baru); margin-top: 4px; }
+.teks-sisa { position: relative; z-index: 2; font-size: 12px; font-weight: bold; color: var(--merah-bata); margin-top: 2px; padding: 3px 0; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+.teks-sisa:active { background-color: #fee2e2; } 
 
 .charts-area { padding: 0 15px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
 .chart-container { background: white; padding: 15px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
