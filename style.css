@@ -15,7 +15,7 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
     position: fixed; 
     top: 0; 
     left: -100%; /* Sembunyi total ke kiri */
-    width: 30%;  /* Untuk kenyamanan sentuhan di HP, 70% lebih ideal, tapi jika ingin sangat tipis ganti ke 30% */
+    width: 50%;  /* Untuk kenyamanan sentuhan di HP, 70% lebih ideal, tapi jika ingin sangat tipis ganti ke 30% */
     max-width: 280px; 
     height: 100vh; 
     background: white; 
