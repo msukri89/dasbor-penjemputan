@@ -205,6 +205,7 @@ function tampilkanDaftarBelum() {
         let pesan = `_Assalamu'alaikum Warahmatullah_
 
 Bapak/Ibu *${donatur.nama}*.
+Semoga Bapak/Ibu senantiasa dalam lindungan Allah swt.
 
 Mohon maaf mengganggu waktunya, kami dari petugas LAZ Sidogiri bermaksud untuk melakukan penjemputan donasi.
 
