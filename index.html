@@ -3,24 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dasbor Penjemputan - LAZ Sidogiri</title>
-    
+    <title>Dasbor LAZ Sidogiri</title>
     <meta name="theme-color" content="#2E5B72">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
-
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <div style="display: flex; align-items: center;">
-                <img src="logo.png" alt="Logo" style="height: 35px; margin-right: 10px;">
-                <h2 style="font-size: 16px;"></h2>
+                <img src="logo.png" alt="Logo" style="height: 30px; margin-right: 8px;">
+                <h2 style="font-size: 14px;">LAZ Sidogiri</h2>
             </div>
             <button id="closeSidebar" class="close-btn"><i class="fas fa-times"></i></button>
         </div>
@@ -29,7 +26,6 @@
             <li><a href="#" id="menuBelum"><i class="fas fa-list-ul"></i> Belum Berdonasi</a></li>
         </ul>
     </div>
-
     <div id="overlay" class="overlay"></div>
 
     <div class="main-content">
@@ -39,69 +35,45 @@
         </header>
 
         <div class="filter-area">
-            <select id="filterPetugas" class="dropdown-aksen">
-                <option value="Semua">Semua Petugas</option>
-            </select>
+            <select id="filterPetugas" class="dropdown-aksen"><option value="Semua">Semua Petugas</option></select>
             <select id="filterPekan" class="dropdown-aksen">
                 <option value="Total">Total Bulan Ini</option>
-                <option value="Pekan 1">Pekan 1</option>
-                <option value="Pekan 2">Pekan 2</option>
-                <option value="Pekan 3">Pekan 3</option>
-                <option value="Pekan 4">Pekan 4</option>
+                <option value="Pekan 1">P1</option><option value="Pekan 2">P2</option>
+                <option value="Pekan 3">P3</option><option value="Pekan 4">P4</option>
             </select>
         </div>
 
         <div id="areaDasbor">
             <div class="summary-cards">
-                <div class="card card-petrol">
-                    <h3>Persentase</h3>
-                    <h2 id="teksPersentase">0%</h2>
-                </div>
-                <div class="card card-muda">
-                    <h3>Kewajiban</h3>
-                    <h2 id="teksKewajiban">0</h2>
-                </div>
-                <div class="card card-lime">
-                    <h3>Berhasil</h3>
-                    <h2 id="teksBerhasil">0</h2>
-                </div>
-                <div class="card card-lime">
-                    <h3>Pemasukan</h3>
-                    <h2 id="teksPemasukan">Rp 0</h2>
-                </div>
+                <div class="card card-petrol"><h3>Persentase</h3><h2 id="teksPersentase">0%</h2></div>
+                <div class="card card-muda"><h3>Kewajiban</h3><h2 id="teksKewajiban">0</h2></div>
+                <div class="card card-lime"><h3>Berhasil</h3><h2 id="teksBerhasil">0</h2></div>
+                <div class="card card-lime"><h3>Pemasukan</h3><h2 id="teksPemasukan">Rp 0</h2></div>
             </div>
             
             <div class="charts-area">
                 <div class="chart-container">
-                    <h3>Realisasi Target (Rutin, IKP, IIP)</h3>
-                    <div style="height: 300px; position: relative;">
-                        <canvas id="grafikUtama"></canvas>
-                    </div>
+                    <h3>Realisasi Target</h3>
+                    <div style="height: 220px; position: relative;"><canvas id="grafikUtama"></canvas></div>
                 </div>
-                
-                <div class="chart-container" style="margin-top: 20px;">
-                    <h3>Donasi Insidental (Non-Target)</h3>
-                    <div style="height: 150px; position: relative;">
-                        <canvas id="grafikInsidental"></canvas>
-                    </div>
+                <div class="chart-container">
+                    <h3>Donasi Insidental</h3>
+                    <div style="height: 70px; position: relative;"><canvas id="grafikInsidental"></canvas></div>
                 </div>
             </div>
         </div>
 
-        <div id="areaBelum" style="display: none;">
+        <div id="areaBelum" style="display: none; padding: 0 15px;">
             <div class="header-halaman">
-                <h2 style="font-size: 16px;">Sisa Penjemputan</h2>
+                <h2>Sisa Penjemputan</h2>
                 <select id="filterJenisDonatur" class="dropdown-kecil">
-                    <option value="Semua">Semua Jenis</option>
-                    <option value="RUTIN">Rutin</option>
-                    <option value="IKP">IKP</option>
-                    <option value="IIP">IIP</option>
+                    <option value="Semua">Semua</option><option value="RUTIN">Rutin</option>
+                    <option value="IKP">IKP</option><option value="IIP">IIP</option>
                 </select>
             </div>
-            <div id="wadahDaftarBelum" style="padding: 0 20px;"></div>
+            <div id="wadahDaftarBelum"></div>
         </div>
     </div>
-
     <script src="app.js"></script>
 </body>
 </html>
