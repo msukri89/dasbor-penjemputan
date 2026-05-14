@@ -207,7 +207,6 @@ function downloadDataSisa(kategori) {
     let csvContent = "Nama Donatur,Kategori,Alamat,No HP\n";
     
     dataF.forEach(d => {
-        // Mencegah error jika ada tanda koma (,) di dalam teks alamat
         let nama = `"${String(d.n).replace(/"/g, '""')}"`;
         let kat = `"${String(d.k).replace(/"/g, '""')}"`;
         let alamat = `"${String(d.a).replace(/"/g, '""')}"`;
@@ -215,7 +214,6 @@ function downloadDataSisa(kategori) {
         csvContent += `${nama},${kat},${alamat},${hp}\n`;
     });
 
-    // Membuat file Blob dengan encoding uFEFF (BOM) agar terbuka sempurna di Microsoft Excel
     const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
