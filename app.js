@@ -180,7 +180,15 @@ function tampilkanDaftarBelum() {
     dF.forEach(d => {
         let n = String(d.h || "").replace(/[^0-9]/g,''); 
         if(n.startsWith('0')) n = '62' + n.substring(1);
-        let p = `Assalamu'alaikum, Bapak/Ibu *${d.n}*. Kami petugas LAZ Sidogiri bermaksud menjemput donasi. Apakah ada waktu hari ini?`;
+        let p = `_Assalamu'alaikum,_ Bapak/Ibu *${d.n}*.
+
+Semoga kesehatan dan lindungan Allah swt. senantiasa menyertai Bapak/Ibu beserta keluarga. _Aamiin._
+
+​Kami dari LAZ Sidogiri ingin mengucapkan terima kasih. Berkat kebaikan dan donasi Bapak/Ibu sebelumnya, amanah tersebut telah tersalurkan dengan baik dan sangat membantu para penerima manfaat.
+
+​Jika Bapak/Ibu berkenan untuk kembali berpartisipasi bulan ini, petugas kami siap membantu menjemput donasi. Apakah sekiranya Bapak/Ibu ada waktu luang hari ini, atau adakah hari lain yang lebih pas?
+
+_​Wassalamu'alaikum Warahmatullahi Wabarakatuh_ 🙏`;
         let l = n ? `https://wa.me/${n}?text=${encodeURIComponent(p)}` : '#';
         let c = d.k === 'RUTIN' ? '#2E5B72' : (d.k === 'IKP' ? '#B2C330' : '#4FB0C6');
         
