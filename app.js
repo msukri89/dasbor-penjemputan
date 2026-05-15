@@ -144,7 +144,7 @@ function drawGrafik(bR, kR, b1, k1, b2, k2, bIns) {
     grafikUtama = new Chart(ctx, {
         type:'bar', 
         data:{ 
-            labels:['Rutin','IKP','IIP', 'Insidental'], 
+            labels:['RUTIN','IKP','IIP', 'INSIDENTAL'], 
             datasets:[
                 {
                     label:'Berhasil', 
