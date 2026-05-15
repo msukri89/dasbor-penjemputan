@@ -50,8 +50,8 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .watermark-icon {
     position: absolute;
     right: 0px;      
-    bottom: 3px;     
-    font-size: 38px; 
+    bottom: -1px;     
+    font-size: 45px; 
     opacity: 0.12; 
     pointer-events: none; 
     z-index: 1;
