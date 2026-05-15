@@ -177,7 +177,7 @@ function drawGrafik(bR_Pekan, b1_Pekan, b2_Pekan, bIns, sRutin, sIKP, sIIP) {
     grafikUtama = new Chart(ctx, {
         type:'bar', 
         data:{ 
-            labels:['Rutin','IKP','IIP', 'Insidental'], 
+            labels:['RUTIN','IKP','IIP', 'INSIDENTAL'], 
             datasets:[
                 {
                     label:'Terjemput (Pekan Ini)', 
