@@ -41,24 +41,22 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
     text-align: center; 
     border-top: 4px solid transparent; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-    position: relative; /* Penting untuk watermark */
-    overflow: hidden; /* Penting agar watermark tidak keluar batas kotak */
+    position: relative; 
+    overflow: hidden; 
 }
 .card h3 { position: relative; z-index: 2; font-size: 10px; color: #6B7280; text-transform: uppercase; margin-bottom: 6px; letter-spacing: -0.5px; }
 .card h2 { position: relative; z-index: 2; font-size: 16px; font-weight: 800; word-break: break-word; }
 
-/* Posisi dan Desain Watermark */
 .watermark-icon {
     position: absolute;
-    right: 0px;
-    bottom: -3px;
-    font-size: 40px; /* Ukuran Ikon */
-    opacity: 0.12; /* Transparansi (sangat pudar) */
-    pointer-events: none; /* Mencegah ikon menghalangi tombol klik di atasnya */
+    right: 0px;      
+    bottom: 3px;     
+    font-size: 38px; 
+    opacity: 0.12; 
+    pointer-events: none; 
     z-index: 1;
 }
 
-/* Penyesuaian Warna Card & Watermark */
 .card-muda { border-top-color: var(--biru-muda); }
 .card-muda .watermark-icon { color: var(--biru-muda); }
 
