@@ -71,7 +71,7 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .badge { font-size: 8px; padding: 2px 6px; border-radius: 8px; color: white; font-weight: bold; }
 .btn-wa { background: #25D366; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 18px; flex-shrink: 0; }
 
-/* Tombol Muat Lebih Banyak (Lazy Loading) */
+/* Tombol Muat Lebih Banyak */
 .btn-muat-banyak {
     background: var(--biru-muda); color: white; border: none; padding: 10px 20px;
     border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer;
@@ -98,3 +98,20 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 }
 .btn-sisa-rekap:active { background: #FCA5A5; color: white; transform: scale(0.95); }
 .btn-sisa-rekap i { font-size: 9px; margin-left: 3px; }
+
+/* --- SKELETON LOADING UI (Animasi Pantulan Cahaya) --- */
+.skeleton {
+    background: #e2e5e7;
+    background: linear-gradient(90deg, #e5e7eb 8%, #f3f4f6 18%, #e5e7eb 33%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 4px;
+    display: inline-block;
+}
+.skeleton-text { width: 60px; height: 18px; margin: 0 auto; }
+.skeleton-text-small { width: 40px; height: 14px; margin: 0 auto; }
+.skeleton-chart { width: 100%; height: 100%; border-radius: 8px; position: absolute; top: 0; left: 0; z-index: 10; }
+
+@keyframes shimmer {
+    to { background-position: -200% 0; }
+}
