@@ -35,10 +35,9 @@ menuRekap.addEventListener('click', (e) => {
     areaDasbor.style.display = 'none'; areaRekap.style.display = 'block'; areaBelum.style.display = 'none';
     menuRekap.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuBelum.classList.remove('aktif');
     
-    // Saat masuk menu rekap, paksa filter petugas ke "Semua" agar klasemen utuh
     filterPetugas.value = "Semua"; 
     filterPetugas.style.display = 'none'; 
-    kalkulasi(); // Rekalkulasi ulang untuk mendapatkan data sisa semua petugas
+    kalkulasi(); 
     tutupSidebar(); tampilkanRekap();
 });
 
@@ -110,7 +109,6 @@ function kalkulasi() {
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let kR = mR.length, kK1 = mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IKP")).length, kK2 = mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IIP")).length;
 
-    // --- Perekaman Nama Petugas Untuk Tiap Baris Sisa (Penting Untuk Fitur Download Rekap) ---
     let sisaRutin = 0, sisaIKP = 0, sisaIIP = 0;
     mR.forEach(b => { 
         if(!idR_Global.has(String(b["Nomor Register"]).trim())) { 
@@ -188,7 +186,7 @@ function tampilkanDaftarBelum() {
     });
 }
 
-// --- FUNGSI TAMPILAN REKAPITULASI ---
+// --- FUNGSI TAMPILAN REKAPITULASI (DENGAN PERANKINGAN OTOMATIS) ---
 function tampilkanRekap() {
     if(!dataMaster) return;
     const w = document.getElementById('wadahRekap'); w.innerHTML = "";
@@ -198,15 +196,14 @@ function tampilkanRekap() {
     let petugasSet = new Set();
     dataMaster.master_orang.forEach(b => { if(b.Kolektor) petugasSet.add(String(b.Kolektor).trim()); });
     dataMaster.master_kotak.forEach(b => { if(b.Kolektor) petugasSet.add(String(b.Kolektor).trim()); });
-    let petugasArr = Array.from(petugasSet).sort();
+    let petugasArr = Array.from(petugasSet);
 
-    let html = "";
+    let daftarRekapPetugas = [];
     const fmt = (num) => num.toLocaleString('id-ID');
     
-    // Fungsi kecil pembuat tombol untuk mencegah tombol muncul jika sisa 0
     const renderSisaBtn = (sisa, pet, kat) => {
         if(sisa > 0) return `<div class="btn-sisa-rekap" onclick="downloadSisaRekap('${pet}', '${kat}')">${sisa} <i class="fas fa-download"></i></div>`;
-        return `<span style="color: #10B981; font-weight: bold;"><i class="fas fa-check"></i></span>`; // Centang hijau jika tuntas
+        return `<span style="color: #10B981; font-weight: bold;"><i class="fas fa-check"></i></span>`; 
     };
 
     petugasArr.forEach(petugas => {
@@ -262,7 +259,7 @@ function tampilkanRekap() {
         let persen = kW.tot > 0 ? Math.round(((kW.tot - sisaTot) / kW.tot) * 100) : 0;
         let pWarna = persen >= 80 ? 'var(--hijau-lime)' : (persen >= 50 ? '#EAB308' : '#EF4444');
 
-        html += `
+        let cardHtml = `
             <div class="kartu-rekap">
                 <div class="rekap-header">
                     <h3>${petugas}</h3>
@@ -279,8 +276,24 @@ function tampilkanRekap() {
                     </table>
                 </div>
             </div>`;
+
+        // Masukkan data beserta persentase ke dalam array sementara
+        daftarRekapPetugas.push({
+            persen: persen,
+            html: cardHtml
+        });
     });
-    w.innerHTML = html;
+
+    // --- KUNCI UTAMA: Urutkan array dari persentase terbesar ke terkecil ---
+    daftarRekapPetugas.sort((a, b) => b.persen - a.persen);
+
+    // Gabungkan seluruh HTML yang sudah berurutan untuk digambar ke layar
+    let finalHtml = "";
+    daftarRekapPetugas.forEach(item => {
+        finalHtml += item.html;
+    });
+    
+    w.innerHTML = finalHtml;
 }
 
 // --- FUNGSI DOWNLOAD TERISOLASI UNTUK REKAP ---
