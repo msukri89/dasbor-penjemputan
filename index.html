@@ -22,6 +22,7 @@
         </div>
         <ul class="menu-list">
             <li><a href="#" id="menuDasbor" class="aktif"><i class="fas fa-chart-pie"></i> DASBOR UTAMA</a></li>
+            <li><a href="#" id="menuRekap"><i class="fas fa-users"></i> REKAP PETUGAS</a></li>
             <li><a href="#" id="menuBelum"><i class="fas fa-list-ul"></i> BELUM BERDONASI</a></li>
         </ul>
     </div>
@@ -59,21 +60,21 @@
                 
                 <div class="card card-muda">
                     <i class="fas fa-user-clock watermark-icon"></i>
-                    <h3>RUTIN</h3>
+                    <h3>KEWAJIBAN RUTIN</h3>
                     <h2 id="teksRutin">0</h2>
                     <div id="teksBaruRutin" class="teks-baru">+0</div>
                     <div id="teksSisaRutin" class="teks-sisa" onclick="downloadDataSisa('RUTIN')">-0</div>
                 </div>
                 <div class="card card-muda">
                     <i class="fas fa-box watermark-icon"></i>
-                    <h3>IKP</h3>
+                    <h3>KEWAJIBAN IKP</h3>
                     <h2 id="teksIKP">0</h2>
                     <div id="teksBaruIKP" class="teks-baru">+0</div>
                     <div id="teksSisaIKP" class="teks-sisa" onclick="downloadDataSisa('IKP')">-0</div>
                 </div>
                 <div class="card card-muda">
                     <i class="fas fa-store watermark-icon"></i>
-                    <h3>IIP</h3>
+                    <h3>KEWAJIBAN IIP</h3>
                     <h2 id="teksIIP">0</h2>
                     <div id="teksBaruIIP" class="teks-baru">+0</div>
                     <div id="teksSisaIIP" class="teks-sisa" onclick="downloadDataSisa('IIP')">-0</div>
@@ -82,10 +83,17 @@
             
             <div class="charts-area">
                 <div class="chart-container">
-                    <h3>REALISASI TARGET & INSIDENTAL</h3>
+                    <h3>Realisasi Target & Insidental</h3>
                     <div style="height: 380px; position: relative;"><canvas id="grafikUtama"></canvas></div>
                 </div>
             </div>
+        </div>
+
+        <div id="areaRekap" style="display: none; padding: 0 15px;">
+            <div class="header-halaman">
+                <h2>Klasemen & Rekap Kinerja</h2>
+            </div>
+            <div id="wadahRekap"></div>
         </div>
 
         <div id="areaBelum" style="display: none; padding: 0 15px;">
