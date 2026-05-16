@@ -13,6 +13,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <div id="layarLogin" class="login-wrapper">
+        <div class="login-box">
+            <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                <img src="logo.png" alt="Logo LAZ Sidogiri" style="height: 60px;">
+            </div>
+            <h2>SISTEM PETUGAS</h2>
+            <p>Silakan masukkan identitas Anda</p>
+            <input type="text" id="inputId" class="input-login" placeholder="ID Petugas (Contoh: 101)" autocomplete="off">
+            <input type="password" id="inputPin" class="input-login" placeholder="PIN Rahasia">
+            <div id="pesanError" class="pesan-error"></div>
+            <button id="btnMasuk" class="btn-masuk">MASUK</button>
+        </div>
+    </div>
+
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <div style="display: flex; align-items: center;">
@@ -22,8 +36,9 @@
         </div>
         <ul class="menu-list">
             <li><a href="#" id="menuDasbor" class="aktif"><i class="fas fa-chart-pie"></i> DASBOR UTAMA</a></li>
-            <li><a href="#" id="menuRekap"><i class="fas fa-users"></i> REKAP PETUGAS</a></li>
+            <li id="wadahMenuRekap"><a href="#" id="menuRekap"><i class="fas fa-users"></i> REKAP PETUGAS</a></li>
             <li><a href="#" id="menuBelum"><i class="fas fa-list-ul"></i> BELUM BERDONASI</a></li>
+            <li><a href="#" id="menuLogout" style="color: var(--merah-bata); border-top: 1px solid #eee; margin-top: 10px;"><i class="fas fa-sign-out-alt"></i> KELUAR AKUN</a></li>
         </ul>
     </div>
     <div id="overlay" class="overlay"></div>
@@ -32,6 +47,7 @@
         <header class="topbar">
             <button id="openSidebar" class="burger-btn"><i class="fas fa-bars"></i></button>
             <h1 class="page-title">DASHBOR KINERJA</h1>
+            <div id="namaPenggunaAktif" style="margin-left: auto; font-size: 11px; font-weight: bold; color: var(--biru-petrol); background: #eee; padding: 4px 8px; border-radius: 6px;"></div>
         </header>
 
         <div id="areaFilterGlobal" class="filter-area">
@@ -99,7 +115,7 @@
         </div>
 
         <div id="areaBelum" style="display: none; padding: 0 15px;">
-            <div class="filter-area-lokal">
+            <div class="filter-area-lokal" id="wadahFilterBelumPetugas">
                 <select id="filterBelumPetugas" class="dropdown-lokal"></select>
                 <select id="filterBelumPekan" class="dropdown-lokal">
                     <option value="Total">TOTAL BULAN INI</option>
