@@ -30,24 +30,32 @@ document.getElementById('openSidebar').addEventListener('click', () => { documen
 document.getElementById('closeSidebar').addEventListener('click', tutupSidebar);
 document.getElementById('overlay').addEventListener('click', tutupSidebar);
 
-// Pindah Menu
+// --- PINDAH MENU (Perbaikan Logika Tampilan Filter) ---
 menuDasbor.addEventListener('click', (e) => {
-    e.preventDefault(); areaDasbor.style.display = 'block'; areaRekap.style.display = 'none'; areaBelum.style.display = 'none';
-    areaFilterGlobal.style.display = 'flex'; menuDasbor.classList.add('aktif'); menuRekap.classList.remove('aktif'); menuBelum.classList.remove('aktif');
+    e.preventDefault(); 
+    areaDasbor.style.display = 'block'; areaRekap.style.display = 'none'; areaBelum.style.display = 'none';
+    areaFilterGlobal.style.display = 'flex'; 
+    filterPetugas.style.display = 'block'; // Tampilkan kembali kotak Petugas
+    menuDasbor.classList.add('aktif'); menuRekap.classList.remove('aktif'); menuBelum.classList.remove('aktif');
     tutupSidebar();
 });
 
 menuRekap.addEventListener('click', (e) => {
-    e.preventDefault(); areaDasbor.style.display = 'none'; areaRekap.style.display = 'block'; areaBelum.style.display = 'none';
-    areaFilterGlobal.style.display = 'flex'; filterPetugas.value = "Semua"; areaFilterGlobal.style.display = 'none';
+    e.preventDefault(); 
+    areaDasbor.style.display = 'none'; areaRekap.style.display = 'block'; areaBelum.style.display = 'none';
+    areaFilterGlobal.style.display = 'flex'; // Wadah utama tetap tampil agar Pekan terlihat
+    filterPetugas.value = "Semua"; 
+    filterPetugas.style.display = 'none'; // Sembunyikan HANYA kotak Petugas
     menuRekap.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuBelum.classList.remove('aktif');
     kalkulasiGlobalDasbor(); tutupSidebar(); tampilkanRekap();
 });
 
 menuBelum.addEventListener('click', (e) => {
-    e.preventDefault(); areaDasbor.style.display = 'none'; areaRekap.style.display = 'none'; areaBelum.style.display = 'block';
-    areaFilterGlobal.style.display = 'none'; menuBelum.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuRekap.classList.remove('aktif');
-    tutupSidebar(); hitungDaftarBelumMandiri(false); // Reset hitungan lazy loading saat buka halaman
+    e.preventDefault(); 
+    areaDasbor.style.display = 'none'; areaRekap.style.display = 'none'; areaBelum.style.display = 'block';
+    areaFilterGlobal.style.display = 'none'; // Sembunyikan semua karena punya filter sendiri
+    menuBelum.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuRekap.classList.remove('aktif');
+    tutupSidebar(); hitungDaftarBelumMandiri(false);
 });
 
 async function mulaiAplikasi() {
@@ -189,7 +197,7 @@ function tampilkanRekap() {
 // --- LOGIKA MANDIRI & KINERJA TINGGI: KARTU BELUM BERDONASI ---
 function hitungDaftarBelumMandiri(muatLebih = false) {
     if(!dataMaster) return;
-    if(!muatLebih) limitTampil = 50; // Reset porsi muat awal jika filter diubah
+    if(!muatLebih) limitTampil = 50; 
 
     const fPet = filterBelumPetugas.value;
     const fPekRaw = filterBelumPekan.value;
@@ -198,7 +206,6 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
 
     dataBelumMandiriLokal = [];
 
-    // 1. Deteksi Pembayaran Global 1 Bulan penuh (Berdasarkan Petugas Mandiri)
     let idR_Lokal = new Set(), idIKP_Lokal = new Set(), idIIP_Lokal = new Set();
     dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => { if(String(b.Spesifikasi||"").toUpperCase().includes("RUTIN")) idR_Lokal.add(String(b["Kode Donatur"]).trim()); });
     dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => {
@@ -206,11 +213,9 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
         if(sp.includes("IKP")) idIKP_Lokal.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Lokal.add(String(b["Kode Donatur"]).trim());
     });
 
-    // 2. Filter Sasaran Target (Master) Sesuai Filter Mandiri
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
 
-    // 3. Masukkan Data Jika Benar-benar Belum Bayar
     mR.forEach(b => { 
         if(!idR_Lokal.has(String(b["Nomor Register"]).trim())) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim()}); }
     });
@@ -220,17 +225,11 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
         else if(sp.includes("IIP") && !idIIP_Lokal.has(id)) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim()}); }
     });
 
-    // 4. Sortir Tambahan Berdasarkan Kategori Tampilan (Rutin/IKP/IIP)
     let dataAkhirTerfilter = (fKat === "Semua") ? dataBelumMandiriLokal : dataBelumMandiriLokal.filter(d => d.k === fKat);
-
-    // Update Counter Total Riil Angka Sisa Donatur
     document.getElementById('totalSisaBelum').innerText = dataAkhirTerfilter.length;
-
-    // Pemicu Penggambaran Layar (Sistem Kinerja Tinggi)
     renderDaftarKeLayar(dataAkhirTerfilter);
 }
 
-// PERFORMA 1 & 2: Bufferisasi + Lazy Loading + Penomoran Otomatis
 function renderDaftarKeLayar(dataList) {
     const wadah = document.getElementById('wadahDaftarBelum');
     const wadahTombol = document.getElementById('wadahTombolMuat');
@@ -242,7 +241,6 @@ function renderDaftarKeLayar(dataList) {
     }
 
     let teksBufferHTML = "";
-    // Hanya cetak data sebanyak batas limitTampil saat ini
     let dataPorsiTampil = dataList.slice(0, limitTampil);
 
     dataPorsiTampil.forEach((d, urutan) => {
@@ -251,7 +249,6 @@ function renderDaftarKeLayar(dataList) {
         let l = n ? `https://wa.me/${n}?text=${encodeURIComponent(p)}` : '#';
         let c = d.k === 'RUTIN' ? '#2E5B72' : (d.k === 'IKP' ? '#B2C330' : '#4FB0C6');
         
-        // Ditambahkan nomor urut otomatis yang akurat (urutan + 1)
         teksBufferHTML += `
             <div class="kartu-belum" style="border-left:4px solid ${c}">
                 <div class="info-donatur">
@@ -266,10 +263,8 @@ function renderDaftarKeLayar(dataList) {
             </div>`;
     });
 
-    // Masukkan rentetan kode HTML sekaligus hanya dengan 1 perintah eksekusi (Sangat Ringan!)
     wadah.innerHTML = teksBufferHTML;
 
-    // Pengaturan Tombol "Muat Lebih Banyak" jika data melebihi limit tampilan
     if(dataList.length > limitTampil) {
         wadahTombol.innerHTML = `<button class="btn-muat-banyak" onclick="aksiMuatLebihBanyak()">Muat Lebih Banyak... (${dataList.length - limitTampil} Sisa)</button>`;
     } else {
@@ -278,7 +273,7 @@ function renderDaftarKeLayar(dataList) {
 }
 
 function aksiMuatLebihBanyak() {
-    limitTampil += 50; // Tambah kuota muat sebanyak 50 data lagi
+    limitTampil += 50; 
     hitungDaftarBelumMandiri(true);
 }
 
