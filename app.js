@@ -53,6 +53,13 @@ menuBelum.addEventListener('click', (e) => {
     tutupSidebar(); hitungDaftarBelumMandiri(false);
 });
 
+// FUNGSI: Mencabut seluruh selimut kotak setelah loading
+function hilangkanSkeleton() {
+    document.querySelectorAll('.skeleton-mode').forEach(el => {
+        el.classList.remove('skeleton-mode');
+    });
+}
+
 // FUNGSI BARU: Menyuntikkan Kerangka Skeleton ke menu lain saat sedang loading awal
 function tampilkanSkeleton() {
     const strSkelRekap = `<div class="kartu-rekap"><div class="rekap-header"><span class="skeleton skeleton-text"></span></div><div class="rekap-body"><span class="skeleton" style="width:100%; height:100px;"></span></div></div>`.repeat(3);
@@ -71,7 +78,6 @@ async function mulaiAplikasi() {
         tampilkanRekap();
     } catch (e) { 
         document.getElementById('teksPersentase').innerText = "ERR"; 
-        if(document.getElementById('skeletonChart')) document.getElementById('skeletonChart').style.display = 'none';
     }
 }
 
@@ -143,7 +149,6 @@ function kalkulasiGlobalDasbor() {
 
     let totalKewajiban = kR + kK1 + kK2, totalSisa = sisaRutin + sisaIKP + sisaIIP;
     
-    // Perintah ini akan otomatis menimpa elemen Skeleton sehingga mereka menghilang seketika
     document.getElementById('teksPersentase').innerText = totalKewajiban > 0 ? Math.round(((totalKewajiban - totalSisa) / totalKewajiban) * 100) + "%" : "0%";
     document.getElementById('teksBerhasil').innerText = bR_Pekan + bK1_Pekan + bK2_Pekan + bIns;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalRp.toLocaleString('id-ID');
@@ -153,6 +158,9 @@ function kalkulasiGlobalDasbor() {
     document.getElementById('teksIIP').innerText = kK2; document.getElementById('teksBaruIIP').innerText = "+" + dBaruIIP; document.getElementById('teksSisaIIP').innerText = "-" + sisaIIP;
 
     drawGrafik(bR_Pekan, bK1_Pekan, bK2_Pekan, bIns, sisaRutin, sisaIKP, sisaIIP); 
+
+    // Panggil pencabutan selimut kotak abu-abu setelah semua data selesai diproses
+    hilangkanSkeleton();
 }
 
 function tampilkanRekap() {
@@ -294,10 +302,6 @@ function aksiMuatLebihBanyak() {
 function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
     const ctx = document.getElementById('grafikUtama').getContext('2d'); if(grafikUtama) grafikUtama.destroy();
     
-    // Matikan Skeleton Chart saat grafik aslinya digambar
-    const skelChart = document.getElementById('skeletonChart');
-    if(skelChart) skelChart.style.display = 'none';
-
     grafikUtama = new Chart(ctx, {
         type:'bar', data:{ labels:['Rutin','IKP','IIP', 'Insidental'], datasets:[{ label:'Terjemput', data:[bR, b1, b2, bIns], backgroundColor:['#2E5B72','#B2C330','#4FB0C6', '#2E5B72'], borderWidth:1, borderColor:'#fff' },{ label:'Sisa', data:[sR, s1, s2, 0], backgroundColor:'#E5E7EB', borderWidth:1, borderColor:'#fff' }] },
         options:{ responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true}, y:{stacked:true, beginAtZero:true}}, plugins:{legend:{display:false}} }
@@ -305,8 +309,8 @@ function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
 }
 
 window.downloadSisaRekap = function(petugas, kategori) {
-    let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && d.p === petugas);
-    if(dataF.length === 0) { alert("Data kosong. Tidak ada sisa " + kategori + " untuk petugas ini."); return; }
+    let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && (petugas === "Semua" || d.p === petugas));
+    if(dataF.length === 0) { alert("Data kosong. Tidak ada sisa " + kategori + " untuk pencarian ini."); return; }
     let csvContent = "Nama Donatur,Kategori,Alamat,No HP,Nama Petugas\n";
     dataF.forEach(d => { csvContent += `"${String(d.n).replace(/"/g, '""')}"`+`,`+`"${String(d.k).replace(/"/g, '""')}"`+`,`+`"${String(d.a).replace(/"/g, '""')}"`+`,`+`"${String(d.h||"").replace(/"/g, '""')}"`+`,`+`"${String(d.p).replace(/"/g, '""')}"\n`; });
     const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const link = document.createElement("a");
