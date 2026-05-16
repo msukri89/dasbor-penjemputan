@@ -1,14 +1,11 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Dcig9_jLXMp5z2cAjqE5hssYFC02QyrFg4sUaeUG1crik9LwRY54EnVgwIDMwaw/exec";
 let dataMaster = null; let grafikUtama = null;
 
-// Array Data Sisa Terpisah (Global Dasbor & Lokal Mandiri)
 let dataBelumDasborGlobal = []; 
 let dataBelumMandiriLokal = [];
 
-// Variabel Kontrol Lazy Loading
 let limitTampil = 50;
 
-// Elemen Navigasi Halaman
 const areaDasbor = document.getElementById('areaDasbor'); 
 const areaRekap = document.getElementById('areaRekap');
 const areaBelum = document.getElementById('areaBelum');
@@ -18,7 +15,6 @@ const menuDasbor = document.getElementById('menuDasbor');
 const menuRekap = document.getElementById('menuRekap');
 const menuBelum = document.getElementById('menuBelum');
 
-// Elemen Filter
 const filterPetugas = document.getElementById('filterPetugas');
 const filterPekan = document.getElementById('filterPekan');
 const filterBelumPetugas = document.getElementById('filterBelumPetugas');
@@ -30,12 +26,11 @@ document.getElementById('openSidebar').addEventListener('click', () => { documen
 document.getElementById('closeSidebar').addEventListener('click', tutupSidebar);
 document.getElementById('overlay').addEventListener('click', tutupSidebar);
 
-// --- PINDAH MENU (Perbaikan Logika Tampilan Filter) ---
 menuDasbor.addEventListener('click', (e) => {
     e.preventDefault(); 
     areaDasbor.style.display = 'block'; areaRekap.style.display = 'none'; areaBelum.style.display = 'none';
     areaFilterGlobal.style.display = 'flex'; 
-    filterPetugas.style.display = 'block'; // Tampilkan kembali kotak Petugas
+    filterPetugas.style.display = 'block'; 
     menuDasbor.classList.add('aktif'); menuRekap.classList.remove('aktif'); menuBelum.classList.remove('aktif');
     tutupSidebar();
 });
@@ -43,9 +38,9 @@ menuDasbor.addEventListener('click', (e) => {
 menuRekap.addEventListener('click', (e) => {
     e.preventDefault(); 
     areaDasbor.style.display = 'none'; areaRekap.style.display = 'block'; areaBelum.style.display = 'none';
-    areaFilterGlobal.style.display = 'flex'; // Wadah utama tetap tampil agar Pekan terlihat
+    areaFilterGlobal.style.display = 'flex'; 
     filterPetugas.value = "Semua"; 
-    filterPetugas.style.display = 'none'; // Sembunyikan HANYA kotak Petugas
+    filterPetugas.style.display = 'none'; 
     menuRekap.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuBelum.classList.remove('aktif');
     kalkulasiGlobalDasbor(); tutupSidebar(); tampilkanRekap();
 });
@@ -53,18 +48,31 @@ menuRekap.addEventListener('click', (e) => {
 menuBelum.addEventListener('click', (e) => {
     e.preventDefault(); 
     areaDasbor.style.display = 'none'; areaRekap.style.display = 'none'; areaBelum.style.display = 'block';
-    areaFilterGlobal.style.display = 'none'; // Sembunyikan semua karena punya filter sendiri
+    areaFilterGlobal.style.display = 'none'; 
     menuBelum.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuRekap.classList.remove('aktif');
     tutupSidebar(); hitungDaftarBelumMandiri(false);
 });
 
+// FUNGSI BARU: Menyuntikkan Kerangka Skeleton ke menu lain saat sedang loading awal
+function tampilkanSkeleton() {
+    const strSkelRekap = `<div class="kartu-rekap"><div class="rekap-header"><span class="skeleton skeleton-text"></span></div><div class="rekap-body"><span class="skeleton" style="width:100%; height:100px;"></span></div></div>`.repeat(3);
+    document.getElementById('wadahRekap').innerHTML = strSkelRekap;
+
+    const strSkelBelum = `<div class="kartu-belum"><div style="width:100%;"><span class="skeleton" style="width:80%; height:14px; margin-bottom:6px; display:block;"></span><span class="skeleton" style="width:50%; height:10px; display:block;"></span></div><div class="skeleton" style="width:35px; height:35px; border-radius:50%; flex-shrink:0;"></div></div>`.repeat(5);
+    document.getElementById('wadahDaftarBelum').innerHTML = strSkelBelum;
+}
+
 async function mulaiAplikasi() {
+    tampilkanSkeleton(); // Pasang ilusi loading sebelum mesin bekerja
     try {
         const res = await fetch(SCRIPT_URL); const json = await res.json(); dataMaster = json.data;
         isiOpsiPetugas(); 
         kalkulasiGlobalDasbor(); 
         tampilkanRekap();
-    } catch (e) { document.getElementById('teksPersentase').innerText = "ERR"; }
+    } catch (e) { 
+        document.getElementById('teksPersentase').innerText = "ERR"; 
+        if(document.getElementById('skeletonChart')) document.getElementById('skeletonChart').style.display = 'none';
+    }
 }
 
 function isiOpsiPetugas() {
@@ -93,7 +101,6 @@ function getPekan(t) {
     return h<=7?"1":h<=14?"2":h<=21?"3":h<=31?"4":"0";
 }
 
-// --- KALKULASI UNTUK KEBUTUHAN DASBOR UTAMA ---
 function kalkulasiGlobalDasbor() {
     if(!dataMaster) return;
     const fPet = filterPetugas.value;
@@ -135,6 +142,8 @@ function kalkulasiGlobalDasbor() {
     if(dataMaster.baru_kotak) { dataMaster.baru_kotak.forEach(b => { let pet = String(b.Kolektor || b["Nama User"] || "").trim(); let pek = b.Pekan ? String(b.Pekan).trim() : getPekan(b.Tanggal); if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) { let sp = String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase(); if(sp.includes("IKP")) dBaruIKP++; if(sp.includes("IIP")) dBaruIIP++; } }); }
 
     let totalKewajiban = kR + kK1 + kK2, totalSisa = sisaRutin + sisaIKP + sisaIIP;
+    
+    // Perintah ini akan otomatis menimpa elemen Skeleton sehingga mereka menghilang seketika
     document.getElementById('teksPersentase').innerText = totalKewajiban > 0 ? Math.round(((totalKewajiban - totalSisa) / totalKewajiban) * 100) + "%" : "0%";
     document.getElementById('teksBerhasil').innerText = bR_Pekan + bK1_Pekan + bK2_Pekan + bIns;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalRp.toLocaleString('id-ID');
@@ -146,7 +155,6 @@ function kalkulasiGlobalDasbor() {
     drawGrafik(bR_Pekan, bK1_Pekan, bK2_Pekan, bIns, sisaRutin, sisaIKP, sisaIIP); 
 }
 
-// --- KLASEMEN REKAP PETUGAS (DARI DASBOR GLOBAL) ---
 function tampilkanRekap() {
     if(!dataMaster) return;
     const w = document.getElementById('wadahRekap'); w.innerHTML = "";
@@ -194,7 +202,6 @@ function tampilkanRekap() {
     w.innerHTML = finalHtml;
 }
 
-// --- LOGIKA MANDIRI & KINERJA TINGGI: KARTU BELUM BERDONASI ---
 function hitungDaftarBelumMandiri(muatLebih = false) {
     if(!dataMaster) return;
     if(!muatLebih) limitTampil = 50; 
@@ -286,13 +293,17 @@ function aksiMuatLebihBanyak() {
 
 function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
     const ctx = document.getElementById('grafikUtama').getContext('2d'); if(grafikUtama) grafikUtama.destroy();
+    
+    // Matikan Skeleton Chart saat grafik aslinya digambar
+    const skelChart = document.getElementById('skeletonChart');
+    if(skelChart) skelChart.style.display = 'none';
+
     grafikUtama = new Chart(ctx, {
         type:'bar', data:{ labels:['Rutin','IKP','IIP', 'Insidental'], datasets:[{ label:'Terjemput', data:[bR, b1, b2, bIns], backgroundColor:['#2E5B72','#B2C330','#4FB0C6', '#2E5B72'], borderWidth:1, borderColor:'#fff' },{ label:'Sisa', data:[sR, s1, s2, 0], backgroundColor:'#E5E7EB', borderWidth:1, borderColor:'#fff' }] },
         options:{ responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true}, y:{stacked:true, beginAtZero:true}}, plugins:{legend:{display:false}} }
     });
 }
 
-// DOWNLOAD REKAP MANDIRI TERISOLASI
 window.downloadSisaRekap = function(petugas, kategori) {
     let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && d.p === petugas);
     if(dataF.length === 0) { alert("Data kosong. Tidak ada sisa " + kategori + " untuk petugas ini."); return; }
@@ -303,11 +314,9 @@ window.downloadSisaRekap = function(petugas, kategori) {
     link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
 };
 
-// Event Listeners Filter Global (Dasbor Utama & Rekap)
 filterPetugas.addEventListener('change', kalkulasiGlobalDasbor);
 filterPekan.addEventListener('change', () => { kalkulasiGlobalDasbor(); tampilkanRekap(); });
 
-// Event Listeners Filter Mandiri (Halaman Belum Berdonasi)
 filterBelumPetugas.addEventListener('change', () => hitungDaftarBelumMandiri(false));
 filterBelumPekan.addEventListener('change', () => hitungDaftarBelumMandiri(false));
 filterJenisDonatur.addEventListener('change', () => hitungDaftarBelumMandiri(false));
