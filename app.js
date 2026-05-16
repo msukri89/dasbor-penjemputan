@@ -5,9 +5,7 @@ let dataBelumDasborGlobal = [];
 let dataBelumMandiriLokal = [];
 let limitTampil = 50;
 
-// Variabel Sesi User
-let sesiRole = "";
-let sesiNama = "";
+let sesiRole = ""; let sesiNama = "";
 
 const areaDasbor = document.getElementById('areaDasbor'); 
 const areaRekap = document.getElementById('areaRekap');
@@ -24,7 +22,6 @@ const filterBelumPetugas = document.getElementById('filterBelumPetugas');
 const filterBelumPekan = document.getElementById('filterBelumPekan');
 const filterJenisDonatur = document.getElementById('filterJenisDonatur');
 
-// LOGIKA MENU NAVIGASI
 function tutupSidebar() { document.getElementById('sidebar').classList.remove('terbuka'); document.getElementById('overlay').classList.remove('terbuka'); }
 document.getElementById('openSidebar').addEventListener('click', () => { document.getElementById('sidebar').classList.add('terbuka'); document.getElementById('overlay').classList.add('terbuka'); });
 document.getElementById('closeSidebar').addEventListener('click', tutupSidebar);
@@ -33,8 +30,7 @@ document.getElementById('overlay').addEventListener('click', tutupSidebar);
 menuDasbor.addEventListener('click', (e) => {
     e.preventDefault(); 
     areaDasbor.style.display = 'block'; areaRekap.style.display = 'none'; areaBelum.style.display = 'none';
-    areaFilterGlobal.style.display = 'flex'; 
-    if(sesiRole === "ADMIN") filterPetugas.style.display = 'block'; 
+    areaFilterGlobal.style.display = 'flex'; if(sesiRole === "ADMIN") filterPetugas.style.display = 'block'; 
     menuDasbor.classList.add('aktif'); menuRekap.classList.remove('aktif'); menuBelum.classList.remove('aktif');
     tutupSidebar();
 });
@@ -43,14 +39,7 @@ menuRekap.addEventListener('click', (e) => {
     e.preventDefault(); 
     areaDasbor.style.display = 'none'; areaRekap.style.display = 'block'; areaBelum.style.display = 'none';
     areaFilterGlobal.style.display = 'flex'; 
-    
-    // Logika Pintar: Jika Admin, munculkan filter nama. Jika Petugas, sembunyikan agar filter pekan terbentang penuh!
-    if(sesiRole === "ADMIN") {
-        filterPetugas.style.display = 'block'; 
-    } else {
-        filterPetugas.style.display = 'none'; 
-    }
-    
+    if(sesiRole === "ADMIN") { filterPetugas.style.display = 'block'; } else { filterPetugas.style.display = 'none'; }
     menuRekap.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuBelum.classList.remove('aktif');
     kalkulasiGlobalDasbor(); tutupSidebar(); tampilkanRekap();
 });
@@ -63,91 +52,53 @@ menuBelum.addEventListener('click', (e) => {
     tutupSidebar(); hitungDaftarBelumMandiri(false);
 });
 
-// LOGOUT
 document.getElementById('menuLogout').addEventListener('click', (e) => {
-    e.preventDefault();
-    localStorage.removeItem('laz_id');
-    localStorage.removeItem('laz_pin');
-    window.location.reload(); 
+    e.preventDefault(); localStorage.removeItem('laz_id'); localStorage.removeItem('laz_pin'); window.location.reload(); 
 });
 
-// LOGIKA UI LOADING & SKELETON
-function hilangkanSkeleton() {
-    document.querySelectorAll('.skeleton-mode').forEach(el => { el.classList.remove('skeleton-mode'); });
-}
-
+function hilangkanSkeleton() { document.querySelectorAll('.skeleton-mode').forEach(el => { el.classList.remove('skeleton-mode'); }); }
 function tampilkanSkeleton() {
     const strSkelRekap = `<div class="kartu-rekap"><div class="rekap-header"><span class="skeleton skeleton-text"></span></div><div class="rekap-body"><span class="skeleton" style="width:100%; height:100px;"></span></div></div>`.repeat(3);
     document.getElementById('wadahRekap').innerHTML = strSkelRekap;
-
     const strSkelBelum = `<div class="kartu-belum"><div style="width:100%;"><span class="skeleton" style="width:80%; height:14px; margin-bottom:6px; display:block;"></span><span class="skeleton" style="width:50%; height:10px; display:block;"></span></div><div class="skeleton" style="width:35px; height:35px; border-radius:50%; flex-shrink:0;"></div></div>`.repeat(5);
     document.getElementById('wadahDaftarBelum').innerHTML = strSkelBelum;
 }
 
-// LOGIKA LOGIN
 document.getElementById('btnMasuk').addEventListener('click', () => {
-    const id = document.getElementById('inputId').value;
-    const pin = document.getElementById('inputPin').value;
+    const id = document.getElementById('inputId').value; const pin = document.getElementById('inputPin').value;
     if(id==="" || pin==="") { document.getElementById('pesanError').innerText = "Mohon isi ID dan PIN!"; return; }
     eksekusiMasuk(id, pin, true);
 });
 
 async function eksekusiMasuk(idInput, pinInput, isManual) {
-    if(isManual) {
-        document.getElementById('btnMasuk').innerText = "Memeriksa Data...";
-        document.getElementById('pesanError').innerText = "";
-    } else {
-        document.getElementById('layarLogin').style.display = 'none';
-        tampilkanSkeleton();
-    }
+    if(isManual) { document.getElementById('btnMasuk').innerText = "Memeriksa Data..."; document.getElementById('pesanError').innerText = "";
+    } else { document.getElementById('layarLogin').style.display = 'none'; tampilkanSkeleton(); }
 
     try {
         const fetchUrl = SCRIPT_URL + `?id=${encodeURIComponent(idInput)}&pin=${encodeURIComponent(pinInput)}`;
-        const res = await fetch(fetchUrl); 
-        const json = await res.json();
+        const res = await fetch(fetchUrl); const json = await res.json();
         
         if(json.status === "ERROR") {
-            if(isManual) {
-                document.getElementById('pesanError').innerText = json.pesan;
-                document.getElementById('btnMasuk').innerText = "MASUK";
-            } else {
-                localStorage.removeItem('laz_id'); localStorage.removeItem('laz_pin');
-                document.getElementById('layarLogin').style.display = 'flex';
-            }
+            if(isManual) { document.getElementById('pesanError').innerText = json.pesan; document.getElementById('btnMasuk').innerText = "MASUK";
+            } else { localStorage.removeItem('laz_id'); localStorage.removeItem('laz_pin'); document.getElementById('layarLogin').style.display = 'flex'; }
             return;
         }
 
-        // --- BERHASIL LOGIN ---
-        dataMaster = json.data;
-        sesiRole = json.role; 
-        sesiNama = json.nama;
-
-        localStorage.setItem('laz_id', idInput);
-        localStorage.setItem('laz_pin', pinInput);
+        dataMaster = json.data; sesiRole = json.role; sesiNama = json.nama;
+        localStorage.setItem('laz_id', idInput); localStorage.setItem('laz_pin', pinInput);
         
-        document.getElementById('layarLogin').style.display = 'none';
-        document.getElementById('namaPenggunaAktif').innerText = sesiNama;
+        document.getElementById('layarLogin').style.display = 'none'; document.getElementById('namaPenggunaAktif').innerText = sesiNama;
 
-        // Terapkan Pembatasan UI untuk Petugas
         if(sesiRole !== "ADMIN") {
-            // Hapus paksaan menyembunyikan wadahMenuRekap agar Petugas bisa melihat Rapornya
-            document.getElementById('filterPetugas').style.display = 'none';
-            document.getElementById('wadahFilterBelumPetugas').style.display = 'none'; 
+            document.getElementById('filterPetugas').style.display = 'none'; document.getElementById('wadahFilterBelumPetugas').style.display = 'none'; 
         } else {
-            document.getElementById('filterPetugas').style.display = 'block';
-            document.getElementById('wadahFilterBelumPetugas').style.display = 'flex';
+            document.getElementById('filterPetugas').style.display = 'block'; document.getElementById('wadahFilterBelumPetugas').style.display = 'flex';
         }
 
-        isiOpsiPetugas(); 
-        kalkulasiGlobalDasbor(); 
-        // Admin akan langsung diload tabel klasemennya (sebagai buffer), Petugas akan diload rapor pribadinya
-        tampilkanRekap(); 
+        isiOpsiPetugas(); kalkulasiGlobalDasbor(); tampilkanRekap(); hitungDaftarBelumMandiri(false);
 
     } catch (e) { 
-        if(isManual){
-            document.getElementById('pesanError').innerText = "Gagal terhubung ke jaringan.";
-            document.getElementById('btnMasuk').innerText = "MASUK";
-        }
+        if(isManual){ document.getElementById('pesanError').innerText = "Gagal terhubung ke jaringan."; document.getElementById('btnMasuk').innerText = "MASUK"; }
         document.getElementById('teksPersentase').innerText = "ERR"; 
     }
 }
@@ -160,52 +111,34 @@ function isiOpsiPetugas() {
     let htmlGlobal = sesiRole === "ADMIN" ? '<option value="Semua">SEMUA PETUGAS</option>' : '';
     let htmlLokal = sesiRole === "ADMIN" ? '<option value="Semua">SEMUA PETUGAS</option>' : '';
     
-    Array.from(s).sort().forEach(n => {
-        if(n && n!=="undefined") {
-            htmlGlobal += `<option value="${n}">${n}</option>`; 
-            htmlLokal += `<option value="${n}">${n}</option>`;
-        }
-    });
-    filterPetugas.innerHTML = htmlGlobal;
-    filterBelumPetugas.innerHTML = htmlLokal;
-
-    if(sesiRole !== "ADMIN") {
-        filterPetugas.value = sesiNama;
-        filterBelumPetugas.value = sesiNama;
-    }
+    Array.from(s).sort().forEach(n => { if(n && n!=="undefined") { htmlGlobal += `<option value="${n}">${n}</option>`; htmlLokal += `<option value="${n}">${n}</option>`; } });
+    filterPetugas.innerHTML = htmlGlobal; filterBelumPetugas.innerHTML = htmlLokal;
+    if(sesiRole !== "ADMIN") { filterPetugas.value = sesiNama; filterBelumPetugas.value = sesiNama; }
 }
 
 function getPekan(t) {
     if(!t) return "0"; let s=String(t), h=0;
-    if(s.includes('/')) h=parseInt(s.split('/')[0],10);
-    else if(s.includes('-')) h=parseInt(s.split('T')[0].split('-')[2],10);
-    else h=new Date(s).getDate();
+    if(s.includes('/')) h=parseInt(s.split('/')[0],10); else if(s.includes('-')) h=parseInt(s.split('T')[0].split('-')[2],10); else h=new Date(s).getDate();
     return h<=7?"1":h<=14?"2":h<=21?"3":h<=31?"4":"0";
 }
 
 function kalkulasiGlobalDasbor() {
     if(!dataMaster) return;
     const fPet = sesiRole === "ADMIN" ? filterPetugas.value : sesiNama;
-    const fPekRaw = filterPekan.value;
-    const fPek = fPekRaw === "Total Bulan Ini" ? "Total" : fPekRaw.replace("Pekan ","");
+    const fPekRaw = filterPekan.value; const fPek = fPekRaw === "Total Bulan Ini" ? "Total" : fPekRaw.replace("Pekan ","");
     
     dataBelumDasborGlobal = []; let totalRp = 0, bIns = 0;
 
     let idR_Global = new Set(), idIKP_Global = new Set(), idIIP_Global = new Set();
     dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => { if(String(b.Spesifikasi||"").toUpperCase().includes("RUTIN")) idR_Global.add(String(b["Kode Donatur"]).trim()); });
     dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => {
-        let sp = String(b.Spesifikasi||"").toUpperCase();
-        if(sp.includes("IKP")) idIKP_Global.add(String(b["Kode Donatur"]).trim());
-        if(sp.includes("IIP")) idIIP_Global.add(String(b["Kode Donatur"]).trim());
+        let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) idIKP_Global.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Global.add(String(b["Kode Donatur"]).trim());
     });
 
-    let tO_Pekan = dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek));
-    let bR_Pekan = 0;
-    tO_Pekan.forEach(b => { totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("RUTIN")) bR_Pekan++; else if(sp.includes("INSIDEN")) bIns++; });
-
-    let tK_Pekan = dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek));
-    let bK1_Pekan = 0, bK2_Pekan = 0;
-    tK_Pekan.forEach(b => { totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) bK1_Pekan++; if(sp.includes("IIP")) bK2_Pekan++; });
+    dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("RUTIN")) bR_Pekan++; else if(sp.includes("INSIDEN")) bIns++; });
+    let bR_Pekan = 0, bK1_Pekan = 0, bK2_Pekan = 0;
+    dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("RUTIN")) bR_Pekan++; });
+    dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) bK1_Pekan++; if(sp.includes("IIP")) bK2_Pekan++; });
 
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
@@ -229,33 +162,23 @@ function kalkulasiGlobalDasbor() {
     document.getElementById('teksBerhasil').innerText = bR_Pekan + bK1_Pekan + bK2_Pekan + bIns;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalRp.toLocaleString('id-ID');
     
-    // PEMBARUAN: Dasbor kini 100% bersih, tidak ada lagi penyisipan angka merah sisa
-    document.getElementById('teksRutin').innerText = kR; document.getElementById('teksBaruRutin').innerText = "+" + dBaruRutin;
-    document.getElementById('teksIKP').innerText = kK1; document.getElementById('teksBaruIKP').innerText = "+" + dBaruIKP;
-    document.getElementById('teksIIP').innerText = kK2; document.getElementById('teksBaruIIP').innerText = "+" + dBaruIIP;
+    // Angka merah Sisa sudah kembali sebagai pajangan (tanpa link download)
+    document.getElementById('teksRutin').innerText = kR; document.getElementById('teksBaruRutin').innerText = "+" + dBaruRutin; document.getElementById('teksSisaRutin').innerText = "-" + sisaRutin;
+    document.getElementById('teksIKP').innerText = kK1; document.getElementById('teksBaruIKP').innerText = "+" + dBaruIKP; document.getElementById('teksSisaIKP').innerText = "-" + sisaIKP;
+    document.getElementById('teksIIP').innerText = kK2; document.getElementById('teksBaruIIP').innerText = "+" + dBaruIIP; document.getElementById('teksSisaIIP').innerText = "-" + sisaIIP;
 
-    drawGrafik(bR_Pekan, bK1_Pekan, bK2_Pekan, bIns, sisaRutin, sisaIKP, sisaIIP); 
-
-    hilangkanSkeleton();
+    drawGrafik(bR_Pekan, bK1_Pekan, bK2_Pekan, bIns, sisaRutin, sisaIKP, sisaIIP); hilangkanSkeleton();
 }
 
 function tampilkanRekap() {
     if(!dataMaster) return;
     const w = document.getElementById('wadahRekap'); w.innerHTML = "";
-    
-    // PEMBARUAN: Rapor Pribadi/Rekap kini mendengarkan Filter Nama & Pekan
     const fPek = filterPekan.value === "Total Bulan Ini" ? "Total" : filterPekan.value.replace("Pekan ","");
     const fPet = sesiRole === "ADMIN" ? filterPetugas.value : sesiNama; 
     
     let petugasSet = new Set();
-    dataMaster.master_orang.forEach(b => { 
-        let p = String(b.Kolektor).trim();
-        if(p && (fPet === "Semua" || p === fPet)) petugasSet.add(p); 
-    });
-    dataMaster.master_kotak.forEach(b => { 
-        let p = String(b.Kolektor).trim();
-        if(p && (fPet === "Semua" || p === fPet)) petugasSet.add(p); 
-    });
+    dataMaster.master_orang.forEach(b => { let p = String(b.Kolektor).trim(); if(p && (fPet === "Semua" || p === fPet)) petugasSet.add(p); });
+    dataMaster.master_kotak.forEach(b => { let p = String(b.Kolektor).trim(); if(p && (fPet === "Semua" || p === fPet)) petugasSet.add(p); });
     
     let daftarRekap = []; const fmt = (num) => num.toLocaleString('id-ID');
     const renderSisaBtn = (sisa, pet, kat) => sisa > 0 ? `<div class="btn-sisa-rekap" onclick="downloadSisaRekap('${pet}', '${kat}')">${sisa} <i class="fas fa-download"></i></div>` : `<span style="color: #10B981; font-weight: bold;"><i class="fas fa-check"></i></span>`;
@@ -313,16 +236,20 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
         if(sp.includes("IKP")) idIKP_Lokal.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Lokal.add(String(b["Kode Donatur"]).trim());
     });
 
+    // Perbaikan Filter: Memastikan donatur yang muncul HANYA donatur di pekan yang difilter!
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
 
+    // Ekstraksi Nomor Register agar fitur Edit berfungsi
     mR.forEach(b => { 
-        if(!idR_Lokal.has(String(b["Nomor Register"]).trim())) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim()}); }
+        if(!idR_Lokal.has(String(b["Nomor Register"]).trim())) { 
+            dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:String(b["Nomor Register"]).trim(), pek:String(b.Pekan).trim()}); 
+        }
     });
     mK.forEach(b => {
         let id=String(b["Nomor Register"]).trim(), sp=String(b.Spesifikasi).toUpperCase();
-        if(sp.includes("IKP") && !idIKP_Lokal.has(id)) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IKP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim()}); } 
-        else if(sp.includes("IIP") && !idIIP_Lokal.has(id)) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim()}); }
+        if(sp.includes("IKP") && !idIKP_Lokal.has(id)) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IKP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim()}); } 
+        else if(sp.includes("IIP") && !idIIP_Lokal.has(id)) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim()}); }
     });
 
     let dataAkhirTerfilter = (fKat === "Semua") ? dataBelumMandiriLokal : dataBelumMandiriLokal.filter(d => d.k === fKat);
@@ -336,8 +263,7 @@ function renderDaftarKeLayar(dataList) {
     
     if(dataList.length === 0) {
         wadah.innerHTML = `<div style="text-align:center; padding:30px; color:#6B7280; font-weight:bold;">Alhamdulillah, Tugas Tuntas Sempurna!</div>`;
-        wadahTombol.innerHTML = "";
-        return;
+        wadahTombol.innerHTML = ""; return;
     }
 
     let teksBufferHTML = "";
@@ -345,48 +271,34 @@ function renderDaftarKeLayar(dataList) {
 
     dataPorsiTampil.forEach((d, urutan) => {
         let n = String(d.h || "").replace(/[^0-9]/g,''); if(n.startsWith('0')) n = '62' + n.substring(1);
-        let p = `Assalamu'alaikum, Bapak/Ibu *${d.n}*.
-        
-        Bagaimana kabarnya? Semoga senantiasa sehat dan penuh berkah bersama keluarga.
-        
-        Alhamdulillah, donasi Bapak/Ibu bulan lalu telah tersalurkan dengan baik. Terima kasih banyak atas istiqomahnya dalam kebaikan.
-        
-        Untuk bulan ini, saya *${d.p}* kembali siap melayani penjemputan donasi jika Bapak/Ibu sudah berkenan. Longgar hari apa dan jam berapa kira-kira, Pak/Bu?
-        Nanti kami sesuaikan jadwal berkunjungnya.`;
+        let p = `Assalamu'alaikum, Bapak/Ibu *${d.n}*. \n\nBagaimana kabarnya? Semoga senantiasa sehat dan penuh berkah bersama keluarga.\n\nAlhamdulillah, donasi Bapak/Ibu bulan lalu telah tersalurkan dengan baik. Terima kasih banyak atas istiqomahnya dalam kebaikan.\n\nUntuk bulan ini, saya *${d.p}* kembali siap melayani penjemputan donasi jika Bapak/Ibu sudah berkenan. Longgar hari apa dan jam berapa kira-kira, Pak/Bu?\nNanti kami sesuaikan jadwal berkunjungnya.`;
         let l = n ? `https://wa.me/${n}?text=${encodeURIComponent(p)}` : '#';
         let c = d.k === 'RUTIN' ? '#2E5B72' : (d.k === 'IKP' ? '#B2C330' : '#4FB0C6');
+        
+        let namaBersih = d.n.replace(/'/g, "\\'"); // Mencegah error jika ada nama pakai tanda petik
         
         teksBufferHTML += `
             <div class="kartu-belum" style="border-left:4px solid ${c}">
                 <div class="info-donatur">
-                    <h4>
-                        <span class="nomor-urut">#${urutan + 1}</span> 
-                        ${d.n} 
-                        <span class="badge" style="background:${c}">${d.k}</span>
-                    </h4>
+                    <h4><span class="nomor-urut">#${urutan + 1}</span> ${d.n} <span class="badge" style="background:${c}">${d.k}</span></h4>
                     <p>${d.a}</p>
                 </div>
-                <a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
+                <div class="grup-tombol">
+                    <button class="btn-edit" onclick="bukaModalEdit('${namaBersih}', '${d.r}', '${d.pek}')"><i class="fas fa-calendar-alt"></i></button>
+                    <a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
+                </div>
             </div>`;
     });
 
     wadah.innerHTML = teksBufferHTML;
-
-    if(dataList.length > limitTampil) {
-        wadahTombol.innerHTML = `<button class="btn-muat-banyak" onclick="aksiMuatLebihBanyak()">Muat Lebih Banyak... (${dataList.length - limitTampil} Sisa)</button>`;
-    } else {
-        wadahTombol.innerHTML = "";
-    }
+    if(dataList.length > limitTampil) { wadahTombol.innerHTML = `<button class="btn-muat-banyak" onclick="aksiMuatLebihBanyak()">Muat Lebih Banyak... (${dataList.length - limitTampil} Sisa)</button>`; } 
+    else { wadahTombol.innerHTML = ""; }
 }
 
-function aksiMuatLebihBanyak() {
-    limitTampil += 50; 
-    hitungDaftarBelumMandiri(true);
-}
+function aksiMuatLebihBanyak() { limitTampil += 50; hitungDaftarBelumMandiri(true); }
 
 function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
     const ctx = document.getElementById('grafikUtama').getContext('2d'); if(grafikUtama) grafikUtama.destroy();
-    
     grafikUtama = new Chart(ctx, {
         type:'bar', data:{ labels:['Rutin','IKP','IIP', 'Insidental'], datasets:[{ label:'Terjemput', data:[bR, b1, b2, bIns], backgroundColor:['#2E5B72','#B2C330','#4FB0C6', '#2E5B72'], borderWidth:1, borderColor:'#fff' },{ label:'Sisa', data:[sR, s1, s2, 0], backgroundColor:'#E5E7EB', borderWidth:1, borderColor:'#fff' }] },
         options:{ responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true}, y:{stacked:true, beginAtZero:true}}, plugins:{legend:{display:false}} }
@@ -395,7 +307,6 @@ function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
 
 window.downloadSisaRekap = function(petugas_param, kategori) {
     let finalPetugas = sesiRole === "ADMIN" ? petugas_param : sesiNama;
-
     let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && (finalPetugas === "Semua" || d.p === finalPetugas));
     if(dataF.length === 0) { alert("Data kosong. Tidak ada sisa " + kategori + " untuk pencarian ini."); return; }
     let csvContent = "Nama Donatur,Kategori,Alamat,No HP,Nama Petugas\n";
@@ -405,22 +316,77 @@ window.downloadSisaRekap = function(petugas_param, kategori) {
     link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
 };
 
+// ==========================================
+// FITUR BARU: EDIT JADWAL PEKAN
+// ==========================================
+function bukaModalEdit(nama, reg, pekanSaatIni) {
+    document.getElementById('namaDonaturEdit').innerText = nama;
+    document.getElementById('regDonaturEdit').value = reg;
+    
+    // Pilih default opsi dropdown sesuai pekan donatur saat ini
+    let sel = document.getElementById('pilihanPekanBaru');
+    if(pekanSaatIni == "1" || pekanSaatIni == "2" || pekanSaatIni == "3" || pekanSaatIni == "4") {
+        sel.value = pekanSaatIni;
+    } else {
+        sel.value = "1"; // Default ke pekan 1 jika kosong/aneh
+    }
+
+    document.getElementById('modalEditPekan').style.display = 'flex';
+}
+
+function tutupModalEdit() {
+    document.getElementById('modalEditPekan').style.display = 'none';
+}
+
+async function simpanPekanBaru() {
+    const reg = document.getElementById('regDonaturEdit').value;
+    const pekanBaru = document.getElementById('pilihanPekanBaru').value;
+    const btn = document.getElementById('btnSimpanPekan');
+
+    btn.innerText = "Menyimpan..."; btn.disabled = true;
+
+    const idUser = localStorage.getItem('laz_id');
+    const pinUser = localStorage.getItem('laz_pin');
+
+    // Mengemas data untuk dikirim ke Google Apps Script (Metode POST)
+    const formData = new URLSearchParams();
+    formData.append('action', 'update_pekan');
+    formData.append('id', idUser);
+    formData.append('pin', pinUser);
+    formData.append('reg', reg);
+    formData.append('pekan', pekanBaru);
+
+    try {
+        const res = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json();
+        
+        if(json.status === "SUKSES") {
+            alert("Alhamdulillah, jadwal penjemputan berhasil dipindah ke Pekan " + pekanBaru + "!");
+            tutupModalEdit();
+            // Lakukan login ulang "diam-diam" untuk menyedot data terbaru tanpa keluar aplikasi
+            eksekusiMasuk(idUser, pinUser, false); 
+        } else {
+            alert("Gagal: " + json.pesan);
+        }
+    } catch(e) {
+        alert("Gagal menghubungi server. Pastikan internet Anda lancar.");
+    }
+    
+    btn.innerText = "Simpan"; btn.disabled = false;
+}
+
 filterPetugas.addEventListener('change', () => { kalkulasiGlobalDasbor(); tampilkanRekap(); });
 filterPekan.addEventListener('change', () => { kalkulasiGlobalDasbor(); tampilkanRekap(); });
-
 filterBelumPetugas.addEventListener('change', () => hitungDaftarBelumMandiri(false));
 filterBelumPekan.addEventListener('change', () => hitungDaftarBelumMandiri(false));
 filterJenisDonatur.addEventListener('change', () => hitungDaftarBelumMandiri(false));
 
 function inisialisasiAplikasi() {
-    const simpananId = localStorage.getItem('laz_id');
-    const simpananPin = localStorage.getItem('laz_pin');
-
-    if (simpananId && simpananPin) {
-        eksekusiMasuk(simpananId, simpananPin, false);
-    } else {
-        document.getElementById('layarLogin').style.display = 'flex';
-    }
+    const simpananId = localStorage.getItem('laz_id'); const simpananPin = localStorage.getItem('laz_pin');
+    if (simpananId && simpananPin) { eksekusiMasuk(simpananId, simpananPin, false); } else { document.getElementById('layarLogin').style.display = 'flex'; }
 }
 
 inisialisasiAplikasi();
