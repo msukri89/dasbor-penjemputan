@@ -43,8 +43,14 @@ menuRekap.addEventListener('click', (e) => {
     e.preventDefault(); 
     areaDasbor.style.display = 'none'; areaRekap.style.display = 'block'; areaBelum.style.display = 'none';
     areaFilterGlobal.style.display = 'flex'; 
-    filterPetugas.value = "Semua"; 
-    filterPetugas.style.display = 'none'; 
+    
+    // Logika Pintar: Jika Admin, munculkan filter nama. Jika Petugas, sembunyikan agar filter pekan terbentang penuh!
+    if(sesiRole === "ADMIN") {
+        filterPetugas.style.display = 'block'; 
+    } else {
+        filterPetugas.style.display = 'none'; 
+    }
+    
     menuRekap.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuBelum.classList.remove('aktif');
     kalkulasiGlobalDasbor(); tutupSidebar(); tampilkanRekap();
 });
@@ -62,7 +68,7 @@ document.getElementById('menuLogout').addEventListener('click', (e) => {
     e.preventDefault();
     localStorage.removeItem('laz_id');
     localStorage.removeItem('laz_pin');
-    window.location.reload(); // Muat ulang halaman
+    window.location.reload(); 
 });
 
 // LOGIKA UI LOADING & SKELETON
@@ -105,7 +111,6 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
                 document.getElementById('pesanError').innerText = json.pesan;
                 document.getElementById('btnMasuk').innerText = "MASUK";
             } else {
-                // Jika login otomatis gagal (misal PIN diganti admin), kembalikan ke layar login
                 localStorage.removeItem('laz_id'); localStorage.removeItem('laz_pin');
                 document.getElementById('layarLogin').style.display = 'flex';
             }
@@ -114,31 +119,29 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
 
         // --- BERHASIL LOGIN ---
         dataMaster = json.data;
-        sesiRole = json.role; // ADMIN atau PETUGAS
+        sesiRole = json.role; 
         sesiNama = json.nama;
 
-        // Simpan ke memori HP
         localStorage.setItem('laz_id', idInput);
         localStorage.setItem('laz_pin', pinInput);
         
         document.getElementById('layarLogin').style.display = 'none';
         document.getElementById('namaPenggunaAktif').innerText = sesiNama;
 
-        // 1. Terapkan Pembatasan Hak Akses UI (ROLE)
+        // Terapkan Pembatasan UI untuk Petugas
         if(sesiRole !== "ADMIN") {
-            // Sembunyikan fitur Admin dari mata Petugas Lapangan
-            document.getElementById('wadahMenuRekap').style.display = 'none';
+            // Hapus paksaan menyembunyikan wadahMenuRekap agar Petugas bisa melihat Rapornya
             document.getElementById('filterPetugas').style.display = 'none';
-            document.getElementById('wadahFilterBelumPetugas').style.display = 'none'; // Sembunyikan kotak filter nama
+            document.getElementById('wadahFilterBelumPetugas').style.display = 'none'; 
         } else {
-            document.getElementById('wadahMenuRekap').style.display = 'block';
             document.getElementById('filterPetugas').style.display = 'block';
             document.getElementById('wadahFilterBelumPetugas').style.display = 'flex';
         }
 
         isiOpsiPetugas(); 
         kalkulasiGlobalDasbor(); 
-        if(sesiRole === "ADMIN") tampilkanRekap();
+        // Admin akan langsung diload tabel klasemennya (sebagai buffer), Petugas akan diload rapor pribadinya
+        tampilkanRekap(); 
 
     } catch (e) { 
         if(isManual){
@@ -149,10 +152,8 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
     }
 }
 
-// LOGIKA PEMBENTUKAN DASBOR
 function isiOpsiPetugas() {
     let s = new Set();
-    // Karena data dari server sudah difilter untuk 'Petugas', opsi ini hanya akan berisi namanya sendiri
     dataMaster.master_orang.forEach(b => { if(b.Kolektor) s.add(String(b.Kolektor).trim()); });
     dataMaster.master_kotak.forEach(b => { if(b.Kolektor) s.add(String(b.Kolektor).trim()); });
     
@@ -168,7 +169,6 @@ function isiOpsiPetugas() {
     filterPetugas.innerHTML = htmlGlobal;
     filterBelumPetugas.innerHTML = htmlLokal;
 
-    // Paksa pilihan filter ke nama sendiri jika bukan Admin
     if(sesiRole !== "ADMIN") {
         filterPetugas.value = sesiNama;
         filterBelumPetugas.value = sesiNama;
@@ -229,9 +229,10 @@ function kalkulasiGlobalDasbor() {
     document.getElementById('teksBerhasil').innerText = bR_Pekan + bK1_Pekan + bK2_Pekan + bIns;
     document.getElementById('teksPemasukan').innerText = "Rp " + totalRp.toLocaleString('id-ID');
     
-    document.getElementById('teksRutin').innerText = kR; document.getElementById('teksBaruRutin').innerText = "+" + dBaruRutin; document.getElementById('teksSisaRutin').innerText = "-" + sisaRutin;
-    document.getElementById('teksIKP').innerText = kK1; document.getElementById('teksBaruIKP').innerText = "+" + dBaruIKP; document.getElementById('teksSisaIKP').innerText = "-" + sisaIKP;
-    document.getElementById('teksIIP').innerText = kK2; document.getElementById('teksBaruIIP').innerText = "+" + dBaruIIP; document.getElementById('teksSisaIIP').innerText = "-" + sisaIIP;
+    // PEMBARUAN: Dasbor kini 100% bersih, tidak ada lagi penyisipan angka merah sisa
+    document.getElementById('teksRutin').innerText = kR; document.getElementById('teksBaruRutin').innerText = "+" + dBaruRutin;
+    document.getElementById('teksIKP').innerText = kK1; document.getElementById('teksBaruIKP').innerText = "+" + dBaruIKP;
+    document.getElementById('teksIIP').innerText = kK2; document.getElementById('teksBaruIIP').innerText = "+" + dBaruIIP;
 
     drawGrafik(bR_Pekan, bK1_Pekan, bK2_Pekan, bIns, sisaRutin, sisaIKP, sisaIIP); 
 
@@ -239,13 +240,22 @@ function kalkulasiGlobalDasbor() {
 }
 
 function tampilkanRekap() {
-    if(!dataMaster || sesiRole !== "ADMIN") return;
+    if(!dataMaster) return;
     const w = document.getElementById('wadahRekap'); w.innerHTML = "";
+    
+    // PEMBARUAN: Rapor Pribadi/Rekap kini mendengarkan Filter Nama & Pekan
     const fPek = filterPekan.value === "Total Bulan Ini" ? "Total" : filterPekan.value.replace("Pekan ","");
+    const fPet = sesiRole === "ADMIN" ? filterPetugas.value : sesiNama; 
     
     let petugasSet = new Set();
-    dataMaster.master_orang.forEach(b => { if(b.Kolektor) petugasSet.add(String(b.Kolektor).trim()); });
-    dataMaster.master_kotak.forEach(b => { if(b.Kolektor) petugasSet.add(String(b.Kolektor).trim()); });
+    dataMaster.master_orang.forEach(b => { 
+        let p = String(b.Kolektor).trim();
+        if(p && (fPet === "Semua" || p === fPet)) petugasSet.add(p); 
+    });
+    dataMaster.master_kotak.forEach(b => { 
+        let p = String(b.Kolektor).trim();
+        if(p && (fPet === "Semua" || p === fPet)) petugasSet.add(p); 
+    });
     
     let daftarRekap = []; const fmt = (num) => num.toLocaleString('id-ID');
     const renderSisaBtn = (sisa, pet, kat) => sisa > 0 ? `<div class="btn-sisa-rekap" onclick="downloadSisaRekap('${pet}', '${kat}')">${sisa} <i class="fas fa-download"></i></div>` : `<span style="color: #10B981; font-weight: bold;"><i class="fas fa-check"></i></span>`;
@@ -289,7 +299,6 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
     if(!dataMaster) return;
     if(!muatLebih) limitTampil = 50; 
 
-    // Paksa hanya untuk nama petugas sendiri jika bukan Admin
     const fPet = sesiRole === "ADMIN" ? filterBelumPetugas.value : sesiNama;
     const fPekRaw = filterBelumPekan.value;
     const fPek = fPekRaw === "Total Bulan Ini" ? "Total" : fPekRaw.replace("Pekan ","");
@@ -385,7 +394,6 @@ function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
 }
 
 window.downloadSisaRekap = function(petugas_param, kategori) {
-    // Agar Petugas tidak bisa manipulasi unduhan
     let finalPetugas = sesiRole === "ADMIN" ? petugas_param : sesiNama;
 
     let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && (finalPetugas === "Semua" || d.p === finalPetugas));
@@ -397,28 +405,22 @@ window.downloadSisaRekap = function(petugas_param, kategori) {
     link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
 };
 
-filterPetugas.addEventListener('change', kalkulasiGlobalDasbor);
+filterPetugas.addEventListener('change', () => { kalkulasiGlobalDasbor(); tampilkanRekap(); });
 filterPekan.addEventListener('change', () => { kalkulasiGlobalDasbor(); tampilkanRekap(); });
 
 filterBelumPetugas.addEventListener('change', () => hitungDaftarBelumMandiri(false));
 filterBelumPekan.addEventListener('change', () => hitungDaftarBelumMandiri(false));
 filterJenisDonatur.addEventListener('change', () => hitungDaftarBelumMandiri(false));
 
-// ==========================================
-// PINTU GERBANG UTAMA (CEK SESI)
-// ==========================================
 function inisialisasiAplikasi() {
     const simpananId = localStorage.getItem('laz_id');
     const simpananPin = localStorage.getItem('laz_pin');
 
     if (simpananId && simpananPin) {
-        // Jika sudah pernah login, coba login otomatis tanpa menampilkan kotak login
         eksekusiMasuk(simpananId, simpananPin, false);
     } else {
-        // Jika belum ada memori, tampilkan layar login
         document.getElementById('layarLogin').style.display = 'flex';
     }
 }
 
-// Gantikan fungsi mulaiAplikasi() di akhir dengan ini:
 inisialisasiAplikasi();
