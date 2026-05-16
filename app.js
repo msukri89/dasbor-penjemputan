@@ -269,7 +269,7 @@ function tampilkanRekap() {
                     <table class="tabel-rekap">
                         <tr><th>KATEGORI</th><th>KEWAJIBAN</th><th>BERDONASI</th><th>BARU</th><th>NOMINAL</th></tr>
                         <tr><td>INSD</td><td>-</td><td>${bD.ins}</td><td>${bR.ins}</td><td>Rp ${fmt(nO.ins)}</td></tr>
-                        <tr><td>RUTINn</td><td>${kW.r}</td><td>${bD.r}</td><td>${bR.r}</td><td>Rp ${fmt(nO.r)}</td></tr>
+                        <tr><td>RUTIN</td><td>${kW.r}</td><td>${bD.r}</td><td>${bR.r}</td><td>Rp ${fmt(nO.r)}</td></tr>
                         <tr><td>IKP</td><td>${kW.k1}</td><td>${bD.k1}</td><td>${bR.k1}</td><td>Rp ${fmt(nO.k1)}</td></tr>
                         <tr><td>IIP</td><td>${kW.k2}</td><td>${bD.k2}</td><td>${bR.k2}</td><td>Rp ${fmt(nO.k2)}</td></tr>
                         <tr class="jumlah"><td>JUMLAH</td><td>${kW.tot}</td><td>${bD.tot}</td><td>${bR.tot}</td><td>Rp ${fmt(nO.tot)}</td></tr>
