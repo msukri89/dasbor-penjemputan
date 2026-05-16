@@ -79,35 +79,34 @@
                     <h3>KEWAJIBAN RUTIN</h3>
                     <h2 id="teksRutin">0</h2>
                     <div id="teksBaruRutin" class="teks-baru">+0</div>
+                    <div id="teksSisaRutin" class="teks-sisa-statis">-0</div>
                 </div>
                 <div class="card card-muda skeleton-mode">
                     <i class="fas fa-box watermark-icon"></i>
                     <h3>KEWAJIBAN IKP</h3>
                     <h2 id="teksIKP">0</h2>
                     <div id="teksBaruIKP" class="teks-baru">+0</div>
+                    <div id="teksSisaIKP" class="teks-sisa-statis">-0</div>
                 </div>
                 <div class="card card-muda skeleton-mode">
                     <i class="fas fa-store watermark-icon"></i>
                     <h3>KEWAJIBAN IIP</h3>
                     <h2 id="teksIIP">0</h2>
                     <div id="teksBaruIIP" class="teks-baru">+0</div>
+                    <div id="teksSisaIIP" class="teks-sisa-statis">-0</div>
                 </div>
             </div>
             
             <div class="charts-area">
                 <div class="chart-container skeleton-mode">
                     <h3>Realisasi Target & Insidental</h3>
-                    <div style="height: 380px; position: relative;">
-                        <canvas id="grafikUtama"></canvas>
-                    </div>
+                    <div style="height: 380px; position: relative;"><canvas id="grafikUtama"></canvas></div>
                 </div>
             </div>
         </div>
 
         <div id="areaRekap" style="display: none; padding: 0 15px;">
-            <div class="header-halaman">
-                <h2>Rapor Pribadi & Klasemen</h2>
-            </div>
+            <div class="header-halaman"><h2>Rapor Pribadi & Klasemen</h2></div>
             <div id="wadahRekap"></div>
         </div>
 
@@ -133,6 +132,29 @@
             <div id="wadahTombolMuat" style="text-align: center; margin: 15px 0 30px 0;"></div>
         </div>
     </div>
+
+    <div id="modalEditPekan" class="overlay" style="z-index: 10000; align-items: center; justify-content: center; display: none;">
+        <div style="background: white; padding: 20px; border-radius: 12px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <h3 style="color: var(--biru-petrol); margin-bottom: 5px; font-size: 15px;">Pindah Jadwal Penjemputan</h3>
+            <p id="namaDonaturEdit" style="font-size: 13px; font-weight: bold; color: var(--hijau-lime); margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;"></p>
+            
+            <input type="hidden" id="regDonaturEdit">
+            
+            <div style="text-align: left; margin-bottom: 5px; font-size: 11px; font-weight: bold; color: #6B7280;">Pilih Pekan Baru:</div>
+            <select id="pilihanPekanBaru" class="input-login" style="margin-bottom: 20px; text-align: left; padding-left: 10px;">
+                <option value="1">Pekan 1</option>
+                <option value="2">Pekan 2</option>
+                <option value="3">Pekan 3</option>
+                <option value="4">Pekan 4</option>
+            </select>
+            
+            <div style="display: flex; gap: 10px;">
+                <button onclick="tutupModalEdit()" style="flex:1; padding:10px; background:#E5E7EB; color:var(--biru-petrol); border:none; border-radius:6px; font-weight:bold; cursor: pointer;">Batal</button>
+                <button id="btnSimpanPekan" onclick="simpanPekanBaru()" style="flex:1; padding:10px; background:var(--biru-muda); color:white; border:none; border-radius:6px; font-weight:bold; cursor: pointer;">Simpan</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
