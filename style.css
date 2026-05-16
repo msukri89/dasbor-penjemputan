@@ -50,7 +50,6 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 
 .teks-baru { position: relative; z-index: 2; font-size: 12px; font-weight: bold; color: var(--hijau-baru); margin-top: 4px; }
 .teks-sisa { position: relative; z-index: 2; font-size: 12px; font-weight: bold; color: var(--merah-bata); margin-top: 2px; padding: 3px 0; border-radius: 4px; }
-/* Hapus efek klik di teks-sisa dasbor */
 
 .charts-area { padding: 0 15px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
 .chart-container { background: white; padding: 15px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -79,7 +78,6 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .tabel-rekap td:first-child { text-align: left; font-weight: bold; background: #fafafa; color: #4B5563; padding-left: 6px; }
 .tabel-rekap tr.jumlah td { font-weight: bold; background: #ecfdf5; color: var(--biru-petrol); font-size: 11px; }
 
-/* Tombol Download di Dalam Tabel Rekap */
 .btn-sisa-rekap {
     background: #FEE2E2; color: var(--merah-bata); border: 1px solid #FCA5A5;
     padding: 3px 6px; border-radius: 6px; font-weight: bold; cursor: pointer;
