@@ -26,7 +26,7 @@ menuDasbor.addEventListener('click', (e) => {
     e.preventDefault(); 
     areaDasbor.style.display = 'block'; areaRekap.style.display = 'none'; areaBelum.style.display = 'none';
     menuDasbor.classList.add('aktif'); menuRekap.classList.remove('aktif'); menuBelum.classList.remove('aktif');
-    filterPetugas.style.display = 'block'; // Tampilkan filter petugas
+    filterPetugas.style.display = 'block'; 
     tutupSidebar();
 });
 
@@ -34,7 +34,11 @@ menuRekap.addEventListener('click', (e) => {
     e.preventDefault(); 
     areaDasbor.style.display = 'none'; areaRekap.style.display = 'block'; areaBelum.style.display = 'none';
     menuRekap.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuBelum.classList.remove('aktif');
-    filterPetugas.style.display = 'none'; // Sembunyikan filter petugas agar terlihat semua
+    
+    // Saat masuk menu rekap, paksa filter petugas ke "Semua" agar klasemen utuh
+    filterPetugas.value = "Semua"; 
+    filterPetugas.style.display = 'none'; 
+    kalkulasi(); // Rekalkulasi ulang untuk mendapatkan data sisa semua petugas
     tutupSidebar(); tampilkanRekap();
 });
 
@@ -42,7 +46,7 @@ menuBelum.addEventListener('click', (e) => {
     e.preventDefault(); 
     areaDasbor.style.display = 'none'; areaRekap.style.display = 'none'; areaBelum.style.display = 'block';
     menuBelum.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuRekap.classList.remove('aktif');
-    filterPetugas.style.display = 'block'; // Tampilkan filter petugas
+    filterPetugas.style.display = 'block'; 
     tutupSidebar(); tampilkanDaftarBelum();
 });
 
@@ -77,13 +81,10 @@ function kalkulasi() {
     
     dataBelumBerdonasi = []; let totalRp = 0, bIns = 0;
 
-    // --- 1. PENCARIAN GLOBAL (1 BULAN) ---
     let idR_Global = new Set(), idIKP_Global = new Set(), idIIP_Global = new Set();
     let tO_Global = dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet));
-    tO_Global.forEach(b => {
-        let sp = String(b.Spesifikasi||"").toUpperCase();
-        if(sp.includes("RUTIN")) idR_Global.add(String(b["Kode Donatur"]).trim());
-    });
+    tO_Global.forEach(b => { if(String(b.Spesifikasi||"").toUpperCase().includes("RUTIN")) idR_Global.add(String(b["Kode Donatur"]).trim()); });
+    
     let tK_Global = dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet));
     tK_Global.forEach(b => {
         let sp = String(b.Spesifikasi||"").toUpperCase();
@@ -91,49 +92,46 @@ function kalkulasi() {
         if(sp.includes("IIP")) idIIP_Global.add(String(b["Kode Donatur"]).trim());
     });
 
-    // --- 2. PENGHITUNGAN MINGGUAN ---
     let tO_Pekan = tO_Global.filter(b => (fPek==="Total" || getPekan(b.Tanggal)===fPek));
     let bR_Pekan = 0;
     tO_Pekan.forEach(b => {
-        totalRp += Number(b.Nominal||0);
-        let sp = String(b.Spesifikasi||"").toUpperCase();
-        if(sp.includes("RUTIN")) bR_Pekan++;
-        else if(sp.includes("INSIDEN")) bIns++;
+        totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase();
+        if(sp.includes("RUTIN")) bR_Pekan++; else if(sp.includes("INSIDEN")) bIns++;
     });
 
     let tK_Pekan = tK_Global.filter(b => (fPek==="Total" || getPekan(b.Tanggal)===fPek));
     let bK1_Pekan = 0, bK2_Pekan = 0;
     tK_Pekan.forEach(b => {
-        totalRp += Number(b.Nominal||0);
-        let sp = String(b.Spesifikasi||"").toUpperCase();
-        if(sp.includes("IKP")) bK1_Pekan++;
-        if(sp.includes("IIP")) bK2_Pekan++;
+        totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase();
+        if(sp.includes("IKP")) bK1_Pekan++; if(sp.includes("IIP")) bK2_Pekan++;
     });
 
-    // --- 3. MASTER DATA ---
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let kR = mR.length, kK1 = mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IKP")).length, kK2 = mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IIP")).length;
 
-    // --- 4. PEMBUATAN DAFTAR SISA ---
+    // --- Perekaman Nama Petugas Untuk Tiap Baris Sisa (Penting Untuk Fitur Download Rekap) ---
     let sisaRutin = 0, sisaIKP = 0, sisaIIP = 0;
     mR.forEach(b => { 
-        if(!idR_Global.has(String(b["Nomor Register"]).trim())) { dataBelumBerdonasi.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, b:'badge-rutin'}); sisaRutin++; }
+        if(!idR_Global.has(String(b["Nomor Register"]).trim())) { 
+            dataBelumBerdonasi.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim()}); sisaRutin++; 
+        }
     });
     mK.forEach(b => {
         let id=String(b["Nomor Register"]).trim(), sp=String(b.Spesifikasi).toUpperCase();
-        if(sp.includes("IKP") && !idIKP_Global.has(id)) { dataBelumBerdonasi.push({n:b["Nama Donatur"], k:"IKP", a:b.Alamat, h:b.Hp, b:'badge-ikp'}); sisaIKP++; } 
-        else if(sp.includes("IIP") && !idIIP_Global.has(id)) { dataBelumBerdonasi.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, b:'badge-iip'}); sisaIIP++; }
+        if(sp.includes("IKP") && !idIKP_Global.has(id)) { 
+            dataBelumBerdonasi.push({n:b["Nama Donatur"], k:"IKP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim()}); sisaIKP++; 
+        } 
+        else if(sp.includes("IIP") && !idIIP_Global.has(id)) { 
+            dataBelumBerdonasi.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim()}); sisaIIP++; 
+        }
     });
 
-    // --- 5. PROSES BARU ---
     let dBaruRutin = 0, dBaruIKP = 0, dBaruIIP = 0;
     if(dataMaster.baru_orang) {
         dataMaster.baru_orang.forEach(b => {
             let pet = String(b.Kolektor || b["Nama User"] || "").trim(); let pek = b.Pekan ? String(b.Pekan).trim() : getPekan(b.Tanggal);
-            if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) {
-                if(String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase().includes("RUTIN")) dBaruRutin++;
-            }
+            if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) { if(String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase().includes("RUTIN")) dBaruRutin++; }
         });
     }
     if(dataMaster.baru_kotak) {
@@ -141,13 +139,11 @@ function kalkulasi() {
             let pet = String(b.Kolektor || b["Nama User"] || "").trim(); let pek = b.Pekan ? String(b.Pekan).trim() : getPekan(b.Tanggal);
             if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) {
                 let sp = String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase();
-                if(sp.includes("IKP")) dBaruIKP++;
-                if(sp.includes("IIP")) dBaruIIP++;
+                if(sp.includes("IKP")) dBaruIKP++; if(sp.includes("IIP")) dBaruIIP++;
             }
         });
     }
 
-    // --- 6. UPDATE DASBOR UI ---
     let totalKewajiban = kR + kK1 + kK2, totalSisa = sisaRutin + sisaIKP + sisaIIP;
     let targetTerpenuhi = totalKewajiban - totalSisa; 
     let totalBerhasilPekan = bR_Pekan + bK1_Pekan + bK2_Pekan + bIns;
@@ -192,7 +188,7 @@ function tampilkanDaftarBelum() {
     });
 }
 
-// --- FUNGSI REKAPITULASI PETUGAS ---
+// --- FUNGSI TAMPILAN REKAPITULASI ---
 function tampilkanRekap() {
     if(!dataMaster) return;
     const w = document.getElementById('wadahRekap'); w.innerHTML = "";
@@ -206,6 +202,12 @@ function tampilkanRekap() {
 
     let html = "";
     const fmt = (num) => num.toLocaleString('id-ID');
+    
+    // Fungsi kecil pembuat tombol untuk mencegah tombol muncul jika sisa 0
+    const renderSisaBtn = (sisa, pet, kat) => {
+        if(sisa > 0) return `<div class="btn-sisa-rekap" onclick="downloadSisaRekap('${pet}', '${kat}')">${sisa} <i class="fas fa-download"></i></div>`;
+        return `<span style="color: #10B981; font-weight: bold;"><i class="fas fa-check"></i></span>`; // Centang hijau jika tuntas
+    };
 
     petugasArr.forEach(petugas => {
         let kW = { r:0, k1:0, k2:0, tot:0 }; let bD = { ins:0, r:0, k1:0, k2:0, tot:0 };
@@ -249,14 +251,15 @@ function tampilkanRekap() {
         }
         bR.tot = bR.r + bR.k1 + bR.k2 + bR.ins;
 
-        let sisa = 0;
-        mR.forEach(b => { if(!idR_Glob.has(String(b["Nomor Register"]).trim())) sisa++; });
+        let sisaR = 0, sisaK1 = 0, sisaK2 = 0;
+        mR.forEach(b => { if(!idR_Glob.has(String(b["Nomor Register"]).trim())) sisaR++; });
         mK.forEach(b => {
             let id=String(b["Nomor Register"]).trim(), sp=String(b.Spesifikasi).toUpperCase();
-            if(sp.includes("IKP") && !idIKP_Glob.has(id)) sisa++; else if(sp.includes("IIP") && !idIIP_Glob.has(id)) sisa++;
+            if(sp.includes("IKP") && !idIKP_Glob.has(id)) sisaK1++; else if(sp.includes("IIP") && !idIIP_Glob.has(id)) sisaK2++;
         });
         
-        let persen = kW.tot > 0 ? Math.round(((kW.tot - sisa) / kW.tot) * 100) : 0;
+        let sisaTot = sisaR + sisaK1 + sisaK2;
+        let persen = kW.tot > 0 ? Math.round(((kW.tot - sisaTot) / kW.tot) * 100) : 0;
         let pWarna = persen >= 80 ? 'var(--hijau-lime)' : (persen >= 50 ? '#EAB308' : '#EF4444');
 
         html += `
@@ -267,12 +270,12 @@ function tampilkanRekap() {
                 </div>
                 <div class="rekap-body">
                     <table class="tabel-rekap">
-                        <tr><th>KATEGORI</th><th>KEWAJIBAN</th><th>BERDONASI</th><th>BARU</th><th>NOMINAL</th></tr>
-                        <tr><td>INSD</td><td>-</td><td>${bD.ins}</td><td>${bR.ins}</td><td>Rp ${fmt(nO.ins)}</td></tr>
-                        <tr><td>RUTIN</td><td>${kW.r}</td><td>${bD.r}</td><td>${bR.r}</td><td>Rp ${fmt(nO.r)}</td></tr>
-                        <tr><td>IKP</td><td>${kW.k1}</td><td>${bD.k1}</td><td>${bR.k1}</td><td>Rp ${fmt(nO.k1)}</td></tr>
-                        <tr><td>IIP</td><td>${kW.k2}</td><td>${bD.k2}</td><td>${bR.k2}</td><td>Rp ${fmt(nO.k2)}</td></tr>
-                        <tr class="jumlah"><td>JUMLAH</td><td>${kW.tot}</td><td>${bD.tot}</td><td>${bR.tot}</td><td>Rp ${fmt(nO.tot)}</td></tr>
+                        <tr><th>KAT</th><th>TARGET</th><th>MASUK</th><th>BARU</th><th>SISA</th><th>NOMINAL</th></tr>
+                        <tr><td>Insidental</td><td>-</td><td>${bD.ins}</td><td>${bR.ins}</td><td>-</td><td>Rp ${fmt(nO.ins)}</td></tr>
+                        <tr><td>Rutin</td><td>${kW.r}</td><td>${bD.r}</td><td>${bR.r}</td><td>${renderSisaBtn(sisaR, petugas, 'RUTIN')}</td><td>Rp ${fmt(nO.r)}</td></tr>
+                        <tr><td>IKP</td><td>${kW.k1}</td><td>${bD.k1}</td><td>${bR.k1}</td><td>${renderSisaBtn(sisaK1, petugas, 'IKP')}</td><td>Rp ${fmt(nO.k1)}</td></tr>
+                        <tr><td>IIP</td><td>${kW.k2}</td><td>${bD.k2}</td><td>${bR.k2}</td><td>${renderSisaBtn(sisaK2, petugas, 'IIP')}</td><td>Rp ${fmt(nO.k2)}</td></tr>
+                        <tr class="jumlah"><td>JUMLAH</td><td>${kW.tot}</td><td>${bD.tot}</td><td>${bR.tot}</td><td>${sisaTot}</td><td>Rp ${fmt(nO.tot)}</td></tr>
                     </table>
                 </div>
             </div>`;
@@ -280,21 +283,27 @@ function tampilkanRekap() {
     w.innerHTML = html;
 }
 
-function downloadDataSisa(kategori) {
-    let dataF = dataBelumBerdonasi.filter(d => d.k === kategori);
-    if(dataF.length === 0) { alert("Pekerjaan Tuntas! Tidak ada sisa penjemputan untuk " + kategori + "."); return; }
-    let csvContent = "Nama Donatur,Kategori,Alamat,No HP\n";
+// --- FUNGSI DOWNLOAD TERISOLASI UNTUK REKAP ---
+window.downloadSisaRekap = function(petugas, kategori) {
+    let dataF = dataBelumBerdonasi.filter(d => d.k === kategori && d.p === petugas);
+    if(dataF.length === 0) { alert("Data kosong. Tidak ada sisa " + kategori + " untuk petugas ini."); return; }
+    
+    let csvContent = "Nama Donatur,Kategori,Alamat,No HP,Nama Petugas\n";
     dataF.forEach(d => {
-        let nama = `"${String(d.n).replace(/"/g, '""')}"`, kat = `"${String(d.k).replace(/"/g, '""')}"`;
-        let alamat = `"${String(d.a).replace(/"/g, '""')}"`, hp = `"${String(d.h || "").replace(/"/g, '""')}"`;
-        csvContent += `${nama},${kat},${alamat},${hp}\n`;
+        let nama = `"${String(d.n).replace(/"/g, '""')}"`;
+        let kat = `"${String(d.k).replace(/"/g, '""')}"`;
+        let alamat = `"${String(d.a).replace(/"/g, '""')}"`;
+        let hp = `"${String(d.h || "").replace(/"/g, '""')}"`;
+        let pet = `"${String(d.p).replace(/"/g, '""')}"`;
+        csvContent += `${nama},${kat},${alamat},${hp},${pet}\n`;
     });
+
     const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob); const link = document.createElement("a");
-    let fPet = filterPetugas.value, fPek = document.getElementById('filterPekan').value;
-    link.setAttribute("href", url); link.setAttribute("download", `Sisa_${kategori}_${fPet}_${fPek}.csv`.replace(/ /g, "_"));
+    let fPek = document.getElementById('filterPekan').value;
+    link.setAttribute("href", url); link.setAttribute("download", `Sisa_${kategori}_${petugas}_${fPek}.csv`.replace(/ /g, "_"));
     link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-}
+};
 
 // Event Listeners Filter
 filterPetugas.addEventListener('change', kalkulasi);
