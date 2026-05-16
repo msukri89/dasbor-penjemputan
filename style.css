@@ -61,20 +61,64 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .btn-muat-banyak { background: var(--biru-muda); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; display: inline-block; }
 .btn-muat-banyak:active { transform: scale(0.95); background: var(--biru-petrol); }
 
-.kartu-rekap { background: white; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; overflow: hidden; }
+/* Rapor Pribadi & Rekapitulasi */
+.kartu-rekap { background: white; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #F3F4F6; overflow: hidden; }
 .rekap-header { background: var(--biru-petrol); color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--biru-muda); }
 .rekap-header h3 { font-size: 14px; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
 .rekap-header .persentase { font-size: 16px; font-weight: 800; background: white; padding: 2px 8px; border-radius: 6px; }
-.rekap-body { padding: 10px 5px; overflow-x: auto; }
-.tabel-rekap { width: 100%; border-collapse: collapse; font-size: 10px; text-align: right; }
-.tabel-rekap th { background: var(--warna-abu); padding: 8px 2px; text-align: center; color: var(--biru-petrol); font-weight: bold; border: 1px solid #e5e7eb; font-size: 8px; text-transform: uppercase; }
-.tabel-rekap td { padding: 8px 2px; border: 1px solid #e5e7eb; vertical-align: middle; }
-.tabel-rekap td:first-child { text-align: left; font-weight: bold; background: #fafafa; color: #4B5563; padding-left: 6px; }
-.tabel-rekap tr.jumlah td { font-weight: bold; background: #ecfdf5; color: var(--biru-petrol); font-size: 11px; }
+.rekap-body { padding: 15px; overflow-x: auto; }
 
-.btn-sisa-rekap { background: #FEE2E2; color: var(--merah-bata); border: 1px solid #FCA5A5; padding: 3px 6px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; display: inline-block; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+/* --- GAYA TABEL BARU (ELEGAN & MINIMALIS) --- */
+.tabel-rekap { width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; }
+
+.tabel-rekap th { 
+    padding: 10px 4px; 
+    text-align: right; 
+    color: #9CA3AF; 
+    font-weight: 700; 
+    border-bottom: 2px solid #E5E7EB; 
+    font-size: 9px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+    background: transparent;
+}
+.tabel-rekap th:first-child { text-align: left; }
+
+.tabel-rekap td { 
+    padding: 12px 4px; 
+    border-bottom: 1px solid #F9FAFB; 
+    vertical-align: middle; 
+    color: #4B5563;
+}
+
+/* Kolom Pertama (Nama Kategori) */
+.tabel-rekap td:first-child { 
+    text-align: left; 
+    font-weight: 700; 
+    color: var(--biru-petrol); 
+    background: transparent; 
+}
+
+/* Baris Total/Jumlah */
+.tabel-rekap tr.jumlah td { 
+    font-weight: 800; 
+    background: transparent; 
+    color: var(--biru-petrol); 
+    font-size: 12px; 
+    border-top: 2px solid var(--biru-petrol); 
+    border-bottom: none;
+    padding-top: 14px;
+}
+
+/* Tombol Sisa yang Diperhalus */
+.btn-sisa-rekap { 
+    background: #FEF2F2; color: var(--merah-bata); border: none; 
+    padding: 4px 8px; border-radius: 6px; font-weight: bold; cursor: pointer; 
+    font-size: 11px; display: inline-block; transition: 0.2s; 
+}
 .btn-sisa-rekap:active { background: #FCA5A5; color: white; transform: scale(0.95); }
 .btn-sisa-rekap i { font-size: 9px; margin-left: 3px; }
+
 
 /* --- SKELETON LOADING UI --- */
 @keyframes shimmer { 
