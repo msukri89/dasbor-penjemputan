@@ -35,8 +35,8 @@
         </header>
 
         <div id="areaFilterGlobal" class="filter-area">
-            <select id="filterPetugas" class="dropdown-aksen"><option value="Semua">SEMUA PETUGAS</option></select>
-            <select id="filterPekan" class="dropdown-aksen">
+            <select id="filterPetugas" class="dropdown-aksen skeleton-mode"><option value="Semua">SEMUA PETUGAS</option></select>
+            <select id="filterPekan" class="dropdown-aksen skeleton-mode">
                 <option value="Total">TOTAL BULAN INI</option>
                 <option value="Pekan 1">PEKAN 1</option><option value="Pekan 2">PEKAN 2</option>
                 <option value="Pekan 3">PEKAN 3</option><option value="Pekan 4">PEKAN 4</option>
@@ -45,47 +45,46 @@
 
         <div id="areaDasbor">
             <div class="summary-cards">
-                <div class="card card-lime">
+                <div class="card card-lime skeleton-mode">
                     <i class="fas fa-chart-line watermark-icon"></i>
-                    <h3>PERSENTASE</h3><h2 id="teksPersentase"><span class="skeleton skeleton-text"></span></h2>
+                    <h3>PERSENTASE</h3><h2 id="teksPersentase">0%</h2>
                 </div>
-                <div class="card card-lime">
+                <div class="card card-lime skeleton-mode">
                     <i class="fas fa-hand-holding-heart watermark-icon"></i>
-                    <h3>TERJEMPUT</h3><h2 id="teksBerhasil"><span class="skeleton skeleton-text"></span></h2>
+                    <h3>TERJEMPUT</h3><h2 id="teksBerhasil">0</h2>
                 </div>
-                <div class="card card-lime">
+                <div class="card card-lime skeleton-mode">
                     <i class="fas fa-wallet watermark-icon"></i>
-                    <h3>PEMASUKAN</h3><h2 id="teksPemasukan"><span class="skeleton skeleton-text" style="width: 80px;"></span></h2>
+                    <h3>PEMASUKAN</h3><h2 id="teksPemasukan">Rp 0</h2>
                 </div>
                 
-                <div class="card card-muda">
+                <div class="card card-muda skeleton-mode">
                     <i class="fas fa-user-clock watermark-icon"></i>
                     <h3>KEWAJIBAN RUTIN</h3>
-                    <h2 id="teksRutin"><span class="skeleton skeleton-text"></span></h2>
-                    <div id="teksBaruRutin" class="teks-baru"><span class="skeleton skeleton-text-small"></span></div>
-                    <div id="teksSisaRutin" class="teks-sisa"><span class="skeleton skeleton-text-small"></span></div>
+                    <h2 id="teksRutin">0</h2>
+                    <div id="teksBaruRutin" class="teks-baru">+0</div>
+                    <div id="teksSisaRutin" class="teks-sisa" onclick="downloadSisaRekap(filterPetugas.value, 'RUTIN')">-0</div>
                 </div>
-                <div class="card card-muda">
+                <div class="card card-muda skeleton-mode">
                     <i class="fas fa-box watermark-icon"></i>
                     <h3>KEWAJIBAN IKP</h3>
-                    <h2 id="teksIKP"><span class="skeleton skeleton-text"></span></h2>
-                    <div id="teksBaruIKP" class="teks-baru"><span class="skeleton skeleton-text-small"></span></div>
-                    <div id="teksSisaIKP" class="teks-sisa"><span class="skeleton skeleton-text-small"></span></div>
+                    <h2 id="teksIKP">0</h2>
+                    <div id="teksBaruIKP" class="teks-baru">+0</div>
+                    <div id="teksSisaIKP" class="teks-sisa" onclick="downloadSisaRekap(filterPetugas.value, 'IKP')">-0</div>
                 </div>
-                <div class="card card-muda">
+                <div class="card card-muda skeleton-mode">
                     <i class="fas fa-store watermark-icon"></i>
                     <h3>KEWAJIBAN IIP</h3>
-                    <h2 id="teksIIP"><span class="skeleton skeleton-text"></span></h2>
-                    <div id="teksBaruIIP" class="teks-baru"><span class="skeleton skeleton-text-small"></span></div>
-                    <div id="teksSisaIIP" class="teks-sisa"><span class="skeleton skeleton-text-small"></span></div>
+                    <h2 id="teksIIP">0</h2>
+                    <div id="teksBaruIIP" class="teks-baru">+0</div>
+                    <div id="teksSisaIIP" class="teks-sisa" onclick="downloadSisaRekap(filterPetugas.value, 'IIP')">-0</div>
                 </div>
             </div>
             
             <div class="charts-area">
-                <div class="chart-container">
+                <div class="chart-container skeleton-mode">
                     <h3>Realisasi Target & Insidental</h3>
                     <div style="height: 380px; position: relative;">
-                        <div id="skeletonChart" class="skeleton skeleton-chart"></div>
                         <canvas id="grafikUtama"></canvas>
                     </div>
                 </div>
