@@ -245,7 +245,12 @@ function renderDaftarKeLayar(dataList) {
 
     dataPorsiTampil.forEach((d, urutan) => {
         let n = String(d.h || "").replace(/[^0-9]/g,''); if(n.startsWith('0')) n = '62' + n.substring(1);
-        let p = `Assalamu'alaikum, Bapak/Ibu *${d.n}*. Kami petugas LAZ Sidogiri bermaksud menjemput donasi. Apakah ada waktu hari ini?`;
+        let p = `Assalamu'alaikum, Bapak/Ibu *${d.n}*. 
+        Bagaimana kabarnya? Semoga senantiasa sehat dan penuh berkah bersama keluarga.
+        
+        Alhamdulillah, donasi Bapak/Ibu bulan lalu telah tersalurkan dengan baik. Terima kasih banyak atas istiqomahnya dalam kebaikan.
+        
+       Untuk bulan ini, saya *${d.p}* kembali siap melayani penjemputan donasi jika Bapak/Ibu sudah berkenan. Longgar hari apa dan jam berapa kira-kira, Pak/Bu? Nanti kami sesuaikan jadwal berkunjungnya.`;
         let l = n ? `https://wa.me/${n}?text=${encodeURIComponent(p)}` : '#';
         let c = d.k === 'RUTIN' ? '#2E5B72' : (d.k === 'IKP' ? '#B2C330' : '#4FB0C6');
         
