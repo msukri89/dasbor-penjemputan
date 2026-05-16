@@ -36,7 +36,7 @@
         </div>
         <ul class="menu-list">
             <li><a href="#" id="menuDasbor" class="aktif"><i class="fas fa-chart-pie"></i> DASBOR UTAMA</a></li>
-            <li id="wadahMenuRekap"><a href="#" id="menuRekap"><i class="fas fa-users"></i> REKAP PETUGAS</a></li>
+            <li id="wadahMenuRekap"><a href="#" id="menuRekap"><i class="fas fa-users"></i> RAPOR PETUGAS</a></li>
             <li><a href="#" id="menuBelum"><i class="fas fa-list-ul"></i> BELUM BERDONASI</a></li>
             <li><a href="#" id="menuLogout" style="color: var(--merah-bata); border-top: 1px solid #eee; margin-top: 10px;"><i class="fas fa-sign-out-alt"></i> KELUAR AKUN</a></li>
         </ul>
@@ -79,21 +79,18 @@
                     <h3>KEWAJIBAN RUTIN</h3>
                     <h2 id="teksRutin">0</h2>
                     <div id="teksBaruRutin" class="teks-baru">+0</div>
-                    <div id="teksSisaRutin" class="teks-sisa" onclick="downloadSisaRekap(filterPetugas.value, 'RUTIN')">-0</div>
                 </div>
                 <div class="card card-muda skeleton-mode">
                     <i class="fas fa-box watermark-icon"></i>
                     <h3>KEWAJIBAN IKP</h3>
                     <h2 id="teksIKP">0</h2>
                     <div id="teksBaruIKP" class="teks-baru">+0</div>
-                    <div id="teksSisaIKP" class="teks-sisa" onclick="downloadSisaRekap(filterPetugas.value, 'IKP')">-0</div>
                 </div>
                 <div class="card card-muda skeleton-mode">
                     <i class="fas fa-store watermark-icon"></i>
                     <h3>KEWAJIBAN IIP</h3>
                     <h2 id="teksIIP">0</h2>
                     <div id="teksBaruIIP" class="teks-baru">+0</div>
-                    <div id="teksSisaIIP" class="teks-sisa" onclick="downloadSisaRekap(filterPetugas.value, 'IIP')">-0</div>
                 </div>
             </div>
             
@@ -109,7 +106,7 @@
 
         <div id="areaRekap" style="display: none; padding: 0 15px;">
             <div class="header-halaman">
-                <h2>Klasemen & Rekap Kinerja</h2>
+                <h2>Rapor Pribadi & Klasemen</h2>
             </div>
             <div id="wadahRekap"></div>
         </div>
