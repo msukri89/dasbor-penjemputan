@@ -34,7 +34,7 @@
             <h1 class="page-title">DASHBOR KINERJA</h1>
         </header>
 
-        <div class="filter-area">
+        <div id="areaFilterGlobal" class="filter-area">
             <select id="filterPetugas" class="dropdown-aksen"><option value="Semua">SEMUA PETUGAS</option></select>
             <select id="filterPekan" class="dropdown-aksen">
                 <option value="Total">TOTAL BULAN INI</option>
@@ -97,14 +97,25 @@
         </div>
 
         <div id="areaBelum" style="display: none; padding: 0 15px;">
-            <div class="header-halaman">
-                <h2>Sisa Penjemputan</h2>
+            <div class="filter-area-lokal">
+                <select id="filterBelumPetugas" class="dropdown-lokal"></select>
+                <select id="filterBelumPekan" class="dropdown-lokal">
+                    <option value="Total">TOTAL BULAN INI</option>
+                    <option value="Pekan 1">PEKAN 1</option><option value="Pekan 2">PEKAN 2</option>
+                    <option value="Pekan 3">PEKAN 3</option><option value="Pekan 4">PEKAN 4</option>
+                </select>
+            </div>
+            
+            <div class="header-halaman flex-header">
+                <h2>Sisa (<span id="totalSisaBelum">0</span> Donatur)</h2>
                 <select id="filterJenisDonatur" class="dropdown-kecil">
-                    <option value="Semua">SEMUA</option><option value="RUTIN">RUTIN</option>
+                    <option value="Semua">SEMUA KAT</option><option value="RUTIN">RUTIN</option>
                     <option value="IKP">IKP</option><option value="IIP">IIP</option>
                 </select>
             </div>
+            
             <div id="wadahDaftarBelum"></div>
+            <div id="wadahTombolMuat" style="text-align: center; margin: 15px 0 30px 0;"></div>
         </div>
     </div>
     <script src="app.js"></script>
