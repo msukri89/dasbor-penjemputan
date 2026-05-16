@@ -36,7 +36,6 @@ menuDasbor.addEventListener('click', (e) => {
     areaFilterGlobal.style.display = 'flex'; if(sesiRole === "ADMIN") filterPetugas.style.display = 'block'; 
     menuDasbor.classList.add('aktif'); menuRekap.classList.remove('aktif'); menuBelum.classList.remove('aktif');
     tutupSidebar();
-    // Dasbor tidak perlu dihitung ulang kecuali ada perubahan filter
 });
 
 menuRekap.addEventListener('click', (e) => {
@@ -47,7 +46,6 @@ menuRekap.addEventListener('click', (e) => {
     menuRekap.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuBelum.classList.remove('aktif');
     tutupSidebar();
     
-    // Trik Lazy Loading: Tampilkan Skeleton dulu, biarkan layar merespon, baru hitung data berat
     document.getElementById('wadahRekap').innerHTML = `<div class="kartu-rekap"><div class="rekap-header"><span class="skeleton skeleton-text"></span></div><div class="rekap-body"><span class="skeleton" style="width:100%; height:100px;"></span></div></div>`.repeat(3);
     setTimeout(() => { tampilkanRekap(); }, 50);
 });
@@ -59,7 +57,6 @@ menuBelum.addEventListener('click', (e) => {
     menuBelum.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuRekap.classList.remove('aktif');
     tutupSidebar(); 
     
-    // Trik Lazy Loading: Tampilkan Skeleton dulu
     document.getElementById('wadahDaftarBelum').innerHTML = `<div class="kartu-belum"><div style="width:100%;"><span class="skeleton" style="width:80%; height:14px; margin-bottom:6px; display:block;"></span><span class="skeleton" style="width:50%; height:10px; display:block;"></span></div><div class="skeleton" style="width:35px; height:35px; border-radius:50%; flex-shrink:0;"></div></div>`.repeat(5);
     document.getElementById('wadahTombolMuat').innerHTML = "";
     setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50);
@@ -82,7 +79,7 @@ document.getElementById('btnMasuk').addEventListener('click', () => {
 
 async function eksekusiMasuk(idInput, pinInput, isManual) {
     if(isManual) { document.getElementById('btnMasuk').innerText = "Memeriksa Data..."; document.getElementById('pesanError').innerText = "";
-    } else { document.getElementById('layarLogin').style.display = 'none'; } // Skeleton dasbor sudah otomatis berjalan dari HTML
+    } else { document.getElementById('layarLogin').style.display = 'none'; } 
 
     try {
         const fetchUrl = SCRIPT_URL + `?id=${encodeURIComponent(idInput)}&pin=${encodeURIComponent(pinInput)}`;
@@ -99,15 +96,18 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
         
         document.getElementById('layarLogin').style.display = 'none'; document.getElementById('namaPenggunaAktif').innerText = sesiNama;
 
+        // PEMBARUAN: Biarkan wadah filter tampil untuk Petugas, tapi sembunyikan dropdown namanya saja
         if(sesiRole !== "ADMIN") {
-            document.getElementById('filterPetugas').style.display = 'none'; document.getElementById('wadahFilterBelumPetugas').style.display = 'none'; 
+            document.getElementById('filterPetugas').style.display = 'none'; 
+            document.getElementById('wadahFilterBelumPetugas').style.display = 'flex'; // Tetap dimunculkan agar Filter Pekan terlihat
+            document.getElementById('filterBelumPetugas').style.display = 'none'; // Sembunyikan namanya
         } else {
-            document.getElementById('filterPetugas').style.display = 'block'; document.getElementById('wadahFilterBelumPetugas').style.display = 'flex';
+            document.getElementById('filterPetugas').style.display = 'block'; 
+            document.getElementById('wadahFilterBelumPetugas').style.display = 'flex';
+            document.getElementById('filterBelumPetugas').style.display = 'block';
         }
 
         isiOpsiPetugas(); 
-        
-        // FOKUS KERJA BERTAHAP: Saat awal masuk, mesin HANYA menghitung Dasbor Utama. Rapor & Daftar Belum Donasi diabaikan dulu.
         kalkulasiGlobalDasbor(); 
 
     } catch (e) { 
@@ -151,9 +151,16 @@ function kalkulasiGlobalDasbor() {
         let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) idIKP_Global.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Global.add(String(b["Kode Donatur"]).trim());
     });
 
+    // PEMBARUAN: Deklarasi variabel bR_Pekan dkk diletakkan DI ATAS loop agar tidak error
     let bR_Pekan = 0, bK1_Pekan = 0, bK2_Pekan = 0;
-    dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("RUTIN")) bR_Pekan++; else if(sp.includes("INSIDEN")) bIns++; });
-    dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) bK1_Pekan++; if(sp.includes("IIP")) bK2_Pekan++; });
+    
+    dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { 
+        totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("RUTIN")) bR_Pekan++; else if(sp.includes("INSIDEN")) bIns++; 
+    });
+    
+    dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { 
+        totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) bK1_Pekan++; if(sp.includes("IIP")) bK2_Pekan++; 
+    });
 
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
@@ -182,8 +189,6 @@ function kalkulasiGlobalDasbor() {
     document.getElementById('teksIIP').innerText = kK2; document.getElementById('teksBaruIIP').innerText = "+" + dBaruIIP; document.getElementById('teksSisaIIP').innerText = "-" + sisaIIP;
 
     drawGrafik(bR_Pekan, bK1_Pekan, bK2_Pekan, bIns, sisaRutin, sisaIKP, sisaIIP); 
-    
-    // Copot skeleton karena dasbor sudah siap
     hilangkanSkeleton();
 }
 
@@ -295,13 +300,19 @@ function renderDaftarKeLayar(dataList) {
         let p = `Assalamu'alaikum, Bapak/Ibu *${d.n}*. \n\nBagaimana kabarnya? Semoga senantiasa sehat dan penuh berkah bersama keluarga.\n\nAlhamdulillah, donasi Bapak/Ibu bulan lalu telah tersalurkan dengan baik. Terima kasih banyak atas istiqomahnya dalam kebaikan.\n\nUntuk bulan ini, saya *${d.p}* kembali siap melayani penjemputan donasi jika Bapak/Ibu sudah berkenan. Longgar hari apa dan jam berapa kira-kira, Pak/Bu?\nNanti kami sesuaikan jadwal berkunjungnya.`;
         let l = n ? `https://wa.me/${n}?text=${encodeURIComponent(p)}` : '#';
         let c = d.k === 'RUTIN' ? '#2E5B72' : (d.k === 'IKP' ? '#B2C330' : '#4FB0C6');
-        
         let namaBersih = d.n.replace(/'/g, "\\'"); 
+        
+        // PEMBARUAN: Penambahan Badge Label Pekan
+        let labelPekan = (d.pek && d.pek !== "0" && d.pek !== "undefined" && d.pek !== "") ? `Pekan ${d.pek}` : "Pekan -";
         
         teksBufferHTML += `
             <div class="kartu-belum" style="border-left:4px solid ${c}">
                 <div class="info-donatur">
-                    <h4><span class="nomor-urut">#${urutan + 1}</span> ${d.n} <span class="badge" style="background:${c}">${d.k}</span></h4>
+                    <h4>
+                        <span class="nomor-urut">#${urutan + 1}</span> ${d.n} 
+                        <span class="badge" style="background:${c}">${d.k}</span>
+                        <span class="badge" style="background:#6B7280; margin-left:3px;">${labelPekan}</span>
+                    </h4>
                     <p>${d.a}</p>
                 </div>
                 <div class="grup-tombol">
