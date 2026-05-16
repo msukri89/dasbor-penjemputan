@@ -96,11 +96,10 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
         
         document.getElementById('layarLogin').style.display = 'none'; document.getElementById('namaPenggunaAktif').innerText = sesiNama;
 
-        // PEMBARUAN: Biarkan wadah filter tampil untuk Petugas, tapi sembunyikan dropdown namanya saja
         if(sesiRole !== "ADMIN") {
             document.getElementById('filterPetugas').style.display = 'none'; 
-            document.getElementById('wadahFilterBelumPetugas').style.display = 'flex'; // Tetap dimunculkan agar Filter Pekan terlihat
-            document.getElementById('filterBelumPetugas').style.display = 'none'; // Sembunyikan namanya
+            document.getElementById('wadahFilterBelumPetugas').style.display = 'flex'; 
+            document.getElementById('filterBelumPetugas').style.display = 'none'; 
         } else {
             document.getElementById('filterPetugas').style.display = 'block'; 
             document.getElementById('wadahFilterBelumPetugas').style.display = 'flex';
@@ -151,7 +150,6 @@ function kalkulasiGlobalDasbor() {
         let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) idIKP_Global.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Global.add(String(b["Kode Donatur"]).trim());
     });
 
-    // PEMBARUAN: Deklarasi variabel bR_Pekan dkk diletakkan DI ATAS loop agar tidak error
     let bR_Pekan = 0, bK1_Pekan = 0, bK2_Pekan = 0;
     
     dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { 
@@ -206,7 +204,13 @@ function tampilkanRekap() {
     dataMaster.master_kotak.forEach(b => { let p = String(b.Kolektor).trim(); if(p && (fPet === "Semua" || p === fPet)) petugasSet.add(p); });
     
     let daftarRekap = []; const fmt = (num) => num.toLocaleString('id-ID');
-    const renderSisaBtn = (sisa, pet, kat) => sisa > 0 ? `<div class="btn-sisa-rekap" onclick="downloadSisaRekap('${pet}', '${kat}')">${sisa} <i class="fas fa-download"></i></div>` : `<span style="color: #10B981; font-weight: bold;"><i class="fas fa-check"></i></span>`;
+    
+    // PEMBARUAN: Logika Penguncian Tombol Unduh untuk Petugas
+    const renderSisaBtn = (sisa, pet, kat) => {
+        if (sisa === 0) return `<span style="color: #10B981; font-weight: bold;"><i class="fas fa-check"></i></span>`;
+        if (sesiRole === "ADMIN") return `<div class="btn-sisa-rekap" onclick="downloadSisaRekap('${pet}', '${kat}')">${sisa} <i class="fas fa-download"></i></div>`;
+        return `<span style="color: var(--merah-bata); font-weight: bold;">${sisa}</span>`;
+    };
 
     petugasSet.forEach(petugas => {
         let kW = { r:0, k1:0, k2:0, tot:0 }, bD = { ins:0, r:0, k1:0, k2:0, tot:0 }, bR = { ins:0, r:0, k1:0, k2:0, tot:0 }, nO = { ins:0, r:0, k1:0, k2:0, tot:0 };
@@ -302,7 +306,6 @@ function renderDaftarKeLayar(dataList) {
         let c = d.k === 'RUTIN' ? '#2E5B72' : (d.k === 'IKP' ? '#B2C330' : '#4FB0C6');
         let namaBersih = d.n.replace(/'/g, "\\'"); 
         
-        // PEMBARUAN: Penambahan Badge Label Pekan
         let labelPekan = (d.pek && d.pek !== "0" && d.pek !== "undefined" && d.pek !== "") ? `Pekan ${d.pek}` : "Pekan -";
         
         teksBufferHTML += `
@@ -340,7 +343,10 @@ function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
     });
 }
 
+// PEMBARUAN: Gembok Keamanan agar Petugas tidak bisa menembus fungsi Unduh
 window.downloadSisaRekap = function(petugas_param, kategori) {
+    if (sesiRole !== "ADMIN") return; // Menolak akses selain ADMIN
+    
     let finalPetugas = sesiRole === "ADMIN" ? petugas_param : sesiNama;
     let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && (finalPetugas === "Semua" || d.p === finalPetugas));
     if(dataF.length === 0) { alert("Data kosong. Tidak ada sisa " + kategori + " untuk pencarian ini."); return; }
