@@ -31,7 +31,7 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .page-title { font-size: 15px; font-weight: bold; }
 
 .filter-area { display: flex; gap: 8px; padding: 10px 15px; }
-.dropdown-aksen { flex: 1; padding: 8px; background: var(--biru-petrol); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 11px; outline: none; }
+.dropdown-aksen { flex: 1; padding: 8px; background: var(--biru-petrol); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 11px; outline: none; transition: 0.3s; }
 
 .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 15px; margin-bottom: 20px; }
 .card { 
@@ -49,9 +49,9 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 
 .watermark-icon {
     position: absolute;
-    right: -1px;      
-    bottom: 0px;     
-    font-size: 35px; 
+    right: 5px;      
+    bottom: 5px;     
+    font-size: 38px; 
     opacity: 0.12; 
     pointer-events: none; 
     z-index: 1;
@@ -59,7 +59,6 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 
 .card-muda { border-top-color: var(--biru-muda); }
 .card-muda .watermark-icon { color: var(--biru-muda); }
-
 .card-lime { border-top-color: var(--hijau-lime); }
 .card-lime .watermark-icon { color: var(--hijau-lime); }
 
@@ -80,3 +79,15 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .info-donatur p { font-size: 11px; color: #6B7280; line-height: 1.2; }
 .badge { font-size: 8px; padding: 2px 6px; border-radius: 8px; color: white; font-weight: bold; margin-left: 5px; }
 .btn-wa { background: #25D366; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 18px; flex-shrink: 0; }
+
+/* --- DESAIN MENU REKAPITULASI KLASEMEN --- */
+.kartu-rekap { background: white; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; overflow: hidden; }
+.rekap-header { background: var(--biru-petrol); color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--hijau-lime); }
+.rekap-header h3 { font-size: 14px; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
+.rekap-header .persentase { font-size: 18px; font-weight: 800; background: white; padding: 2px 8px; border-radius: 6px; }
+.rekap-body { padding: 10px 5px; overflow-x: auto; }
+.tabel-rekap { width: 100%; border-collapse: collapse; font-size: 10px; text-align: right; }
+.tabel-rekap th { background: var(--warna-abu); padding: 8px 4px; text-align: center; color: var(--biru-petrol); font-weight: bold; border: 1px solid #e5e7eb; font-size: 9px; text-transform: uppercase; }
+.tabel-rekap td { padding: 8px 4px; border: 1px solid #e5e7eb; }
+.tabel-rekap td:first-child { text-align: left; font-weight: bold; background: #fafafa; color: #4B5563; }
+.tabel-rekap tr.jumlah td { font-weight: bold; background: #ecfdf5; color: var(--biru-petrol); font-size: 11px; }
