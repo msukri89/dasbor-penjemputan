@@ -52,7 +52,6 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .card-lime .watermark-icon { color: var(--hijau-lime); }
 
 .teks-baru { position: relative; z-index: 2; font-size: 12px; font-weight: bold; color: var(--hijau-baru); margin-top: 4px; }
-.teks-sisa { position: relative; z-index: 2; font-size: 12px; font-weight: bold; color: var(--merah-bata); margin-top: 2px; padding: 3px 0; border-radius: 4px; cursor: pointer;}
 
 .charts-area { padding: 0 15px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
 .chart-container { background: white; padding: 15px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -63,7 +62,7 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .header-halaman h2 { font-size: 13px; color: var(--biru-petrol); font-weight: bold; }
 .dropdown-kecil { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--biru-petrol); font-size: 11px; background: white; outline: none; font-weight: bold; color: var(--biru-petrol); }
 
-/* List Belum Berdonasi + Fitur Nomor */
+/* List Belum Berdonasi */
 .kartu-belum { background: white; padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid var(--warna-abu); }
 .info-donatur h4 { font-size: 13px; margin-bottom: 2px; display: flex; align-items: center; gap: 5px; }
 .info-donatur p { font-size: 11px; color: #6B7280; line-height: 1.2; padding-left: 24px; }
@@ -71,7 +70,6 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .badge { font-size: 8px; padding: 2px 6px; border-radius: 8px; color: white; font-weight: bold; }
 .btn-wa { background: #25D366; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 18px; flex-shrink: 0; }
 
-/* Tombol Muat Lebih Banyak */
 .btn-muat-banyak {
     background: var(--biru-muda); color: white; border: none; padding: 10px 20px;
     border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer;
@@ -79,7 +77,7 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 }
 .btn-muat-banyak:active { transform: scale(0.95); background: var(--biru-petrol); }
 
-/* Desain Menu Rekapitulasi */
+/* Rapor Pribadi & Rekapitulasi */
 .kartu-rekap { background: white; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; overflow: hidden; }
 .rekap-header { background: var(--biru-petrol); color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--biru-muda); }
 .rekap-header h3 { font-size: 14px; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -99,7 +97,7 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .btn-sisa-rekap:active { background: #FCA5A5; color: white; transform: scale(0.95); }
 .btn-sisa-rekap i { font-size: 9px; margin-left: 3px; }
 
-/* --- SKELETON LOADING UI (Animasi Cahaya Dinamis) --- */
+/* --- SKELETON LOADING UI --- */
 @keyframes shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
@@ -109,18 +107,17 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
     background-color: #E5E7EB;
     background-image: linear-gradient(90deg, #E5E7EB 0%, #FFFFFF 50%, #E5E7EB 100%);
     background-size: 200% 100%;
-    animation: shimmer 10s infinite linear;
+    animation: shimmer 2.5s infinite linear;
     border-radius: 4px;
     display: inline-block;
 }
 .skeleton-text { width: 60px; height: 18px; margin: 0 auto; }
 
-/* KELAS KHUSUS: Full-Block Skeleton untuk Dasbor */
 .skeleton-mode {
     background-color: #E5E7EB !important;
     background-image: linear-gradient(90deg, #E5E7EB 0%, #FFFFFF 50%, #E5E7EB 100%) !important;
     background-size: 200% 100% !important;
-    animation: shimmer 10s infinite linear !important;
+    animation: shimmer 2.5s infinite linear !important;
     border-color: transparent !important;
     box-shadow: none !important;
     color: transparent !important; 
@@ -136,14 +133,13 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
     position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
     background: var(--biru-petrol);
     display: flex; justify-content: center; align-items: center;
-    z-index: 9999; /* Berada di atas segalanya */
+    z-index: 9999;
 }
 
 .login-box {
     background: white; width: 90%; max-width: 350px;
     padding: 30px 20px; border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center;
 }
 
 .login-box h2 { color: var(--biru-petrol); margin-bottom: 5px; font-size: 18px; font-weight: 800; }
@@ -164,5 +160,4 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
     box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.2s; margin-top: 10px;
 }
 .btn-masuk:active { transform: scale(0.98); background: #9ca3af; }
-
 .pesan-error { color: var(--merah-bata); font-size: 11px; margin-bottom: 10px; font-weight: bold; min-height: 15px; }
