@@ -30,8 +30,11 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .burger-btn { background: none; border: none; font-size: 20px; cursor: pointer; margin-right: 12px; color: var(--biru-petrol); }
 .page-title { font-size: 15px; font-weight: bold; }
 
+/* Filter Area */
 .filter-area { display: flex; gap: 8px; padding: 10px 15px; }
-.dropdown-aksen { flex: 1; padding: 8px; background: var(--biru-petrol); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 11px; outline: none; transition: 0.3s; }
+.filter-area-lokal { display: flex; gap: 8px; padding: 10px 0; }
+.dropdown-aksen { flex: 1; padding: 8px; background: var(--biru-petrol); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 11px; outline: none; }
+.dropdown-lokal { flex: 1; padding: 8px; background: #4B5563; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 11px; outline: none; }
 
 .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 15px; margin-bottom: 20px; }
 .card { 
@@ -56,22 +59,32 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .chart-container h3 { margin-bottom: 10px; font-size: 13px; text-align: center; color: var(--biru-petrol); }
 
 .header-halaman { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-.header-halaman h2 { font-size: 14px; color: var(--biru-petrol); }
-.dropdown-kecil { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--biru-petrol); font-size: 11px; background: white; outline: none; }
+.header-halaman.flex-header { background: #E5E7EB; padding: 8px 10px; border-radius: 6px; margin-top: 5px; }
+.header-halaman h2 { font-size: 13px; color: var(--biru-petrol); font-weight: bold; }
+.dropdown-kecil { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--biru-petrol); font-size: 11px; background: white; outline: none; font-weight: bold; color: var(--biru-petrol); }
 
+/* List Belum Berdonasi + Fitur Nomor */
 .kartu-belum { background: white; padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid var(--warna-abu); }
-.info-donatur h4 { font-size: 13px; margin-bottom: 2px; }
-.info-donatur p { font-size: 11px; color: #6B7280; line-height: 1.2; }
-.badge { font-size: 8px; padding: 2px 6px; border-radius: 8px; color: white; font-weight: bold; margin-left: 5px; }
+.info-donatur h4 { font-size: 13px; margin-bottom: 2px; display: flex; align-items: center; gap: 5px; }
+.info-donatur p { font-size: 11px; color: #6B7280; line-height: 1.2; padding-left: 24px; }
+.nomor-urut { color: #9CA3AF; font-weight: bold; font-family: monospace; display: inline-block; width: 19px; }
+.badge { font-size: 8px; padding: 2px 6px; border-radius: 8px; color: white; font-weight: bold; }
 .btn-wa { background: #25D366; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 18px; flex-shrink: 0; }
 
-/* --- DESAIN MENU REKAPITULASI --- */
+/* Tombol Muat Lebih Banyak (Lazy Loading) */
+.btn-muat-banyak {
+    background: var(--biru-muda); color: white; border: none; padding: 10px 20px;
+    border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; display: inline-block;
+}
+.btn-muat-banyak:active { transform: scale(0.95); background: var(--biru-petrol); }
+
+/* Desain Menu Rekapitulasi */
 .kartu-rekap { background: white; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; overflow: hidden; }
 .rekap-header { background: var(--biru-petrol); color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--hijau-lime); }
 .rekap-header h3 { font-size: 14px; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
 .rekap-header .persentase { font-size: 16px; font-weight: 800; background: white; padding: 2px 8px; border-radius: 6px; }
 .rekap-body { padding: 10px 5px; overflow-x: auto; }
-
 .tabel-rekap { width: 100%; border-collapse: collapse; font-size: 10px; text-align: right; }
 .tabel-rekap th { background: var(--warna-abu); padding: 8px 2px; text-align: center; color: var(--biru-petrol); font-weight: bold; border: 1px solid #e5e7eb; font-size: 8px; text-transform: uppercase; }
 .tabel-rekap td { padding: 8px 2px; border: 1px solid #e5e7eb; vertical-align: middle; }
@@ -81,8 +94,7 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); font-siz
 .btn-sisa-rekap {
     background: #FEE2E2; color: var(--merah-bata); border: 1px solid #FCA5A5;
     padding: 3px 6px; border-radius: 6px; font-weight: bold; cursor: pointer;
-    font-size: 11px; display: inline-block; transition: 0.2s;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    font-size: 11px; display: inline-block; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 .btn-sisa-rekap:active { background: #FCA5A5; color: white; transform: scale(0.95); }
 .btn-sisa-rekap i { font-size: 9px; margin-left: 3px; }
