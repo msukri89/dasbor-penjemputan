@@ -151,9 +151,8 @@ function kalkulasiGlobalDasbor() {
         let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) idIKP_Global.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Global.add(String(b["Kode Donatur"]).trim());
     });
 
-    dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("RUTIN")) bR_Pekan++; else if(sp.includes("INSIDEN")) bIns++; });
     let bR_Pekan = 0, bK1_Pekan = 0, bK2_Pekan = 0;
-    dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("RUTIN")) bR_Pekan++; });
+    dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("RUTIN")) bR_Pekan++; else if(sp.includes("INSIDEN")) bIns++; });
     dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) bK1_Pekan++; if(sp.includes("IIP")) bK2_Pekan++; });
 
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
