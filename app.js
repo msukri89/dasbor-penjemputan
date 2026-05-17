@@ -21,6 +21,7 @@ const filterPekan = document.getElementById('filterPekan');
 const filterBelumPetugas = document.getElementById('filterBelumPetugas');
 const filterBelumPekan = document.getElementById('filterBelumPekan');
 const filterJenisDonatur = document.getElementById('filterJenisDonatur');
+const inputCariDonatur = document.getElementById('inputCariDonatur');
 
 // ==========================================
 // LOGIKA MENU NAVIGASI (LAZY LOADING)
@@ -56,6 +57,8 @@ menuBelum.addEventListener('click', (e) => {
     areaFilterGlobal.style.display = 'none'; 
     menuBelum.classList.add('aktif'); menuDasbor.classList.remove('aktif'); menuRekap.classList.remove('aktif');
     tutupSidebar(); 
+    
+    inputCariDonatur.value = ""; // Bersihkan kolom pencarian saat pindah menu
     
     document.getElementById('wadahDaftarBelum').innerHTML = `<div class="kartu-belum"><div style="width:100%;"><span class="skeleton" style="width:80%; height:14px; margin-bottom:6px; display:block;"></span><span class="skeleton" style="width:50%; height:10px; display:block;"></span></div><div class="skeleton" style="width:35px; height:35px; border-radius:50%; flex-shrink:0;"></div></div>`.repeat(5);
     document.getElementById('wadahTombolMuat').innerHTML = "";
@@ -205,7 +208,6 @@ function tampilkanRekap() {
     
     let daftarRekap = []; const fmt = (num) => num.toLocaleString('id-ID');
     
-    // PEMBARUAN: Logika Penguncian Tombol Unduh untuk Petugas
     const renderSisaBtn = (sisa, pet, kat) => {
         if (sisa === 0) return `<span style="color: #10B981; font-weight: bold;"><i class="fas fa-check"></i></span>`;
         if (sesiRole === "ADMIN") return `<div class="btn-sisa-rekap" onclick="downloadSisaRekap('${pet}', '${kat}')">${sisa} <i class="fas fa-download"></i></div>`;
@@ -283,6 +285,16 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
     });
 
     let dataAkhirTerfilter = (fKat === "Semua") ? dataBelumMandiriLokal : dataBelumMandiriLokal.filter(d => d.k === fKat);
+    
+    // PEMBARUAN: Logika Filter Berdasarkan Kata Kunci Pencarian Teks
+    const kataKunci = inputCariDonatur.value.toLowerCase().trim();
+    if (kataKunci !== "") {
+        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => 
+            String(d.n).toLowerCase().includes(kataKunci) || 
+            String(d.r).toLowerCase().includes(kataKunci)
+        );
+    }
+
     document.getElementById('totalSisaBelum').innerText = dataAkhirTerfilter.length;
     renderDaftarKeLayar(dataAkhirTerfilter);
 }
@@ -292,7 +304,7 @@ function renderDaftarKeLayar(dataList) {
     const wadahTombol = document.getElementById('wadahTombolMuat');
     
     if(dataList.length === 0) {
-        wadah.innerHTML = `<div style="text-align:center; padding:30px; color:#6B7280; font-weight:bold;">Alhamdulillah, Tugas Tuntas Sempurna!</div>`;
+        wadah.innerHTML = `<div style="text-align:center; padding:30px; color:#6B7280; font-weight:bold;">Tidak ada data yang ditemukan.</div>`;
         wadahTombol.innerHTML = ""; return;
     }
 
@@ -343,9 +355,8 @@ function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
     });
 }
 
-// PEMBARUAN: Gembok Keamanan agar Petugas tidak bisa menembus fungsi Unduh
 window.downloadSisaRekap = function(petugas_param, kategori) {
-    if (sesiRole !== "ADMIN") return; // Menolak akses selain ADMIN
+    if (sesiRole !== "ADMIN") return; 
     
     let finalPetugas = sesiRole === "ADMIN" ? petugas_param : sesiNama;
     let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && (finalPetugas === "Semua" || d.p === finalPetugas));
@@ -391,13 +402,19 @@ async function simpanPekanBaru() {
 }
 
 // ==========================================
-// EVENT LISTENER FILTER
+// EVENT LISTENER FILTER & PENCARIAN
 // ==========================================
 filterPetugas.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
 filterPekan.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
 filterBelumPetugas.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
 filterBelumPekan.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
 filterJenisDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
+
+// PEMBARUAN: Deteksi ketikan secara Real-time pada Kotak Pencarian
+inputCariDonatur.addEventListener('input', () => { 
+    limitTampil = 50; // Reset porsi tampilan ke 50 setiap kali mencari teks baru
+    hitungDaftarBelumMandiri(false); 
+});
 
 function inisialisasiAplikasi() {
     const simpananId = localStorage.getItem('laz_id'); const simpananPin = localStorage.getItem('laz_pin');
