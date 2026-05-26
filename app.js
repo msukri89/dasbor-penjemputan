@@ -205,7 +205,6 @@ function tampilkanRekap() {
     
     let daftarRekap = []; const fmt = (num) => num.toLocaleString('id-ID');
     
-    // PEMBARUAN: Logika Penguncian Tombol Unduh untuk Petugas
     const renderSisaBtn = (sisa, pet, kat) => {
         if (sisa === 0) return `<span style="color: #10B981; font-weight: bold;"><i class="fas fa-check"></i></span>`;
         if (sesiRole === "ADMIN") return `<div class="btn-sisa-rekap" onclick="downloadSisaRekap('${pet}', '${kat}')">${sisa} <i class="fas fa-download"></i></div>`;
@@ -283,6 +282,17 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
     });
 
     let dataAkhirTerfilter = (fKat === "Semua") ? dataBelumMandiriLokal : dataBelumMandiriLokal.filter(d => d.k === fKat);
+    
+    // INTEGRASI AKTIVASI FITUR TOMBOL CARI DONATUR
+    const kataKunci = document.getElementById('inputCariDonatur').value.toLowerCase().trim();
+    if(kataKunci) {
+        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => 
+            String(d.n).toLowerCase().includes(kataKunci) || 
+            String(d.r).toLowerCase().includes(kataKunci) ||
+            String(d.a).toLowerCase().includes(kataKunci)
+        );
+    }
+
     document.getElementById('totalSisaBelum').innerText = dataAkhirTerfilter.length;
     renderDaftarKeLayar(dataAkhirTerfilter);
 }
@@ -343,9 +353,8 @@ function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
     });
 }
 
-// PEMBARUAN: Gembok Keamanan agar Petugas tidak bisa menembus fungsi Unduh
 window.downloadSisaRekap = function(petugas_param, kategori) {
-    if (sesiRole !== "ADMIN") return; // Menolak akses selain ADMIN
+    if (sesiRole !== "ADMIN") return; 
     
     let finalPetugas = sesiRole === "ADMIN" ? petugas_param : sesiNama;
     let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && (finalPetugas === "Semua" || d.p === finalPetugas));
@@ -391,7 +400,7 @@ async function simpanPekanBaru() {
 }
 
 // ==========================================
-// EVENT LISTENER FILTER
+// EVENT LISTENER FILTER & REALTIME INPUT
 // ==========================================
 filterPetugas.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
 filterPekan.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
@@ -399,7 +408,14 @@ filterBelumPetugas.addEventListener('change', () => { setTimeout(() => { hitungD
 filterBelumPekan.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
 filterJenisDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
 
+// KONEKSI REALTIME INPUT KEYWORD PENCARIAN
+document.getElementById('inputCariDonatur').addEventListener('input', () => { hitungDaftarBelumMandiri(false); });
+
 function inisialisasiAplikasi() {
+    // REGISTRASI OTOMATIS SERVICE WORKER PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Registration Skip/Error:', err));
+    }
     const simpananId = localStorage.getItem('laz_id'); const simpananPin = localStorage.getItem('laz_pin');
     if (simpananId && simpananPin) { eksekusiMasuk(simpananId, simpananPin, false); } else { document.getElementById('layarLogin').style.display = 'flex'; }
 }
