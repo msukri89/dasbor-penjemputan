@@ -33,57 +33,67 @@
         </header>
 
         <div id="areaFilterGlobal" class="filter-area" style="display:none;">
-            <select id="filterPetugas" class="dropdown-aksen skeleton-mode"><option value="Semua">SEMUA PETUGAS</option></select>
-            <select id="filterPekan" class="dropdown-aksen skeleton-mode">
-                <option value="Total">TOTAL BULAN INI</option>
-                <option value="Pekan 1">PEKAN 1</option><option value="Pekan 2">PEKAN 2</option>
-                <option value="Pekan 3">PEKAN 3</option><option value="Pekan 4">PEKAN 4</option>
+            <select id="filterPetugas" style="display:none;"><option value="Semua">SEMUA PETUGAS</option></select>
+            <select id="filterPekan" style="display:none;">
+                <option value="Total">TOTAL BULAN INI</option><option value="Pekan 1">PEKAN 1</option>
+                <option value="Pekan 2">PEKAN 2</option><option value="Pekan 3">PEKAN 3</option>
+                <option value="Pekan 4">PEKAN 4</option>
             </select>
+            
+            <div id="uiFilterPetugas" class="custom-select-trigger skeleton-mode" onclick="bukaModalPilih('filterPetugas', 'Pilih Petugas', 'uiFilterPetugas')"><span>SEMUA PETUGAS</span> <i class="fas fa-chevron-down"></i></div>
+            <div id="uiFilterPekan" class="custom-select-trigger skeleton-mode" onclick="bukaModalPilih('filterPekan', 'Pilih Pekan', 'uiFilterPekan')"><span>TOTAL BULAN INI</span> <i class="fas fa-chevron-down"></i></div>
         </div>
 
         <div id="areaDasbor">
             <div class="summary-cards">
-                <div class="card card-lime skeleton-mode">
-                    <i class="fas fa-chart-pie watermark-icon" style="color: var(--hijau-lime);"></i>
-                    <div class="card-content">
-                        <h3>PERSENTASE</h3><h2 id="teksPersentase">0%</h2>
+                <div class="dasbor-grid-top">
+                    <div class="card card-lime skeleton-mode">
+                        <i class="fas fa-chart-pie watermark-icon" style="color: var(--hijau-lime);"></i>
+                        <div class="card-content">
+                            <h3>PERSENTASE</h3><h2 id="teksPersentase">0%</h2>
+                        </div>
                     </div>
-                </div>
-                <div class="card card-lime skeleton-mode">
-                    <i class="fas fa-hand-holding-heart watermark-icon" style="color: var(--hijau-lime);"></i>
-                    <div class="card-content">
-                        <h3>TERJEMPUT</h3><h2 id="teksBerhasil">0</h2>
-                    </div>
-                </div>
-                <div class="card card-lime card-full skeleton-mode">
-                    <i class="fas fa-wallet watermark-icon" style="color: var(--hijau-lime);"></i>
-                    <div class="card-content">
-                        <h3>PEMASUKAN</h3><h2 id="teksPemasukan">Rp 0</h2>
+                    <div class="card card-lime skeleton-mode">
+                        <i class="fas fa-hand-holding-heart watermark-icon" style="color: var(--hijau-lime);"></i>
+                        <div class="card-content">
+                            <h3>TERJEMPUT</h3><h2 id="teksBerhasil">0</h2>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="card card-muda skeleton-mode">
-                    <i class="fas fa-user-clock watermark-icon" style="color: var(--biru-muda);"></i>
-                    <div class="card-content">
-                        <h3>RUTIN</h3>
-                        <h2 id="teksRutin">0</h2>
-                        <div class="keterangan-bawah"><span id="teksBaruRutin" class="teks-baru">+0</span> | <span id="teksSisaRutin" class="teks-sisa-statis">-0</span></div>
+                <div class="dasbor-grid-mid">
+                    <div class="card card-lime skeleton-mode" style="text-align: center;">
+                        <i class="fas fa-wallet watermark-icon" style="color: var(--hijau-lime);"></i>
+                        <div class="card-content">
+                            <h3>TOTAL PEMASUKAN</h3><h2 id="teksPemasukan">Rp 0</h2>
+                        </div>
                     </div>
                 </div>
-                <div class="card card-muda skeleton-mode">
-                    <i class="fas fa-box watermark-icon" style="color: var(--biru-muda);"></i>
-                    <div class="card-content">
-                        <h3>IKP</h3>
-                        <h2 id="teksIKP">0</h2>
-                        <div class="keterangan-bawah"><span id="teksBaruIKP" class="teks-baru">+0</span> | <span id="teksSisaIKP" class="teks-sisa-statis">-0</span></div>
+                
+                <div class="dasbor-grid-bot">
+                    <div class="card card-muda skeleton-mode">
+                        <i class="fas fa-user-clock watermark-icon" style="color: var(--biru-muda);"></i>
+                        <div class="card-content">
+                            <h3>RUTIN</h3>
+                            <h2 id="teksRutin">0</h2>
+                            <div class="keterangan-bawah"><span id="teksBaruRutin" class="teks-baru">+0</span> | <span id="teksSisaRutin" class="teks-sisa-statis">-0</span></div>
+                        </div>
                     </div>
-                </div>
-                <div class="card card-muda card-full skeleton-mode">
-                    <i class="fas fa-store watermark-icon" style="color: var(--biru-muda);"></i>
-                    <div class="card-content">
-                        <h3>IIP</h3>
-                        <h2 id="teksIIP">0</h2>
-                        <div class="keterangan-bawah"><span id="teksBaruIIP" class="teks-baru">+0</span> | <span id="teksSisaIIP" class="teks-sisa-statis">-0</span></div>
+                    <div class="card card-muda skeleton-mode">
+                        <i class="fas fa-box watermark-icon" style="color: var(--biru-muda);"></i>
+                        <div class="card-content">
+                            <h3>IKP</h3>
+                            <h2 id="teksIKP">0</h2>
+                            <div class="keterangan-bawah"><span id="teksBaruIKP" class="teks-baru">+0</span> | <span id="teksSisaIKP" class="teks-sisa-statis">-0</span></div>
+                        </div>
+                    </div>
+                    <div class="card card-muda skeleton-mode">
+                        <i class="fas fa-store watermark-icon" style="color: var(--biru-muda);"></i>
+                        <div class="card-content">
+                            <h3>IIP</h3>
+                            <h2 id="teksIIP">0</h2>
+                            <div class="keterangan-bawah"><span id="teksBaruIIP" class="teks-baru">+0</span> | <span id="teksSisaIIP" class="teks-sisa-statis">-0</span></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -91,7 +101,7 @@
             <div class="charts-area">
                 <div class="chart-container skeleton-mode">
                     <h3>Realisasi Target & Insidental</h3>
-                    <div style="height: 300px; position: relative;"><canvas id="grafikUtama"></canvas></div>
+                    <div style="height: 250px; position: relative;"><canvas id="grafikUtama"></canvas></div>
                 </div>
             </div>
         </div>
@@ -102,12 +112,15 @@
 
         <div id="areaBelum" style="display: none; padding: 0 15px;">
             <div class="filter-area-lokal" id="wadahFilterBelumPetugas" style="padding-top: 15px;">
-                <select id="filterBelumPetugas" class="dropdown-lokal"></select>
-                <select id="filterBelumPekan" class="dropdown-lokal">
-                    <option value="Total">TOTAL BULAN INI</option>
-                    <option value="Pekan 1">PEKAN 1</option><option value="Pekan 2">PEKAN 2</option>
-                    <option value="Pekan 3">PEKAN 3</option><option value="Pekan 4">PEKAN 4</option>
+                <select id="filterBelumPetugas" style="display:none;"></select>
+                <select id="filterBelumPekan" style="display:none;">
+                    <option value="Total">TOTAL BULAN INI</option><option value="Pekan 1">PEKAN 1</option>
+                    <option value="Pekan 2">PEKAN 2</option><option value="Pekan 3">PEKAN 3</option>
+                    <option value="Pekan 4">PEKAN 4</option>
                 </select>
+                
+                <div id="uiFilterBelumPetugas" class="custom-select-trigger lokal" onclick="bukaModalPilih('filterBelumPetugas', 'Pilih Petugas', 'uiFilterBelumPetugas')"><span>SEMUA PETUGAS</span> <i class="fas fa-chevron-down"></i></div>
+                <div id="uiFilterBelumPekan" class="custom-select-trigger lokal" onclick="bukaModalPilih('filterBelumPekan', 'Pilih Pekan', 'uiFilterBelumPekan')"><span>TOTAL BULAN INI</span> <i class="fas fa-chevron-down"></i></div>
             </div>
             
             <div class="search-wrapper">
@@ -117,10 +130,12 @@
             
             <div class="header-halaman flex-header">
                 <h2>Total: <span id="totalSemuaDonatur">0</span></h2>
-                <select id="filterJenisDonatur" class="dropdown-kecil">
+                
+                <select id="filterJenisDonatur" style="display:none;">
                     <option value="Semua">SEMUA KAT</option><option value="RUTIN">RUTIN</option>
                     <option value="IKP">IKP</option><option value="IIP">IIP</option>
                 </select>
+                <div id="uiFilterJenis" class="dropdown-kecil custom-select-trigger lokal" style="flex:none; padding:8px 12px; font-size:12px; border-radius:10px;" onclick="bukaModalPilih('filterJenisDonatur', 'Kategori', 'uiFilterJenis')"><span>SEMUA KAT</span> <i class="fas fa-chevron-down" style="font-size:10px;"></i></div>
             </div>
             
             <div id="wadahDaftarBelum"></div>
@@ -185,7 +200,16 @@
         </div>
     </div>
     
-    <div id="modalAlert" class="overlay" style="display: none; z-index: 10001;">
+    <div id="modalPilihan" class="overlay" style="display: none; z-index: 10002;">
+        <div class="modal-box custom-pilihan-box" style="padding: 25px 15px;">
+            <h3 id="judulModalPilihan" style="margin-bottom: 15px; text-align: left; padding-left: 10px;">Pilih</h3>
+            <div id="wadahDaftarPilihan" class="daftar-pilihan-modal">
+                </div>
+            <button onclick="tutupModalPilihan()" class="btn-batal" style="width: 100%; margin-top: 20px;">Batal</button>
+        </div>
+    </div>
+
+    <div id="modalAlert" class="overlay" style="display: none; z-index: 10003;">
         <div class="modal-box">
             <div id="iconAlert" style="font-size: 40px; margin-bottom: 10px;"></div>
             <h3 id="judulAlert" style="margin-bottom: 10px;"></h3>
