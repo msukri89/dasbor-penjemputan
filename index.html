@@ -15,15 +15,24 @@
 <body>
     <div id="layarLogin" class="login-wrapper">
         <div class="login-box">
-            <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-                <img src="logo.png" alt="Logo LAZ Sidogiri" style="height: 65px; border-radius: 12px;">
+            <div style="display: flex; justify-content: center; margin-bottom: 25px;">
+                <img src="logo.png" alt="Logo LAZ Sidogiri" style="height: 75px; border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
             </div>
-            <h2>SISTEM PETUGAS</h2>
-            <p>Silakan masukkan identitas Anda</p>
-            <input type="text" id="inputId" class="input-login" placeholder="ID Petugas (Contoh: 101)" autocomplete="off">
-            <input type="password" id="inputPin" class="input-login" placeholder="PIN Rahasia">
+            <h2>Selamat Datang</h2>
+            <p>Silakan masuk menggunakan identitas Anda</p>
+            
+            <div class="input-group-login">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="inputId" class="input-login premium" placeholder="ID Petugas atau No. HP" autocomplete="off">
+            </div>
+            
+            <div class="input-group-login">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" id="inputPin" class="input-login premium" placeholder="PIN Rahasia">
+            </div>
+            
             <div id="pesanError" class="pesan-error"></div>
-            <button id="btnMasuk" class="btn-masuk">MASUK</button>
+            <button id="btnMasuk" class="btn-masuk premium-btn">MASUK APLIKASI</button>
         </div>
     </div>
 
@@ -161,7 +170,7 @@
 
                 <div class="menu-profil-list">
                     <div class="menu-profil-item">
-                        <div class="mpi-left"><i class="fas fa-id-badge" style="color: var(--biru-petrol);"></i> ID Petugas</div>
+                        <div class="mpi-left"><i class="fas fa-id-badge" style="color: var(--biru-petrol);"></i> Identitas</div>
                         <div class="mpi-right" id="idPenggunaProfil">-</div>
                     </div>
                     <div class="menu-profil-item">
@@ -212,8 +221,7 @@
     <div id="modalPilihan" class="overlay" style="display: none; z-index: 10002;">
         <div class="modal-box custom-pilihan-box" style="padding: 25px 15px;">
             <h3 id="judulModalPilihan" style="margin-bottom: 15px; text-align: left; padding-left: 10px;">Pilih</h3>
-            <div id="wadahDaftarPilihan" class="daftar-pilihan-modal">
-                </div>
+            <div id="wadahDaftarPilihan" class="daftar-pilihan-modal"></div>
             <button onclick="tutupModalPilihan()" class="btn-batal" style="width: 100%; margin-top: 20px;">Batal</button>
         </div>
     </div>
