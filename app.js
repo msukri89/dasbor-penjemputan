@@ -2,10 +2,11 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Dcig9_jLXMp5z2cAj
 let dataMaster = null; let grafikUtama = null;
 
 let dataBelumDasborGlobal = []; 
-let dataSemuaMandiriLokal = []; // Diganti namanya karena menampung semua donatur
+let dataSemuaMandiriLokal = []; 
 let limitTampil = 50;
 
 let sesiRole = ""; let sesiNama = "";
+let historyPushed = false; // Flag untuk tombol Back HP
 
 // Element Area Halaman
 const areaDasbor = document.getElementById('areaDasbor'); 
@@ -21,7 +22,7 @@ const navBelum = document.getElementById('navBelum');
 const navProfil = document.getElementById('navProfil');
 const pageTitle = document.getElementById('pageTitle');
 
-// Filter Element
+// Filter Element (Native Hidden)
 const filterPetugas = document.getElementById('filterPetugas');
 const filterPekan = document.getElementById('filterPekan');
 const filterBelumPetugas = document.getElementById('filterBelumPetugas');
@@ -29,92 +30,105 @@ const filterBelumPekan = document.getElementById('filterBelumPekan');
 const filterJenisDonatur = document.getElementById('filterJenisDonatur');
 
 // ==========================================
+// LOGIKA CUSTOM DROPDOWN (FILTER)
+// ==========================================
+function bukaModalPilih(selectId, judul, uiId) {
+    const selectElement = document.getElementById(selectId);
+    document.getElementById('judulModalPilihan').innerText = judul;
+    
+    let htmlPilihan = '';
+    Array.from(selectElement.options).forEach(opt => {
+        const isSelected = selectElement.value === opt.value;
+        const styleAktif = isSelected ? 'background: #E5E5EA; font-weight: bold; color: var(--biru-petrol);' : '';
+        const iconCheck = isSelected ? '<i class="fas fa-check" style="color: var(--hijau-lime); float:right;"></i>' : '';
+        
+        htmlPilihan += `<div class="opsi-item" style="${styleAktif}" onclick="pilihOpsiFilter('${selectId}', '${opt.value}', '${opt.text}', '${uiId}')">${opt.text} ${iconCheck}</div>`;
+    });
+    
+    document.getElementById('wadahDaftarPilihan').innerHTML = htmlPilihan;
+    document.getElementById('modalPilihan').style.display = 'flex';
+}
+
+function pilihOpsiFilter(selectId, value, text, uiId) {
+    const selectElement = document.getElementById(selectId);
+    selectElement.value = value;
+    
+    // Update Teks di Tombol UI
+    document.getElementById(uiId).innerHTML = `<span>${text}</span> <i class="fas fa-chevron-down"></i>`;
+    
+    // Tutup Modal
+    document.getElementById('modalPilihan').style.display = 'none';
+    
+    // Picu event change agar filter langsung berjalan
+    selectElement.dispatchEvent(new Event('change'));
+}
+
+function tutupModalPilihan() { document.getElementById('modalPilihan').style.display = 'none'; }
+
+// ==========================================
 // LOGIKA ALERT CUSTOM
 // ==========================================
 function tampilkanAlert(tipe, judul, pesan) {
     const modal = document.getElementById('modalAlert');
     const icon = document.getElementById('iconAlert');
-    const judulEl = document.getElementById('judulAlert');
-    const pesanEl = document.getElementById('pesanAlert');
+    document.getElementById('judulAlert').innerText = judul;
+    document.getElementById('pesanAlert').innerText = pesan;
     
-    if(tipe === 'sukses') {
-        icon.innerHTML = '<i class="fas fa-check-circle" style="color: #34C759;"></i>';
-    } else {
-        icon.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #FF3B30;"></i>';
-    }
-    
-    judulEl.innerText = judul;
-    pesanEl.innerText = pesan;
+    if(tipe === 'sukses') { icon.innerHTML = '<i class="fas fa-check-circle" style="color: #34C759;"></i>'; } 
+    else { icon.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #FF3B30;"></i>'; }
     modal.style.display = 'flex';
 }
-
-function tutupAlert() {
-    document.getElementById('modalAlert').style.display = 'none';
-}
+function tutupAlert() { document.getElementById('modalAlert').style.display = 'none'; }
 
 // ==========================================
-// LOGIKA NAVIGASI BOTTOM MENU (TAB SWITCHER)
+// LOGIKA NAVIGASI BOTTOM MENU & BACK BUTTON
 // ==========================================
-function switchTab(activeNav, activeArea, titleText) {
-    // 1. Sembunyikan Semua Area
-    areaDasbor.style.display = 'none';
-    areaRekap.style.display = 'none';
-    areaBelum.style.display = 'none';
-    areaProfil.style.display = 'none';
-    
-    // 2. Matikan status aktif di semua menu bawah
+function switchTab(activeNav, activeArea, titleText, isBackAction = false) {
+    areaDasbor.style.display = 'none'; areaRekap.style.display = 'none'; areaBelum.style.display = 'none'; areaProfil.style.display = 'none';
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('aktif'));
     
-    // 3. Tampilkan Area yang dipilih & aktifkan icon
-    activeArea.style.display = 'block';
-    activeNav.classList.add('aktif');
-    pageTitle.innerText = titleText;
-    
-    // 4. Scroll kembali ke atas secara mulus
+    activeArea.style.display = 'block'; activeNav.classList.add('aktif'); pageTitle.innerText = titleText;
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // History API (Tombol Back HP)
+    if (titleText !== "Dasbor Utama" && !isBackAction) {
+        if (!historyPushed) { window.history.pushState({ page: 'internal' }, "", ""); historyPushed = true; }
+    } else if (titleText === "Dasbor Utama") { historyPushed = false; }
 }
 
-navDasbor.addEventListener('click', (e) => {
-    e.preventDefault(); 
-    switchTab(navDasbor, areaDasbor, "Dasbor Utama");
-    areaFilterGlobal.style.display = 'flex'; 
+// Event Listener Tombol Kembali Bawaan HP
+window.addEventListener('popstate', (e) => {
+    if(areaDasbor.style.display === 'none') {
+        switchTab(navDasbor, areaDasbor, "Dasbor Utama", true);
+        areaFilterGlobal.style.display = 'flex'; 
+        if(sesiRole === "ADMIN") document.getElementById('uiFilterPetugas').style.display = 'flex'; 
+    }
 });
 
-navRekap.addEventListener('click', (e) => {
-    e.preventDefault(); 
-    switchTab(navRekap, areaRekap, "Rapor Petugas");
-    // Filter Global Tampil untuk Rapor (Perbaikan nomor 2)
+navDasbor.addEventListener('click', (e) => {
+    e.preventDefault(); switchTab(navDasbor, areaDasbor, "Dasbor Utama");
     areaFilterGlobal.style.display = 'flex'; 
-    
-    // Animasi Loading
+});
+navRekap.addEventListener('click', (e) => {
+    e.preventDefault(); switchTab(navRekap, areaRekap, "Rapor Petugas");
+    areaFilterGlobal.style.display = 'flex'; 
     document.getElementById('wadahRekap').innerHTML = `<div class="kartu-rekap"><div class="rekap-header"><span class="skeleton skeleton-text"></span></div><div class="rekap-body"><span class="skeleton" style="width:100%; height:100px; display:block; border-radius:8px;"></span></div></div>`.repeat(3);
     setTimeout(() => { tampilkanRekap(); }, 50);
 });
-
 navBelum.addEventListener('click', (e) => {
-    e.preventDefault(); 
-    switchTab(navBelum, areaBelum, "Daftar Donatur"); // Diubah nama menunya
+    e.preventDefault(); switchTab(navBelum, areaBelum, "Daftar Donatur");
     areaFilterGlobal.style.display = 'none'; 
-    
-    // Animasi Loading
     document.getElementById('wadahDaftarBelum').innerHTML = `<div class="kartu-belum"><div style="width:100%;"><span class="skeleton" style="width:80%; height:14px; margin-bottom:6px; display:block;"></span><span class="skeleton" style="width:50%; height:10px; display:block;"></span></div><div class="skeleton" style="width:38px; height:38px; border-radius:12px; flex-shrink:0;"></div></div>`.repeat(5);
     document.getElementById('wadahTombolMuat').innerHTML = "";
     setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50);
 });
-
 navProfil.addEventListener('click', (e) => {
-    e.preventDefault();
-    switchTab(navProfil, areaProfil, "Profil Pengguna");
-    areaFilterGlobal.style.display = 'none';
+    e.preventDefault(); switchTab(navProfil, areaProfil, "Profil Pengguna"); areaFilterGlobal.style.display = 'none';
 });
 
 document.getElementById('menuLogout').addEventListener('click', (e) => {
-    e.preventDefault(); 
-    localStorage.removeItem('laz_id'); 
-    localStorage.removeItem('laz_pin'); 
-    window.location.reload(); 
+    e.preventDefault(); localStorage.removeItem('laz_id'); localStorage.removeItem('laz_pin'); window.location.reload(); 
 });
-
 function hilangkanSkeleton() { document.querySelectorAll('.skeleton-mode').forEach(el => { el.classList.remove('skeleton-mode'); }); }
 
 // ==========================================
@@ -151,17 +165,17 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
         document.getElementById('idPenggunaProfil').innerText = idInput;
 
         if(sesiRole !== "ADMIN") {
-            document.getElementById('filterPetugas').style.display = 'none'; 
+            document.getElementById('uiFilterPetugas').style.display = 'none'; 
             document.getElementById('wadahFilterBelumPetugas').style.display = 'flex'; 
-            document.getElementById('filterBelumPetugas').style.display = 'none'; 
+            document.getElementById('uiFilterBelumPetugas').style.display = 'none'; 
         } else {
-            document.getElementById('filterPetugas').style.display = 'block'; 
+            document.getElementById('uiFilterPetugas').style.display = 'flex'; 
             document.getElementById('wadahFilterBelumPetugas').style.display = 'flex';
-            document.getElementById('filterBelumPetugas').style.display = 'block';
+            document.getElementById('uiFilterBelumPetugas').style.display = 'flex';
         }
 
         isiOpsiPetugas(); 
-        areaFilterGlobal.style.display = 'flex'; // Default show on Dashboard
+        areaFilterGlobal.style.display = 'flex'; 
         kalkulasiGlobalDasbor(); 
 
     } catch (e) { 
@@ -179,8 +193,17 @@ function isiOpsiPetugas() {
     let htmlLokal = sesiRole === "ADMIN" ? '<option value="Semua">SEMUA PETUGAS</option>' : '';
     
     Array.from(s).sort().forEach(n => { if(n && n!=="undefined") { htmlGlobal += `<option value="${n}">${n}</option>`; htmlLokal += `<option value="${n}">${n}</option>`; } });
+    
     filterPetugas.innerHTML = htmlGlobal; filterBelumPetugas.innerHTML = htmlLokal;
-    if(sesiRole !== "ADMIN") { filterPetugas.value = sesiNama; filterBelumPetugas.value = sesiNama; }
+    
+    if(sesiRole !== "ADMIN") { 
+        filterPetugas.value = sesiNama; filterBelumPetugas.value = sesiNama; 
+        document.getElementById('uiFilterPetugas').innerHTML = `<span>${sesiNama}</span> <i class="fas fa-chevron-down"></i>`;
+        document.getElementById('uiFilterBelumPetugas').innerHTML = `<span>${sesiNama}</span> <i class="fas fa-chevron-down"></i>`;
+    } else {
+        document.getElementById('uiFilterPetugas').innerHTML = `<span>SEMUA PETUGAS</span> <i class="fas fa-chevron-down"></i>`;
+        document.getElementById('uiFilterBelumPetugas').innerHTML = `<span>SEMUA PETUGAS</span> <i class="fas fa-chevron-down"></i>`;
+    }
 }
 
 function getPekan(t) {
@@ -195,7 +218,7 @@ function getPekan(t) {
 function kalkulasiGlobalDasbor() {
     if(!dataMaster) return;
     const fPet = sesiRole === "ADMIN" ? filterPetugas.value : sesiNama;
-    const fPekRaw = filterPekan.value; const fPek = fPekRaw === "Total Bulan Ini" ? "Total" : fPekRaw.replace("Pekan ","");
+    const fPekRaw = filterPekan.value; const fPek = fPekRaw === "Total" ? "Total" : fPekRaw.replace("Pekan ","");
     
     dataBelumDasborGlobal = []; let totalRp = 0, bIns = 0;
 
@@ -251,7 +274,7 @@ function kalkulasiGlobalDasbor() {
 function tampilkanRekap() {
     if(!dataMaster) return;
     const w = document.getElementById('wadahRekap'); w.innerHTML = "";
-    const fPek = filterPekan.value === "Total Bulan Ini" ? "Total" : filterPekan.value.replace("Pekan ","");
+    const fPek = filterPekan.value === "Total" ? "Total" : filterPekan.value.replace("Pekan ","");
     const fPet = sesiRole === "ADMIN" ? filterPetugas.value : sesiNama; 
     
     let petugasSet = new Set();
@@ -290,7 +313,7 @@ function tampilkanRekap() {
         mK.forEach(b => { let id=String(b["Nomor Register"]).trim(), sp=String(b.Spesifikasi).toUpperCase(); if(sp.includes("IKP") && !idIKP_Glob.has(id)) sisaK1++; else if(sp.includes("IIP") && !idIIP_Glob.has(id)) sisaK2++; });
         
         let sisaTot = sisaR + sisaK1 + sisaK2; let persen = kW.tot > 0 ? Math.round(((kW.tot - sisaTot) / kW.tot) * 100) : 0;
-        let pWarna = persen >= 80 ? 'var(--hijau-lime)' : (persen >= 50 ? '#FF9500' : 'var(--merah-bata)'); // iOS Orange/Red
+        let pWarna = persen >= 80 ? 'var(--hijau-lime)' : (persen >= 50 ? '#FF9500' : 'var(--merah-bata)');
 
         let cardHtml = `<div class="kartu-rekap"><div class="rekap-header"><h3>${petugas}</h3><div class="persentase" style="color: ${pWarna}">${persen}%</div></div><div class="rekap-body"><table class="tabel-rekap"><tr><th>KAT</th><th>TARGET</th><th>MASUK</th><th>BARU</th><th>SISA</th><th>NOMINAL</th></tr><tr><td>Insidental</td><td>-</td><td>${bD.ins}</td><td>${bR.ins}</td><td>-</td><td>Rp ${fmt(nO.ins)}</td></tr><tr><td>Rutin</td><td>${kW.r}</td><td>${bD.r}</td><td>${bR.r}</td><td>${renderSisaBtn(sisaR, petugas, 'RUTIN')}</td><td>Rp ${fmt(nO.r)}</td></tr><tr><td>IKP</td><td>${kW.k1}</td><td>${bD.k1}</td><td>${bR.k1}</td><td>${renderSisaBtn(sisaK1, petugas, 'IKP')}</td><td>Rp ${fmt(nO.k1)}</td></tr><tr><td>IIP</td><td>${kW.k2}</td><td>${bD.k2}</td><td>${bR.k2}</td><td>${renderSisaBtn(sisaK2, petugas, 'IIP')}</td><td>Rp ${fmt(nO.k2)}</td></tr><tr class="jumlah"><td>JUMLAH</td><td>${kW.tot}</td><td>${bD.tot}</td><td>${bR.tot}</td><td>${sisaTot}</td><td>Rp ${fmt(nO.tot)}</td></tr></table></div></div>`;
         daftarRekap.push({ persen: persen, html: cardHtml });
@@ -302,7 +325,7 @@ function tampilkanRekap() {
 }
 
 // ==========================================
-// FUNGSI 3: DAFTAR SEMUA DONATUR (TERMASUK YANG SELESAI)
+// FUNGSI 3: DAFTAR SEMUA DONATUR
 // ==========================================
 function hitungDaftarDonaturLengkap(muatLebih = false) {
     if(!dataMaster) return;
@@ -310,12 +333,11 @@ function hitungDaftarDonaturLengkap(muatLebih = false) {
 
     const fPet = sesiRole === "ADMIN" ? filterBelumPetugas.value : sesiNama;
     const fPekRaw = filterBelumPekan.value;
-    const fPek = fPekRaw === "Total Bulan Ini" ? "Total" : fPekRaw.replace("Pekan ","");
+    const fPek = fPekRaw === "Total" ? "Total" : fPekRaw.replace("Pekan ","");
     const fKat = filterJenisDonatur.value;
 
     dataSemuaMandiriLokal = [];
 
-    // Cek ID yang sudah diterima (selesai)
     let idR_Lokal = new Set(), idIKP_Lokal = new Set(), idIIP_Lokal = new Set();
     dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => { if(String(b.Spesifikasi||"").toUpperCase().includes("RUTIN")) idR_Lokal.add(String(b["Kode Donatur"]).trim()); });
     dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => {
@@ -323,7 +345,6 @@ function hitungDaftarDonaturLengkap(muatLebih = false) {
         if(sp.includes("IKP")) idIKP_Lokal.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Lokal.add(String(b["Kode Donatur"]).trim());
     });
 
-    // Ambil kewajiban
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
 
@@ -368,10 +389,7 @@ function renderDaftarKeLayar(dataList) {
         wadahTombol.innerHTML = ""; return;
     }
 
-    // Mengurutkan: Yang belum selesai di atas, yang selesai di bawah
-    dataList.sort((a, b) => {
-        return (a.selesai === b.selesai) ? 0 : a.selesai ? 1 : -1;
-    });
+    dataList.sort((a, b) => { return (a.selesai === b.selesai) ? 0 : a.selesai ? 1 : -1; });
 
     let teksBufferHTML = "";
     let dataPorsiTampil = dataList.slice(0, limitTampil);
@@ -385,7 +403,6 @@ function renderDaftarKeLayar(dataList) {
         let namaBersih = d.n.replace(/'/g, "\\'"); 
         let labelPekan = (d.pek && d.pek !== "0" && d.pek !== "undefined" && d.pek !== "") ? `Pekan ${d.pek}` : "Pekan -";
         
-        // Aturan jika selesai
         let kelasSelesai = d.selesai ? "selesai" : "";
         let styleBorder = d.selesai ? "border-left: 5px solid #E5E5EA;" : `border-left: 5px solid ${c}`;
         let badgeSelesai = d.selesai ? `<span class="badge status-selesai"><i class="fas fa-check"></i> SELESAI</span>` : "";
@@ -468,7 +485,6 @@ async function simpanPekanBaru() {
         
         if(json.status === "SUKSES") {
             tutupModalEdit(); 
-            // Panggil Custom Alert Sukses
             tampilkanAlert('sukses', 'Alhamdulillah', 'Jadwal penjemputan berhasil dipindah ke Pekan ' + pekanBaru + '!');
             eksekusiMasuk(idUser, pinUser, false); 
         } else { 
@@ -484,7 +500,7 @@ async function simpanPekanBaru() {
 }
 
 // ==========================================
-// EVENT LISTENER FILTER & REALTIME INPUT
+// EVENT LISTENER FILTER (Memantau Select Asli yg Disembunyikan)
 // ==========================================
 filterPetugas.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
 filterPekan.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
@@ -495,9 +511,7 @@ filterJenisDonatur.addEventListener('change', () => { setTimeout(() => { hitungD
 document.getElementById('inputCariDonatur').addEventListener('input', () => { hitungDaftarDonaturLengkap(false); });
 
 function inisialisasiAplikasi() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Registration Skip/Error:', err));
-    }
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Registration Skip:', err)); }
     const simpananId = localStorage.getItem('laz_id'); const simpananPin = localStorage.getItem('laz_pin');
     if (simpananId && simpananPin) { eksekusiMasuk(simpananId, simpananPin, false); } else { document.getElementById('layarLogin').style.display = 'flex'; }
 }
