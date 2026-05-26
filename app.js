@@ -250,7 +250,7 @@ function tampilkanRekap() {
 }
 
 // ==========================================
-// FUNGSI 3: DAFTAR BELUM BERDONASI
+// FUNGSI 3: DAFTAR BELUM BERDONASI (MODIFIKASI LUNAS/BELUM)
 // ==========================================
 function hitungDaftarBelumMandiri(muatLebih = false) {
     if(!dataMaster) return;
@@ -273,20 +273,27 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
 
+    // MASUKKAN SEMUA DATA & BERI PENANDA (isLunas)
     mR.forEach(b => { 
-        if(!idR_Lokal.has(String(b["Nomor Register"]).trim())) { 
-            dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:String(b["Nomor Register"]).trim(), pek:String(b.Pekan).trim()}); 
-        }
+        let id = String(b["Nomor Register"]).trim();
+        let statusLunas = idR_Lokal.has(id);
+        dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim(), isLunas: statusLunas}); 
     });
+    
     mK.forEach(b => {
         let id=String(b["Nomor Register"]).trim(), sp=String(b.Spesifikasi).toUpperCase();
-        if(sp.includes("IKP") && !idIKP_Lokal.has(id)) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IKP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim()}); } 
-        else if(sp.includes("IIP") && !idIIP_Lokal.has(id)) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim()}); }
+        if(sp.includes("IKP")) { 
+            let statusLunas = idIKP_Lokal.has(id);
+            dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IKP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim(), isLunas: statusLunas}); 
+        } 
+        else if(sp.includes("IIP")) { 
+            let statusLunas = idIIP_Lokal.has(id);
+            dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim(), isLunas: statusLunas}); 
+        }
     });
 
     let dataAkhirTerfilter = (fKat === "Semua") ? dataBelumMandiriLokal : dataBelumMandiriLokal.filter(d => d.k === fKat);
     
-    // PEMBARUAN: Logika Filter Berdasarkan Kata Kunci Pencarian Teks
     const kataKunci = inputCariDonatur.value.toLowerCase().trim();
     if (kataKunci !== "") {
         dataAkhirTerfilter = dataAkhirTerfilter.filter(d => 
@@ -295,7 +302,13 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
         );
     }
 
-    document.getElementById('totalSisaBelum').innerText = dataAkhirTerfilter.length;
+    // Hitung Sisa Aktual (Yang belum lunas)
+    let sisaAktual = dataAkhirTerfilter.filter(d => !d.isLunas).length;
+    document.getElementById('totalSisaBelum').innerText = sisaAktual;
+    
+    // Urutkan: Yang belum lunas di atas, yang sudah lunas di bawah
+    dataAkhirTerfilter.sort((a, b) => (a.isLunas === b.isLunas) ? 0 : a.isLunas ? 1 : -1);
+
     renderDaftarKeLayar(dataAkhirTerfilter);
 }
 
@@ -304,7 +317,7 @@ function renderDaftarKeLayar(dataList) {
     const wadahTombol = document.getElementById('wadahTombolMuat');
     
     if(dataList.length === 0) {
-        wadah.innerHTML = `<div style="text-align:center; padding:30px; color:#6B7280; font-weight:bold;">Tidak ada data yang ditemukan.</div>`;
+        wadah.innerHTML = `<div style="text-align:center; padding:40px 20px; color:var(--teks-pudar); font-weight:600;">Tidak ada data yang ditemukan.</div>`;
         wadahTombol.innerHTML = ""; return;
     }
 
@@ -315,24 +328,36 @@ function renderDaftarKeLayar(dataList) {
         let n = String(d.h || "").replace(/[^0-9]/g,''); if(n.startsWith('0')) n = '62' + n.substring(1);
         let p = `Assalamu'alaikum, Bapak/Ibu *${d.n}*. \n\nBagaimana kabarnya? Semoga senantiasa sehat dan penuh berkah bersama keluarga.\n\nAlhamdulillah, donasi Bapak/Ibu bulan lalu telah tersalurkan dengan baik. Terima kasih banyak atas istiqomahnya dalam kebaikan.\n\nUntuk bulan ini, saya *${d.p}* kembali siap melayani penjemputan donasi jika Bapak/Ibu sudah berkenan. Longgar hari apa dan jam berapa kira-kira, Pak/Bu?\nNanti kami sesuaikan jadwal berkunjungnya.`;
         let l = n ? `https://wa.me/${n}?text=${encodeURIComponent(p)}` : '#';
-        let c = d.k === 'RUTIN' ? '#2E5B72' : (d.k === 'IKP' ? '#B2C330' : '#4FB0C6');
-        let namaBersih = d.n.replace(/'/g, "\\'"); 
         
+        let namaBersih = d.n.replace(/'/g, "\\'"); 
         let labelPekan = (d.pek && d.pek !== "0" && d.pek !== "undefined" && d.pek !== "") ? `Pekan ${d.pek}` : "Pekan -";
         
+        // Logika Visual "Clear White" Lunas vs Belum
+        let warnaGaris = d.isLunas ? 'var(--garis-halus)' : (d.k === 'RUTIN' ? 'var(--aksen-utama)' : (d.k === 'IKP' ? '#0EA5E9' : '#8B5CF6'));
+        let warnaBadge = d.isLunas ? 'var(--garis-halus)' : warnaGaris;
+        let teksBadge = d.isLunas ? 'var(--teks-pudar)' : '#FFFFFF';
+        let warnaTeksPekan = d.isLunas ? '#9CA3AF' : '#6B7280';
+        let opacityKartu = d.isLunas ? '0.6' : '1';
+        let bgKartu = d.isLunas ? '#F9FAFB' : 'var(--bg-kartu)';
+
+        let aksiTombolWa = d.isLunas 
+            ? `<span style="background: var(--garis-halus); color: var(--teks-pudar); padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 700;"><i class="fas fa-check-circle"></i> Selesai</span>`
+            : `<a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>`;
+
         teksBufferHTML += `
-            <div class="kartu-belum" style="border-left:4px solid ${c}">
+            <div class="kartu-belum" style="border-left: 4px solid ${warnaGaris}; background-color: ${bgKartu}; opacity: ${opacityKartu};">
                 <div class="info-donatur">
                     <h4>
-                        <span class="nomor-urut">#${urutan + 1}</span> ${d.n} 
-                        <span class="badge" style="background:${c}">${d.k}</span>
-                        <span class="badge" style="background:#6B7280; margin-left:3px;">${labelPekan}</span>
+                        <span class="nomor-urut" style="color:${d.isLunas ? '#D1D5DB' : '#9CA3AF'}">#${urutan + 1}</span> 
+                        <span style="color:${d.isLunas ? '#9CA3AF' : 'var(--teks-gelap)'}">${d.n}</span> 
+                        <span class="badge" style="background:${warnaBadge}; color:${teksBadge};">${d.k}</span>
+                        <span class="badge" style="background:${d.isLunas ? '#F3F4F6' : '#F3F4F6'}; color:${warnaTeksPekan}; margin-left:3px;">${labelPekan}</span>
                     </h4>
-                    <p>${d.a}</p>
+                    <p style="color:${d.isLunas ? '#D1D5DB' : 'var(--teks-pudar)'}">${d.a}</p>
                 </div>
                 <div class="grup-tombol">
-                    <button class="btn-edit" onclick="bukaModalEdit('${namaBersih}', '${d.r}', '${d.pek}')"><i class="fas fa-calendar-alt"></i></button>
-                    <a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
+                    <button class="btn-edit" style="background: ${d.isLunas ? '#F3F4F6' : 'var(--bg-utama)'}; color: ${d.isLunas ? '#9CA3AF' : 'var(--teks-gelap)'};" onclick="bukaModalEdit('${namaBersih}', '${d.r}', '${d.pek}')"><i class="fas fa-calendar-alt"></i></button>
+                    ${aksiTombolWa}
                 </div>
             </div>`;
     });
@@ -341,84 +366,3 @@ function renderDaftarKeLayar(dataList) {
     if(dataList.length > limitTampil) { wadahTombol.innerHTML = `<button class="btn-muat-banyak" onclick="aksiMuatLebihBanyak()">Muat Lebih Banyak... (${dataList.length - limitTampil} Sisa)</button>`; } 
     else { wadahTombol.innerHTML = ""; }
 }
-
-function aksiMuatLebihBanyak() { limitTampil += 50; hitungDaftarBelumMandiri(true); }
-
-// ==========================================
-// UTILITAS (GRAFIK, UNDUH, EDIT)
-// ==========================================
-function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
-    const ctx = document.getElementById('grafikUtama').getContext('2d'); if(grafikUtama) grafikUtama.destroy();
-    grafikUtama = new Chart(ctx, {
-        type:'bar', data:{ labels:['Rutin','IKP','IIP', 'Insidental'], datasets:[{ label:'Terjemput', data:[bR, b1, b2, bIns], backgroundColor:['#2E5B72','#B2C330','#4FB0C6', '#2E5B72'], borderWidth:1, borderColor:'#fff' },{ label:'Sisa', data:[sR, s1, s2, 0], backgroundColor:'#E5E7EB', borderWidth:1, borderColor:'#fff' }] },
-        options:{ responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true}, y:{stacked:true, beginAtZero:true}}, plugins:{legend:{display:false}} }
-    });
-}
-
-window.downloadSisaRekap = function(petugas_param, kategori) {
-    if (sesiRole !== "ADMIN") return; 
-    
-    let finalPetugas = sesiRole === "ADMIN" ? petugas_param : sesiNama;
-    let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && (finalPetugas === "Semua" || d.p === finalPetugas));
-    if(dataF.length === 0) { alert("Data kosong. Tidak ada sisa " + kategori + " untuk pencarian ini."); return; }
-    let csvContent = "Nama Donatur,Kategori,Alamat,No HP,Nama Petugas\n";
-    dataF.forEach(d => { csvContent += `"${String(d.n).replace(/"/g, '""')}"`+`,`+`"${String(d.k).replace(/"/g, '""')}"`+`,`+`"${String(d.a).replace(/"/g, '""')}"`+`,`+`"${String(d.h||"").replace(/"/g, '""')}"`+`,`+`"${String(d.p).replace(/"/g, '""')}"\n`; });
-    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const link = document.createElement("a");
-    link.setAttribute("href", url); link.setAttribute("download", `Sisa_${kategori}_${finalPetugas}_${filterPekan.value}.csv`.replace(/ /g, "_"));
-    link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-};
-
-function bukaModalEdit(nama, reg, pekanSaatIni) {
-    document.getElementById('namaDonaturEdit').innerText = nama;
-    document.getElementById('regDonaturEdit').value = reg;
-    
-    let sel = document.getElementById('pilihanPekanBaru');
-    if(pekanSaatIni == "1" || pekanSaatIni == "2" || pekanSaatIni == "3" || pekanSaatIni == "4") { sel.value = pekanSaatIni; } else { sel.value = "1"; }
-    document.getElementById('modalEditPekan').style.display = 'flex';
-}
-
-function tutupModalEdit() { document.getElementById('modalEditPekan').style.display = 'none'; }
-
-async function simpanPekanBaru() {
-    const reg = document.getElementById('regDonaturEdit').value;
-    const pekanBaru = document.getElementById('pilihanPekanBaru').value;
-    const btn = document.getElementById('btnSimpanPekan');
-
-    btn.innerText = "Menyimpan..."; btn.disabled = true;
-
-    const idUser = localStorage.getItem('laz_id'); const pinUser = localStorage.getItem('laz_pin');
-    const formData = new URLSearchParams(); formData.append('action', 'update_pekan'); formData.append('id', idUser); formData.append('pin', pinUser); formData.append('reg', reg); formData.append('pekan', pekanBaru);
-
-    try {
-        const res = await fetch(SCRIPT_URL, { method: 'POST', body: formData }); const json = await res.json();
-        
-        if(json.status === "SUKSES") {
-            alert("Alhamdulillah, jadwal penjemputan berhasil dipindah ke Pekan " + pekanBaru + "!");
-            tutupModalEdit(); eksekusiMasuk(idUser, pinUser, false); 
-        } else { alert("Gagal: " + json.pesan); }
-    } catch(e) { alert("Gagal menghubungi server. Pastikan internet Anda lancar."); }
-    
-    btn.innerText = "Simpan"; btn.disabled = false;
-}
-
-// ==========================================
-// EVENT LISTENER FILTER & PENCARIAN
-// ==========================================
-filterPetugas.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
-filterPekan.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
-filterBelumPetugas.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
-filterBelumPekan.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
-filterJenisDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
-
-// PEMBARUAN: Deteksi ketikan secara Real-time pada Kotak Pencarian
-inputCariDonatur.addEventListener('input', () => { 
-    limitTampil = 50; // Reset porsi tampilan ke 50 setiap kali mencari teks baru
-    hitungDaftarBelumMandiri(false); 
-});
-
-function inisialisasiAplikasi() {
-    const simpananId = localStorage.getItem('laz_id'); const simpananPin = localStorage.getItem('laz_pin');
-    if (simpananId && simpananPin) { eksekusiMasuk(simpananId, simpananPin, false); } else { document.getElementById('layarLogin').style.display = 'flex'; }
-}
-
-inisialisasiAplikasi();
