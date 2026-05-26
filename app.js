@@ -28,6 +28,7 @@ const filterPekan = document.getElementById('filterPekan');
 const filterBelumPetugas = document.getElementById('filterBelumPetugas');
 const filterBelumPekan = document.getElementById('filterBelumPekan');
 const filterJenisDonatur = document.getElementById('filterJenisDonatur');
+const filterStatusDonatur = document.getElementById('filterStatusDonatur'); // Tambahan Baru
 
 // ==========================================
 // LOGIKA CUSTOM DROPDOWN (FILTER)
@@ -54,7 +55,7 @@ function pilihOpsiFilter(selectId, value, text, uiId) {
     selectElement.value = value;
     
     // Update Teks di Tombol UI
-    document.getElementById(uiId).innerHTML = `<span>${text}</span> <i class="fas fa-chevron-down"></i>`;
+    document.getElementById(uiId).innerHTML = `<span>${text}</span> <i class="fas fa-chevron-down" style="font-size:10px;"></i>`;
     
     // Tutup Modal
     document.getElementById('modalPilihan').style.display = 'none';
@@ -335,6 +336,7 @@ function hitungDaftarDonaturLengkap(muatLebih = false) {
     const fPekRaw = filterBelumPekan.value;
     const fPek = fPekRaw === "Total" ? "Total" : fPekRaw.replace("Pekan ","");
     const fKat = filterJenisDonatur.value;
+    const fStat = filterStatusDonatur.value; // Filter Status Penjemputan Baru
 
     dataSemuaMandiriLokal = [];
 
@@ -365,8 +367,21 @@ function hitungDaftarDonaturLengkap(muatLebih = false) {
         }
     });
 
-    let dataAkhirTerfilter = (fKat === "Semua") ? dataSemuaMandiriLokal : dataSemuaMandiriLokal.filter(d => d.k === fKat);
+    let dataAkhirTerfilter = dataSemuaMandiriLokal;
     
+    // Terapkan Filter Kategori
+    if(fKat !== "Semua") {
+        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.k === fKat);
+    }
+    
+    // Terapkan Filter Status Baru (Sudah / Belum)
+    if(fStat === "Sudah") {
+        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.selesai === true);
+    } else if(fStat === "Belum") {
+        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.selesai === false);
+    }
+    
+    // Terapkan Kolom Pencarian
     const kataKunci = document.getElementById('inputCariDonatur').value.toLowerCase().trim();
     if(kataKunci) {
         dataAkhirTerfilter = dataAkhirTerfilter.filter(d => 
@@ -507,6 +522,7 @@ filterPekan.addEventListener('change', () => { setTimeout(() => { kalkulasiGloba
 filterBelumPetugas.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
 filterBelumPekan.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
 filterJenisDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
+filterStatusDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); }); // Event Listener Status Baru
 
 document.getElementById('inputCariDonatur').addEventListener('input', () => { hitungDaftarDonaturLengkap(false); });
 
