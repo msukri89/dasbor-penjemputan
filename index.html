@@ -131,11 +131,20 @@
             <div class="header-halaman flex-header">
                 <h2>Total: <span id="totalSemuaDonatur">0</span></h2>
                 
-                <select id="filterJenisDonatur" style="display:none;">
-                    <option value="Semua">SEMUA KAT</option><option value="RUTIN">RUTIN</option>
-                    <option value="IKP">IKP</option><option value="IIP">IIP</option>
-                </select>
-                <div id="uiFilterJenis" class="dropdown-kecil custom-select-trigger lokal" style="flex:none; padding:8px 12px; font-size:12px; border-radius:10px;" onclick="bukaModalPilih('filterJenisDonatur', 'Kategori', 'uiFilterJenis')"><span>SEMUA KAT</span> <i class="fas fa-chevron-down" style="font-size:10px;"></i></div>
+                <div style="display: flex; gap: 6px;">
+                    <select id="filterStatusDonatur" style="display:none;">
+                        <option value="Semua">SEMUA STATUS</option>
+                        <option value="Belum">BELUM SELESAI</option>
+                        <option value="Sudah">SUDAH SELESAI</option>
+                    </select>
+                    <div id="uiFilterStatus" class="dropdown-kecil custom-select-trigger lokal" style="flex:none; padding:6px 10px; font-size:11px; border-radius:10px;" onclick="bukaModalPilih('filterStatusDonatur', 'Status Penjemputan', 'uiFilterStatus')"><span>SEMUA STATUS</span> <i class="fas fa-chevron-down" style="font-size:10px;"></i></div>
+
+                    <select id="filterJenisDonatur" style="display:none;">
+                        <option value="Semua">SEMUA KAT</option><option value="RUTIN">RUTIN</option>
+                        <option value="IKP">IKP</option><option value="IIP">IIP</option>
+                    </select>
+                    <div id="uiFilterJenis" class="dropdown-kecil custom-select-trigger lokal" style="flex:none; padding:6px 10px; font-size:11px; border-radius:10px;" onclick="bukaModalPilih('filterJenisDonatur', 'Kategori', 'uiFilterJenis')"><span>SEMUA KAT</span> <i class="fas fa-chevron-down" style="font-size:10px;"></i></div>
+                </div>
             </div>
             
             <div id="wadahDaftarBelum"></div>
