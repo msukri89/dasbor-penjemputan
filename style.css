@@ -1,116 +1,53 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 :root {
-    /* Identitas Asli Anda */
-    --biru-petrol: #2E5B72;
-    --biru-muda: #4FB0C6;
-    --hijau-lime: #B2C330;
-    
-    /* Warna Netral untuk Clear White UI */
-    --warna-putih: #F9FAFB; /* Background layar yang sangat bersih */
-    --warna-hitam: #111827; /* Hitam pekat untuk teks bacaan utama */
-    --warna-abu: #E5E7EB;   /* Abu-abu garis batas (halus) */
-    --teks-pudar: #6B7280;  /* Sub-teks */
-    --merah-bata: #EF4444;
-    --hijau-baru: #10B981;
+    --warna-putih: #F3F4F6;
+    --warna-putih-kartu: #FFFFFF; 
+    --biru-petrol: #2E5B72;      /* Warna Rutin */
+    --biru-muda: #4FB0C6;        /* Warna Kewajiban */
+    --hijau-lime: #B2C330;       /* Warna Berhasil & Pemasukan */
+    --warna-hitam: #1A1A1A;
+    --warna-abu: #E5E7EB;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
-body { background-color: var(--warna-putih); color: var(--warna-hitam); font-size: 13px; overflow-x: hidden; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+body { background-color: var(--warna-putih); color: var(--warna-hitam); }
 
-/* OVERLAY & SIDEBAR (Tetap elegan) */
-.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17, 24, 39, 0.4); display: none; z-index: 999; backdrop-filter: blur(2px); }
-.overlay.terbuka { display: block; }
-
-.sidebar { position: fixed; top: 0; left: -100%; width: 65%; max-width: 280px; height: 100vh; background: white; z-index: 1000; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 24px rgba(0,0,0,0.06); }
+/* Sidebar & Topbar */
+.sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100vh; background: white; box-shadow: 4px 0 10px rgba(0,0,0,0.1); transition: 0.3s; z-index: 1000; }
 .sidebar.terbuka { left: 0; }
-.sidebar-header { display: flex; align-items: center; padding: 20px 15px; border-bottom: 1px solid var(--warna-abu); justify-content: space-between; }
-.close-btn { background: none; border: none; font-size: 20px; color: var(--teks-pudar); cursor: pointer; }
-.menu-list { list-style: none; padding: 10px 0; }
-.menu-list li a { display: flex; align-items: center; gap: 12px; padding: 14px 20px; text-decoration: none; color: var(--teks-pudar); font-weight: 600; font-size: 14px; }
-.menu-list li a i { font-size: 18px; width: 20px; text-align: center; }
-.menu-list li a.aktif { background: #F0F4F8; color: var(--biru-petrol); border-right: 3px solid var(--biru-petrol); }
+.sidebar-header { display: flex; align-items: center; padding: 20px; border-bottom: 1px solid #eee; justify-content: space-between; }
+.menu-list { list-style: none; padding: 20px 0; }
+.menu-list li a { display: block; padding: 15px 20px; text-decoration: none; color: var(--warna-hitam); font-weight: 500; }
+.menu-list li a.aktif { background: var(--biru-petrol); color: white; }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
+.overlay.terbuka { display: block; }
+.topbar { display: flex; align-items: center; padding: 15px 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.burger-btn { background: none; border: none; font-size: 24px; cursor: pointer; margin-right: 15px; color: var(--biru-petrol); }
 
-/* TOPBAR */
-.topbar { display: flex; align-items: center; padding: 16px 15px; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--warna-abu); }
-.burger-btn { background: none; border: none; font-size: 20px; cursor: pointer; margin-right: 15px; color: var(--biru-petrol); }
-.page-title { font-size: 16px; font-weight: 700; color: var(--warna-hitam); }
+/* Filter */
+.filter-area { display: flex; gap: 10px; padding: 20px; }
+.dropdown-aksen { flex: 1; padding: 12px; background: var(--biru-petrol); color: white; border: none; border-radius: 8px; font-weight: bold; outline: none; }
 
-/* KONTROL & FILTER (Pill shape) */
-.filter-area, .filter-area-lokal { display: flex; gap: 10px; padding: 16px 15px; }
-.dropdown-aksen, .dropdown-lokal, .dropdown-kecil { flex: 1; padding: 10px 12px; background: white; color: var(--biru-petrol); border: 1px solid var(--biru-petrol); border-radius: 8px; font-weight: 600; font-size: 12px; outline: none; box-shadow: 0 2px 4px rgba(46, 91, 114, 0.05); }
+/* Summary Cards - Desain Warna Sesuai Request */
+.summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px; margin-bottom: 25px; }
+.card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-top: 5px solid transparent; }
+.card h3 { font-size: 11px; color: #6B7280; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+.card h2 { font-size: 18px; font-weight: 800; }
 
-/* KOTAK PENCARIAN (Clear style) */
-.search-wrapper { position: relative; display: flex; align-items: center; margin: 0 15px 16px 15px; }
-.search-icon { position: absolute; left: 14px; color: var(--teks-pudar); font-size: 14px; }
-.input-cari { width: 100%; padding: 12px 14px 12px 40px; border: 1px solid var(--warna-abu); border-radius: 12px; font-size: 13px; outline: none; transition: 0.2s; color: var(--warna-hitam); background: white; font-weight: 500; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-.input-cari:focus { border-color: var(--biru-muda); box-shadow: 0 0 0 3px rgba(79, 176, 198, 0.15); }
+.card-petrol { border-top-color: var(--biru-petrol); }
+.card-muda { border-top-color: var(--biru-muda); }
+.card-lime { border-top-color: var(--hijau-lime); }
 
-/* SUMMARY CARDS DASBOR (Bayangan Halus & Sudut Lengkung) */
-.summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 15px; margin-bottom: 24px; }
-.card { background: white; padding: 18px 10px; border-radius: 16px; text-align: center; border: 1px solid var(--warna-abu); box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; overflow: hidden; }
-.card h3 { position: relative; z-index: 2; font-size: 10px; color: var(--teks-pudar); text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
-.card h2 { position: relative; z-index: 2; font-size: 18px; font-weight: 800; color: var(--warna-hitam); word-break: break-word; }
-.watermark-icon { position: absolute; right: -5px; bottom: -5px; font-size: 45px; opacity: 0.05; pointer-events: none; z-index: 1; }
+/* Charts */
+.charts-area { padding: 0 20px; }
+.chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+.chart-container h3 { margin-bottom: 5px; font-size: 15px; text-align: center; color: var(--biru-petrol); }
 
-.card-muda { border-top: 4px solid var(--biru-muda); } .card-muda .watermark-icon { color: var(--biru-muda); }
-.card-lime { border-top: 4px solid var(--hijau-lime); } .card-lime .watermark-icon { color: var(--hijau-lime); }
-
-.teks-baru { position: relative; z-index: 2; font-size: 12px; font-weight: 700; color: var(--hijau-baru); margin-top: 6px; }
-.teks-sisa-statis { position: relative; z-index: 2; font-size: 12px; font-weight: 600; color: var(--merah-bata); margin-top: 2px; }
-
-/* AREA GRAFIK */
-.charts-area { padding: 0 15px; margin-bottom: 24px; }
-.chart-container { background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--warna-abu); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-.chart-container h3 { margin-bottom: 16px; font-size: 14px; text-align: center; color: var(--biru-petrol); font-weight: 700; }
-
-/* HEADER HALAMAN */
-.header-halaman { margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-.header-halaman.flex-header { background: #F3F4F6; padding: 10px 15px; border-radius: 10px; margin-top: 5px; }
-.header-halaman h2 { font-size: 14px; color: var(--biru-petrol); font-weight: 700; }
-
-/* DAFTAR BELUM BERDONASI (Garis Kiri Disesuaikan, Card Bersih) */
-.kartu-belum { background: white; padding: 16px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--warna-abu); box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: opacity 0.2s; }
-.info-donatur h4 { font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; color: var(--warna-hitam); font-weight: 600; }
-.info-donatur p { font-size: 12px; color: var(--teks-pudar); line-height: 1.4; padding-left: 26px; }
-.nomor-urut { color: var(--teks-pudar); font-weight: 700; font-family: 'Inter', monospace; display: inline-block; width: 20px; }
-.badge { font-size: 9px; padding: 4px 8px; border-radius: 6px; color: white; font-weight: 700; }
-.grup-tombol { display: flex; gap: 8px; align-items: center; }
-.btn-wa { background: #25D366; color: white; width: 38px; height: 38px; border-radius: 10px; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 18px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.2); }
-.btn-edit { background: #EAB308; color: white; width: 38px; height: 38px; border-radius: 10px; display: flex; justify-content: center; align-items: center; border: none; font-size: 14px; flex-shrink: 0; cursor: pointer; box-shadow: 0 2px 6px rgba(234, 179, 8, 0.2); }
-
-.btn-muat-banyak { background: white; color: var(--biru-petrol); border: 1px solid var(--warna-abu); padding: 12px 24px; border-radius: 20px; font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03); transition: 0.2s; display: inline-block; }
-.btn-muat-banyak:active { background: var(--warna-abu); }
-
-/* RAPOR PRIBADI */
-.kartu-rekap { background: white; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--warna-abu); box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden; }
-.rekap-header { background: var(--biru-petrol); color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--biru-muda); }
-.rekap-header h3 { font-size: 15px; margin: 0; font-weight: 700; text-transform: uppercase; }
-.rekap-header .persentase { font-size: 16px; font-weight: 800; background: white; color: var(--biru-petrol); padding: 4px 10px; border-radius: 8px; }
-.rekap-body { padding: 16px; overflow-x: auto; }
-
-.tabel-rekap { width: 100%; border-collapse: collapse; font-size: 12px; text-align: right; }
-.tabel-rekap th { padding: 10px 4px; text-align: right; color: var(--teks-pudar); font-weight: 700; border-bottom: 2px solid var(--warna-abu); font-size: 10px; text-transform: uppercase; }
-.tabel-rekap th:first-child { text-align: left; }
-.tabel-rekap td { padding: 14px 4px; border-bottom: 1px solid #F9FAFB; color: var(--warna-hitam); }
-.tabel-rekap td:first-child { text-align: left; font-weight: 600; color: var(--biru-petrol); }
-.tabel-rekap tr.jumlah td { font-weight: 800; font-size: 13px; color: var(--biru-petrol); border-top: 2px solid var(--biru-petrol); padding-top: 16px; border-bottom: none; }
-
-.btn-sisa-rekap { background: #FEF2F2; color: var(--merah-bata); border: none; padding: 6px 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 11px; display: inline-block; transition: 0.2s; }
-
-/* LAYAR LOGIN */
-.login-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--biru-petrol); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-.login-box { background: white; width: 90%; max-width: 360px; padding: 40px 24px; border-radius: 24px; box-shadow: 0 16px 40px rgba(0,0,0,0.2); text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-.login-box h2 { color: var(--biru-petrol); margin-bottom: 8px; font-size: 20px; font-weight: 800; }
-.login-box p { color: var(--teks-pudar); font-size: 13px; margin-bottom: 30px; }
-.input-login { width: 100%; padding: 14px 16px; margin-bottom: 16px; border: 1px solid var(--warna-abu); border-radius: 12px; font-size: 14px; outline: none; text-align: center; background: #F9FAFB; transition: 0.2s; font-weight: 600; }
-.input-login:focus { border-color: var(--biru-muda); background: white; box-shadow: 0 0 0 3px rgba(79, 176, 198, 0.15); }
-.btn-masuk { width: 100%; padding: 14px; background: var(--hijau-lime); color: var(--biru-petrol); border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(178, 195, 48, 0.3); transition: 0.2s; margin-top: 10px; }
-.pesan-error { color: var(--merah-bata); font-size: 12px; margin-bottom: 12px; font-weight: 600; min-height: 16px; }
-
-/* SKELETON */
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-.skeleton { background-color: var(--warna-abu); background-image: linear-gradient(90deg, var(--warna-abu) 25%, #FFFFFF 50%, var(--warna-abu) 75%); background-size: 200% 100%; animation: shimmer 2s infinite linear; border-radius: 6px; display: inline-block; }
-.skeleton-text { width: 60px; height: 18px; margin: 0 auto; }
-.skeleton-mode { background-color: var(--warna-abu) !important; background-image: linear-gradient(90deg, var(--warna-abu) 25%, #FFFFFF 50%, var(--warna-abu) 75%) !important; background-size: 200% 100% !important; animation: shimmer 2s infinite linear !important; border-color: transparent !important; box-shadow: none !important; color: transparent !important; pointer-events: none !important; }
-.skeleton-mode > * { visibility: hidden !important; }
+/* Belum Berdonasi */
+.header-halaman { padding: 0 20px; margin: 10px 0 15px 0; display: flex; justify-content: space-between; align-items: center; }
+.dropdown-kecil { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--biru-petrol); color: var(--biru-petrol); font-weight: bold; }
+.kartu-belum { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.badge { font-size: 9px; padding: 2px 8px; border-radius: 10px; color: white; font-weight: bold; }
+.badge-rutin { background: var(--biru-petrol); }
+.badge-ikp { background: var(--hijau-lime); }
+.badge-iip { background: var(--biru-muda); }
+.btn-wa { background: #25D366; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 20px; }

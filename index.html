@@ -8,18 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="logo.png">
-    
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log("PWA Aktif!"))
-            .catch(err => console.log("PWA Gagal:", err));
-        });
-      }
-    </script>
-    
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -27,7 +16,7 @@
     <div id="layarLogin" class="login-wrapper">
         <div class="login-box">
             <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-                <img src="logo.png" alt="Logo LAZ Sidogiri" style="height: 60px; border-radius: 8px;">
+                <img src="logo.png" alt="Logo LAZ Sidogiri" style="height: 60px;">
             </div>
             <h2>SISTEM PETUGAS</h2>
             <p>Silakan masukkan identitas Anda</p>
@@ -41,7 +30,7 @@
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <div style="display: flex; align-items: center;">
-                <h3 style="color: var(--biru-petrol);">LAZ SIDOGIRI</h3>
+                <img src="logo.png" alt="Logo" style="height: 30px; margin-right: 8px;">
             </div>
             <button id="closeSidebar" class="close-btn"><i class="fas fa-times"></i></button>
         </div>
@@ -171,6 +160,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=4"></script>
+    <script src="app.js"></script>
 </body>
 </html>

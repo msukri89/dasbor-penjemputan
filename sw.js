@@ -1,14 +1,14 @@
-const CACHE_NAME = 'dasbor-v7-clearwhite'; 
+const CACHE_NAME = 'dasbor-v3';
 const urlsToCache = [
   './',
   './index.html',
-  './style.css?v=4', 
-  './app.js?v=4',
+  './style.css',
+  './app.js',
   './manifest.json'
 ];
 
+// Menyimpan tampilan ke memori HP saat pertama kali diinstal
 self.addEventListener('install', event => {
-  self.skipWaiting(); 
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(urlsToCache);
@@ -16,27 +16,11 @@ self.addEventListener('install', event => {
   );
 });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName); 
-          }
-        })
-      );
-    }).then(() => self.clients.claim()) 
-  );
-});
-
+// Menggunakan memori yang tersimpan agar loading cepat
 self.addEventListener('fetch', event => {
-  // PERBAIKAN: Jangan pernah simpan data Google Script ke dalam Cache!
-  if (event.request.url.includes('script.google.com') || event.request.url.includes('script.googleusercontent.com')) {
-    return; // Biarkan langsung mengambil data asli dari internet
-  }
-  
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
   );
 });
