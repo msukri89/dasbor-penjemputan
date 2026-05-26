@@ -32,47 +32,59 @@
             <h1 id="pageTitle" class="page-title">Dasbor Utama</h1>
         </header>
 
-        <div id="areaDasbor">
-            <div id="areaFilterGlobal" class="filter-area">
-                <select id="filterPetugas" class="dropdown-aksen skeleton-mode"><option value="Semua">SEMUA PETUGAS</option></select>
-                <select id="filterPekan" class="dropdown-aksen skeleton-mode">
-                    <option value="Total">TOTAL BULAN INI</option>
-                    <option value="Pekan 1">PEKAN 1</option><option value="Pekan 2">PEKAN 2</option>
-                    <option value="Pekan 3">PEKAN 3</option><option value="Pekan 4">PEKAN 4</option>
-                </select>
-            </div>
+        <div id="areaFilterGlobal" class="filter-area" style="display:none;">
+            <select id="filterPetugas" class="dropdown-aksen skeleton-mode"><option value="Semua">SEMUA PETUGAS</option></select>
+            <select id="filterPekan" class="dropdown-aksen skeleton-mode">
+                <option value="Total">TOTAL BULAN INI</option>
+                <option value="Pekan 1">PEKAN 1</option><option value="Pekan 2">PEKAN 2</option>
+                <option value="Pekan 3">PEKAN 3</option><option value="Pekan 4">PEKAN 4</option>
+            </select>
+        </div>
 
+        <div id="areaDasbor">
             <div class="summary-cards">
                 <div class="card card-lime skeleton-mode">
-                    <div class="card-icon-wrapper" style="color: var(--hijau-lime); background: #f3f7e6;"><i class="fas fa-chart-pie"></i></div>
-                    <h3>PERSENTASE</h3><h2 id="teksPersentase">0%</h2>
+                    <i class="fas fa-chart-pie watermark-icon" style="color: var(--hijau-lime);"></i>
+                    <div class="card-content">
+                        <h3>PERSENTASE</h3><h2 id="teksPersentase">0%</h2>
+                    </div>
                 </div>
                 <div class="card card-lime skeleton-mode">
-                    <div class="card-icon-wrapper" style="color: var(--hijau-lime); background: #f3f7e6;"><i class="fas fa-hand-holding-heart"></i></div>
-                    <h3>TERJEMPUT</h3><h2 id="teksBerhasil">0</h2>
+                    <i class="fas fa-hand-holding-heart watermark-icon" style="color: var(--hijau-lime);"></i>
+                    <div class="card-content">
+                        <h3>TERJEMPUT</h3><h2 id="teksBerhasil">0</h2>
+                    </div>
                 </div>
                 <div class="card card-lime card-full skeleton-mode">
-                    <div class="card-icon-wrapper" style="color: var(--hijau-lime); background: #f3f7e6;"><i class="fas fa-wallet"></i></div>
-                    <h3>PEMASUKAN</h3><h2 id="teksPemasukan">Rp 0</h2>
+                    <i class="fas fa-wallet watermark-icon" style="color: var(--hijau-lime);"></i>
+                    <div class="card-content">
+                        <h3>PEMASUKAN</h3><h2 id="teksPemasukan">Rp 0</h2>
+                    </div>
                 </div>
                 
                 <div class="card card-muda skeleton-mode">
-                    <div class="card-icon-wrapper" style="color: var(--biru-muda); background: #eaf6f8;"><i class="fas fa-user-clock"></i></div>
-                    <h3>RUTIN</h3>
-                    <h2 id="teksRutin">0</h2>
-                    <div class="keterangan-bawah"><span id="teksBaruRutin" class="teks-baru">+0</span> | <span id="teksSisaRutin" class="teks-sisa-statis">-0</span></div>
+                    <i class="fas fa-user-clock watermark-icon" style="color: var(--biru-muda);"></i>
+                    <div class="card-content">
+                        <h3>RUTIN</h3>
+                        <h2 id="teksRutin">0</h2>
+                        <div class="keterangan-bawah"><span id="teksBaruRutin" class="teks-baru">+0</span> | <span id="teksSisaRutin" class="teks-sisa-statis">-0</span></div>
+                    </div>
                 </div>
                 <div class="card card-muda skeleton-mode">
-                    <div class="card-icon-wrapper" style="color: var(--biru-muda); background: #eaf6f8;"><i class="fas fa-box"></i></div>
-                    <h3>IKP</h3>
-                    <h2 id="teksIKP">0</h2>
-                    <div class="keterangan-bawah"><span id="teksBaruIKP" class="teks-baru">+0</span> | <span id="teksSisaIKP" class="teks-sisa-statis">-0</span></div>
+                    <i class="fas fa-box watermark-icon" style="color: var(--biru-muda);"></i>
+                    <div class="card-content">
+                        <h3>IKP</h3>
+                        <h2 id="teksIKP">0</h2>
+                        <div class="keterangan-bawah"><span id="teksBaruIKP" class="teks-baru">+0</span> | <span id="teksSisaIKP" class="teks-sisa-statis">-0</span></div>
+                    </div>
                 </div>
                 <div class="card card-muda card-full skeleton-mode">
-                    <div class="card-icon-wrapper" style="color: var(--biru-muda); background: #eaf6f8;"><i class="fas fa-store"></i></div>
-                    <h3>IIP</h3>
-                    <h2 id="teksIIP">0</h2>
-                    <div class="keterangan-bawah"><span id="teksBaruIIP" class="teks-baru">+0</span> | <span id="teksSisaIIP" class="teks-sisa-statis">-0</span></div>
+                    <i class="fas fa-store watermark-icon" style="color: var(--biru-muda);"></i>
+                    <div class="card-content">
+                        <h3>IIP</h3>
+                        <h2 id="teksIIP">0</h2>
+                        <div class="keterangan-bawah"><span id="teksBaruIIP" class="teks-baru">+0</span> | <span id="teksSisaIIP" class="teks-sisa-statis">-0</span></div>
+                    </div>
                 </div>
             </div>
             
@@ -104,7 +116,7 @@
             </div>
             
             <div class="header-halaman flex-header">
-                <h2>Sisa: <span id="totalSisaBelum">0</span></h2>
+                <h2>Total: <span id="totalSemuaDonatur">0</span></h2>
                 <select id="filterJenisDonatur" class="dropdown-kecil">
                     <option value="Semua">SEMUA KAT</option><option value="RUTIN">RUTIN</option>
                     <option value="IKP">IKP</option><option value="IIP">IIP</option>
@@ -149,7 +161,7 @@
             <i class="fas fa-users"></i><span>Rapor</span>
         </a>
         <a href="#" id="navBelum" class="nav-item">
-            <i class="fas fa-list-ul"></i><span>Sisa</span>
+            <i class="fas fa-list-ul"></i><span>Daftar</span>
         </a>
         <a href="#" id="navProfil" class="nav-item">
             <i class="fas fa-user"></i><span>Profil</span>
@@ -170,6 +182,15 @@
                 <button onclick="tutupModalEdit()" class="btn-batal">Batal</button>
                 <button id="btnSimpanPekan" onclick="simpanPekanBaru()" class="btn-simpan">Simpan</button>
             </div>
+        </div>
+    </div>
+    
+    <div id="modalAlert" class="overlay" style="display: none; z-index: 10001;">
+        <div class="modal-box">
+            <div id="iconAlert" style="font-size: 40px; margin-bottom: 10px;"></div>
+            <h3 id="judulAlert" style="margin-bottom: 10px;"></h3>
+            <p id="pesanAlert" style="font-size: 14px; color: #8E8E93; margin-bottom: 20px;"></p>
+            <button onclick="tutupAlert()" class="btn-simpan" style="width: 100%;">Tutup</button>
         </div>
     </div>
 
