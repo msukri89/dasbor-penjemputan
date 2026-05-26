@@ -2,7 +2,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Dcig9_jLXMp5z2cAj
 let dataMaster = null; let grafikUtama = null;
 
 let dataBelumDasborGlobal = []; 
-let dataBelumMandiriLokal = [];
+let dataSemuaMandiriLokal = []; // Diganti namanya karena menampung semua donatur
 let limitTampil = 50;
 
 let sesiRole = ""; let sesiNama = "";
@@ -27,6 +27,30 @@ const filterPekan = document.getElementById('filterPekan');
 const filterBelumPetugas = document.getElementById('filterBelumPetugas');
 const filterBelumPekan = document.getElementById('filterBelumPekan');
 const filterJenisDonatur = document.getElementById('filterJenisDonatur');
+
+// ==========================================
+// LOGIKA ALERT CUSTOM
+// ==========================================
+function tampilkanAlert(tipe, judul, pesan) {
+    const modal = document.getElementById('modalAlert');
+    const icon = document.getElementById('iconAlert');
+    const judulEl = document.getElementById('judulAlert');
+    const pesanEl = document.getElementById('pesanAlert');
+    
+    if(tipe === 'sukses') {
+        icon.innerHTML = '<i class="fas fa-check-circle" style="color: #34C759;"></i>';
+    } else {
+        icon.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #FF3B30;"></i>';
+    }
+    
+    judulEl.innerText = judul;
+    pesanEl.innerText = pesan;
+    modal.style.display = 'flex';
+}
+
+function tutupAlert() {
+    document.getElementById('modalAlert').style.display = 'none';
+}
 
 // ==========================================
 // LOGIKA NAVIGASI BOTTOM MENU (TAB SWITCHER)
@@ -54,14 +78,13 @@ navDasbor.addEventListener('click', (e) => {
     e.preventDefault(); 
     switchTab(navDasbor, areaDasbor, "Dasbor Utama");
     areaFilterGlobal.style.display = 'flex'; 
-    if(sesiRole === "ADMIN") filterPetugas.style.display = 'block'; 
 });
 
 navRekap.addEventListener('click', (e) => {
     e.preventDefault(); 
     switchTab(navRekap, areaRekap, "Rapor Petugas");
+    // Filter Global Tampil untuk Rapor (Perbaikan nomor 2)
     areaFilterGlobal.style.display = 'flex'; 
-    if(sesiRole === "ADMIN") { filterPetugas.style.display = 'block'; } else { filterPetugas.style.display = 'none'; }
     
     // Animasi Loading
     document.getElementById('wadahRekap').innerHTML = `<div class="kartu-rekap"><div class="rekap-header"><span class="skeleton skeleton-text"></span></div><div class="rekap-body"><span class="skeleton" style="width:100%; height:100px; display:block; border-radius:8px;"></span></div></div>`.repeat(3);
@@ -70,13 +93,13 @@ navRekap.addEventListener('click', (e) => {
 
 navBelum.addEventListener('click', (e) => {
     e.preventDefault(); 
-    switchTab(navBelum, areaBelum, "Belum Berdonasi");
+    switchTab(navBelum, areaBelum, "Daftar Donatur"); // Diubah nama menunya
     areaFilterGlobal.style.display = 'none'; 
     
     // Animasi Loading
     document.getElementById('wadahDaftarBelum').innerHTML = `<div class="kartu-belum"><div style="width:100%;"><span class="skeleton" style="width:80%; height:14px; margin-bottom:6px; display:block;"></span><span class="skeleton" style="width:50%; height:10px; display:block;"></span></div><div class="skeleton" style="width:38px; height:38px; border-radius:12px; flex-shrink:0;"></div></div>`.repeat(5);
     document.getElementById('wadahTombolMuat').innerHTML = "";
-    setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50);
+    setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50);
 });
 
 navProfil.addEventListener('click', (e) => {
@@ -138,6 +161,7 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
         }
 
         isiOpsiPetugas(); 
+        areaFilterGlobal.style.display = 'flex'; // Default show on Dashboard
         kalkulasiGlobalDasbor(); 
 
     } catch (e) { 
@@ -278,9 +302,9 @@ function tampilkanRekap() {
 }
 
 // ==========================================
-// FUNGSI 3: DAFTAR BELUM BERDONASI
+// FUNGSI 3: DAFTAR SEMUA DONATUR (TERMASUK YANG SELESAI)
 // ==========================================
-function hitungDaftarBelumMandiri(muatLebih = false) {
+function hitungDaftarDonaturLengkap(muatLebih = false) {
     if(!dataMaster) return;
     if(!muatLebih) limitTampil = 50; 
 
@@ -289,8 +313,9 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
     const fPek = fPekRaw === "Total Bulan Ini" ? "Total" : fPekRaw.replace("Pekan ","");
     const fKat = filterJenisDonatur.value;
 
-    dataBelumMandiriLokal = [];
+    dataSemuaMandiriLokal = [];
 
+    // Cek ID yang sudah diterima (selesai)
     let idR_Lokal = new Set(), idIKP_Lokal = new Set(), idIIP_Lokal = new Set();
     dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => { if(String(b.Spesifikasi||"").toUpperCase().includes("RUTIN")) idR_Lokal.add(String(b["Kode Donatur"]).trim()); });
     dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => {
@@ -298,21 +323,28 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
         if(sp.includes("IKP")) idIKP_Lokal.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Lokal.add(String(b["Kode Donatur"]).trim());
     });
 
+    // Ambil kewajiban
     let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
 
     mR.forEach(b => { 
-        if(!idR_Lokal.has(String(b["Nomor Register"]).trim())) { 
-            dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:String(b["Nomor Register"]).trim(), pek:String(b.Pekan).trim()}); 
-        }
+        let isSelesai = idR_Lokal.has(String(b["Nomor Register"]).trim());
+        dataSemuaMandiriLokal.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:String(b["Nomor Register"]).trim(), pek:String(b.Pekan).trim(), selesai: isSelesai}); 
     });
+    
     mK.forEach(b => {
         let id=String(b["Nomor Register"]).trim(), sp=String(b.Spesifikasi).toUpperCase();
-        if(sp.includes("IKP") && !idIKP_Lokal.has(id)) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IKP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim()}); } 
-        else if(sp.includes("IIP") && !idIIP_Lokal.has(id)) { dataBelumMandiriLokal.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim()}); }
+        if(sp.includes("IKP")) { 
+            let isSelesai = idIKP_Lokal.has(id);
+            dataSemuaMandiriLokal.push({n:b["Nama Donatur"], k:"IKP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim(), selesai: isSelesai}); 
+        } 
+        else if(sp.includes("IIP")) { 
+            let isSelesai = idIIP_Lokal.has(id);
+            dataSemuaMandiriLokal.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim(), selesai: isSelesai}); 
+        }
     });
 
-    let dataAkhirTerfilter = (fKat === "Semua") ? dataBelumMandiriLokal : dataBelumMandiriLokal.filter(d => d.k === fKat);
+    let dataAkhirTerfilter = (fKat === "Semua") ? dataSemuaMandiriLokal : dataSemuaMandiriLokal.filter(d => d.k === fKat);
     
     const kataKunci = document.getElementById('inputCariDonatur').value.toLowerCase().trim();
     if(kataKunci) {
@@ -323,7 +355,7 @@ function hitungDaftarBelumMandiri(muatLebih = false) {
         );
     }
 
-    document.getElementById('totalSisaBelum').innerText = dataAkhirTerfilter.length;
+    document.getElementById('totalSemuaDonatur').innerText = dataAkhirTerfilter.length;
     renderDaftarKeLayar(dataAkhirTerfilter);
 }
 
@@ -332,9 +364,14 @@ function renderDaftarKeLayar(dataList) {
     const wadahTombol = document.getElementById('wadahTombolMuat');
     
     if(dataList.length === 0) {
-        wadah.innerHTML = `<div style="text-align:center; padding:30px; color:#8E8E93; font-weight:600;">Alhamdulillah, Tugas Tuntas Sempurna!</div>`;
+        wadah.innerHTML = `<div style="text-align:center; padding:30px; color:#8E8E93; font-weight:600;">Data tidak ditemukan.</div>`;
         wadahTombol.innerHTML = ""; return;
     }
+
+    // Mengurutkan: Yang belum selesai di atas, yang selesai di bawah
+    dataList.sort((a, b) => {
+        return (a.selesai === b.selesai) ? 0 : a.selesai ? 1 : -1;
+    });
 
     let teksBufferHTML = "";
     let dataPorsiTampil = dataList.slice(0, limitTampil);
@@ -343,24 +380,32 @@ function renderDaftarKeLayar(dataList) {
         let n = String(d.h || "").replace(/[^0-9]/g,''); if(n.startsWith('0')) n = '62' + n.substring(1);
         let p = `Assalamu'alaikum, Bapak/Ibu *${d.n}*. \n\nBagaimana kabarnya? Semoga senantiasa sehat dan penuh berkah bersama keluarga.\n\nAlhamdulillah, donasi Bapak/Ibu bulan lalu telah tersalurkan dengan baik. Terima kasih banyak atas istiqomahnya dalam kebaikan.\n\nUntuk bulan ini, saya *${d.p}* kembali siap melayani penjemputan donasi jika Bapak/Ibu sudah berkenan. Longgar hari apa dan jam berapa kira-kira, Pak/Bu?\nNanti kami sesuaikan jadwal berkunjungnya.`;
         let l = n ? `https://wa.me/${n}?text=${encodeURIComponent(p)}` : '#';
+        
         let c = d.k === 'RUTIN' ? 'var(--biru-petrol)' : (d.k === 'IKP' ? 'var(--hijau-lime)' : 'var(--biru-muda)');
         let namaBersih = d.n.replace(/'/g, "\\'"); 
-        
         let labelPekan = (d.pek && d.pek !== "0" && d.pek !== "undefined" && d.pek !== "") ? `Pekan ${d.pek}` : "Pekan -";
         
+        // Aturan jika selesai
+        let kelasSelesai = d.selesai ? "selesai" : "";
+        let styleBorder = d.selesai ? "border-left: 5px solid #E5E5EA;" : `border-left: 5px solid ${c}`;
+        let badgeSelesai = d.selesai ? `<span class="badge status-selesai"><i class="fas fa-check"></i> SELESAI</span>` : "";
+        let badgeKatStyle = d.selesai ? "background:#8E8E93" : `background:${c}`;
+        let tombolWA = d.selesai ? "" : `<a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>`;
+
         teksBufferHTML += `
-            <div class="kartu-belum" style="border-left: 5px solid ${c}">
+            <div class="kartu-belum ${kelasSelesai}" style="${styleBorder}">
                 <div class="info-donatur">
                     <h4>
                         <span class="nomor-urut">#${urutan + 1}</span> ${d.n} 
-                        <span class="badge" style="background:${c}">${d.k}</span>
+                        <span class="badge" style="${badgeKatStyle}">${d.k}</span>
                         <span class="badge" style="background:#8E8E93; margin-left:3px;">${labelPekan}</span>
+                        ${badgeSelesai}
                     </h4>
                     <p>${d.a}</p>
                 </div>
                 <div class="grup-tombol">
                     <button class="btn-edit" onclick="bukaModalEdit('${namaBersih}', '${d.r}', '${d.pek}')"><i class="fas fa-calendar-alt"></i></button>
-                    <a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
+                    ${tombolWA}
                 </div>
             </div>`;
     });
@@ -370,7 +415,7 @@ function renderDaftarKeLayar(dataList) {
     else { wadahTombol.innerHTML = ""; }
 }
 
-function aksiMuatLebihBanyak() { limitTampil += 50; hitungDaftarBelumMandiri(true); }
+function aksiMuatLebihBanyak() { limitTampil += 50; hitungDaftarDonaturLengkap(true); }
 
 // ==========================================
 // UTILITAS (GRAFIK, UNDUH, EDIT)
@@ -388,7 +433,8 @@ window.downloadSisaRekap = function(petugas_param, kategori) {
     
     let finalPetugas = sesiRole === "ADMIN" ? petugas_param : sesiNama;
     let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && (finalPetugas === "Semua" || d.p === finalPetugas));
-    if(dataF.length === 0) { alert("Data kosong. Tidak ada sisa " + kategori + " untuk pencarian ini."); return; }
+    if(dataF.length === 0) { tampilkanAlert('error', 'Kosong', "Tidak ada sisa " + kategori + " untuk pencarian ini."); return; }
+    
     let csvContent = "Nama Donatur,Kategori,Alamat,No HP,Nama Petugas\n";
     dataF.forEach(d => { csvContent += `"${String(d.n).replace(/"/g, '""')}"`+`,`+`"${String(d.k).replace(/"/g, '""')}"`+`,`+`"${String(d.a).replace(/"/g, '""')}"`+`,`+`"${String(d.h||"").replace(/"/g, '""')}"`+`,`+`"${String(d.p).replace(/"/g, '""')}"\n`; });
     const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const link = document.createElement("a");
@@ -421,10 +467,18 @@ async function simpanPekanBaru() {
         const res = await fetch(SCRIPT_URL, { method: 'POST', body: formData }); const json = await res.json();
         
         if(json.status === "SUKSES") {
-            alert("Alhamdulillah, jadwal penjemputan berhasil dipindah ke Pekan " + pekanBaru + "!");
-            tutupModalEdit(); eksekusiMasuk(idUser, pinUser, false); 
-        } else { alert("Gagal: " + json.pesan); }
-    } catch(e) { alert("Gagal menghubungi server. Pastikan internet Anda lancar."); }
+            tutupModalEdit(); 
+            // Panggil Custom Alert Sukses
+            tampilkanAlert('sukses', 'Alhamdulillah', 'Jadwal penjemputan berhasil dipindah ke Pekan ' + pekanBaru + '!');
+            eksekusiMasuk(idUser, pinUser, false); 
+        } else { 
+            tutupModalEdit();
+            tampilkanAlert('error', 'Gagal', json.pesan);
+        }
+    } catch(e) { 
+        tutupModalEdit();
+        tampilkanAlert('error', 'Koneksi Bermasalah', 'Gagal menghubungi server. Pastikan internet Anda lancar.');
+    }
     
     btn.innerText = "Simpan"; btn.disabled = false;
 }
@@ -434,11 +488,11 @@ async function simpanPekanBaru() {
 // ==========================================
 filterPetugas.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
 filterPekan.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
-filterBelumPetugas.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
-filterBelumPekan.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
-filterJenisDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarBelumMandiri(false); }, 50); });
+filterBelumPetugas.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
+filterBelumPekan.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
+filterJenisDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
 
-document.getElementById('inputCariDonatur').addEventListener('input', () => { hitungDaftarBelumMandiri(false); });
+document.getElementById('inputCariDonatur').addEventListener('input', () => { hitungDaftarDonaturLengkap(false); });
 
 function inisialisasiAplikasi() {
     if ('serviceWorker' in navigator) {
