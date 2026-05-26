@@ -6,7 +6,7 @@ let dataSemuaMandiriLokal = [];
 let limitTampil = 50;
 
 let sesiRole = ""; let sesiNama = "";
-let historyPushed = false; // Flag untuk tombol Back HP
+let historyPushed = false; 
 
 // Element Area Halaman
 const areaDasbor = document.getElementById('areaDasbor'); 
@@ -15,23 +15,23 @@ const areaBelum = document.getElementById('areaBelum');
 const areaProfil = document.getElementById('areaProfil');
 const areaFilterGlobal = document.getElementById('areaFilterGlobal');
 
-// Element Navigasi Bawah (Bottom Menu)
+// Element Navigasi Bawah
 const navDasbor = document.getElementById('navDasbor');
 const navRekap = document.getElementById('navRekap');
 const navBelum = document.getElementById('navBelum');
 const navProfil = document.getElementById('navProfil');
 const pageTitle = document.getElementById('pageTitle');
 
-// Filter Element (Native Hidden)
+// Filter Element
 const filterPetugas = document.getElementById('filterPetugas');
 const filterPekan = document.getElementById('filterPekan');
 const filterBelumPetugas = document.getElementById('filterBelumPetugas');
 const filterBelumPekan = document.getElementById('filterBelumPekan');
 const filterJenisDonatur = document.getElementById('filterJenisDonatur');
-const filterStatusDonatur = document.getElementById('filterStatusDonatur'); // Tambahan Baru
+const filterStatusDonatur = document.getElementById('filterStatusDonatur'); 
 
 // ==========================================
-// LOGIKA CUSTOM DROPDOWN (FILTER)
+// LOGIKA CUSTOM DROPDOWN
 // ==========================================
 function bukaModalPilih(selectId, judul, uiId) {
     const selectElement = document.getElementById(selectId);
@@ -53,14 +53,8 @@ function bukaModalPilih(selectId, judul, uiId) {
 function pilihOpsiFilter(selectId, value, text, uiId) {
     const selectElement = document.getElementById(selectId);
     selectElement.value = value;
-    
-    // Update Teks di Tombol UI
     document.getElementById(uiId).innerHTML = `<span>${text}</span> <i class="fas fa-chevron-down" style="font-size:10px;"></i>`;
-    
-    // Tutup Modal
     document.getElementById('modalPilihan').style.display = 'none';
-    
-    // Picu event change agar filter langsung berjalan
     selectElement.dispatchEvent(new Event('change'));
 }
 
@@ -91,13 +85,11 @@ function switchTab(activeNav, activeArea, titleText, isBackAction = false) {
     activeArea.style.display = 'block'; activeNav.classList.add('aktif'); pageTitle.innerText = titleText;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // History API (Tombol Back HP)
     if (titleText !== "Dasbor Utama" && !isBackAction) {
         if (!historyPushed) { window.history.pushState({ page: 'internal' }, "", ""); historyPushed = true; }
     } else if (titleText === "Dasbor Utama") { historyPushed = false; }
 }
 
-// Event Listener Tombol Kembali Bawaan HP
 window.addEventListener('popstate', (e) => {
     if(areaDasbor.style.display === 'none') {
         switchTab(navDasbor, areaDasbor, "Dasbor Utama", true);
@@ -106,39 +98,31 @@ window.addEventListener('popstate', (e) => {
     }
 });
 
-navDasbor.addEventListener('click', (e) => {
-    e.preventDefault(); switchTab(navDasbor, areaDasbor, "Dasbor Utama");
-    areaFilterGlobal.style.display = 'flex'; 
-});
+navDasbor.addEventListener('click', (e) => { e.preventDefault(); switchTab(navDasbor, areaDasbor, "Dasbor Utama"); areaFilterGlobal.style.display = 'flex'; });
 navRekap.addEventListener('click', (e) => {
-    e.preventDefault(); switchTab(navRekap, areaRekap, "Rapor Petugas");
-    areaFilterGlobal.style.display = 'flex'; 
+    e.preventDefault(); switchTab(navRekap, areaRekap, "Rapor Petugas"); areaFilterGlobal.style.display = 'flex'; 
     document.getElementById('wadahRekap').innerHTML = `<div class="kartu-rekap"><div class="rekap-header"><span class="skeleton skeleton-text"></span></div><div class="rekap-body"><span class="skeleton" style="width:100%; height:100px; display:block; border-radius:8px;"></span></div></div>`.repeat(3);
     setTimeout(() => { tampilkanRekap(); }, 50);
 });
 navBelum.addEventListener('click', (e) => {
-    e.preventDefault(); switchTab(navBelum, areaBelum, "Daftar Donatur");
-    areaFilterGlobal.style.display = 'none'; 
+    e.preventDefault(); switchTab(navBelum, areaBelum, "Daftar Donatur"); areaFilterGlobal.style.display = 'none'; 
     document.getElementById('wadahDaftarBelum').innerHTML = `<div class="kartu-belum"><div style="width:100%;"><span class="skeleton" style="width:80%; height:14px; margin-bottom:6px; display:block;"></span><span class="skeleton" style="width:50%; height:10px; display:block;"></span></div><div class="skeleton" style="width:38px; height:38px; border-radius:12px; flex-shrink:0;"></div></div>`.repeat(5);
     document.getElementById('wadahTombolMuat').innerHTML = "";
     setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50);
 });
-navProfil.addEventListener('click', (e) => {
-    e.preventDefault(); switchTab(navProfil, areaProfil, "Profil Pengguna"); areaFilterGlobal.style.display = 'none';
-});
+navProfil.addEventListener('click', (e) => { e.preventDefault(); switchTab(navProfil, areaProfil, "Profil Pengguna"); areaFilterGlobal.style.display = 'none'; });
 
-document.getElementById('menuLogout').addEventListener('click', (e) => {
-    e.preventDefault(); localStorage.removeItem('laz_id'); localStorage.removeItem('laz_pin'); window.location.reload(); 
-});
+document.getElementById('menuLogout').addEventListener('click', (e) => { e.preventDefault(); localStorage.removeItem('laz_id'); localStorage.removeItem('laz_pin'); window.location.reload(); });
 function hilangkanSkeleton() { document.querySelectorAll('.skeleton-mode').forEach(el => { el.classList.remove('skeleton-mode'); }); }
 
 // ==========================================
-// LOGIKA LOGIN & INITIALISASI PUSAT
+// LOGIKA LOGIN
 // ==========================================
 document.getElementById('btnMasuk').addEventListener('click', () => {
-    const id = document.getElementById('inputId').value; const pin = document.getElementById('inputPin').value;
-    if(id==="" || pin==="") { document.getElementById('pesanError').innerText = "Mohon isi ID dan PIN!"; return; }
-    eksekusiMasuk(id, pin, true);
+    const idOrPhone = document.getElementById('inputId').value; 
+    const pin = document.getElementById('inputPin').value;
+    if(idOrPhone==="" || pin==="") { document.getElementById('pesanError').innerText = "Mohon isi identitas dan PIN!"; return; }
+    eksekusiMasuk(idOrPhone, pin, true);
 });
 
 async function eksekusiMasuk(idInput, pinInput, isManual) {
@@ -146,11 +130,12 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
     } else { document.getElementById('layarLogin').style.display = 'none'; } 
 
     try {
+        // Mengirim inputan sebagai parameter 'id'. Pastikan GAS diatur untuk memproses No. HP jika inputan bukan format ID standar.
         const fetchUrl = SCRIPT_URL + `?id=${encodeURIComponent(idInput)}&pin=${encodeURIComponent(pinInput)}`;
         const res = await fetch(fetchUrl); const json = await res.json();
         
         if(json.status === "ERROR") {
-            if(isManual) { document.getElementById('pesanError').innerText = json.pesan; document.getElementById('btnMasuk').innerText = "MASUK";
+            if(isManual) { document.getElementById('pesanError').innerText = json.pesan; document.getElementById('btnMasuk').innerText = "MASUK APLIKASI";
             } else { localStorage.removeItem('laz_id'); localStorage.removeItem('laz_pin'); document.getElementById('layarLogin').style.display = 'flex'; }
             return;
         }
@@ -160,7 +145,6 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
         
         document.getElementById('layarLogin').style.display = 'none'; 
         
-        // Isi Data Profil
         document.getElementById('namaPenggunaProfil').innerText = sesiNama;
         document.getElementById('rolePenggunaProfil').innerText = sesiRole === "ADMIN" ? "Administrator" : "Petugas Lapangan";
         document.getElementById('idPenggunaProfil').innerText = idInput;
@@ -180,7 +164,7 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
         kalkulasiGlobalDasbor(); 
 
     } catch (e) { 
-        if(isManual){ document.getElementById('pesanError').innerText = "Gagal terhubung ke jaringan."; document.getElementById('btnMasuk').innerText = "MASUK"; }
+        if(isManual){ document.getElementById('pesanError').innerText = "Gagal terhubung ke jaringan."; document.getElementById('btnMasuk').innerText = "MASUK APLIKASI"; }
         document.getElementById('teksPersentase').innerText = "ERR"; 
     }
 }
@@ -214,7 +198,7 @@ function getPekan(t) {
 }
 
 // ==========================================
-// FUNGSI 1: DASBOR UTAMA
+// FUNGSI 1: DASBOR
 // ==========================================
 function kalkulasiGlobalDasbor() {
     if(!dataMaster) return;
@@ -270,7 +254,7 @@ function kalkulasiGlobalDasbor() {
 }
 
 // ==========================================
-// FUNGSI 2: RAPOR PRIBADI & KLASEMEN
+// FUNGSI 2: RAPOR PRIBADI
 // ==========================================
 function tampilkanRekap() {
     if(!dataMaster) return;
@@ -336,7 +320,7 @@ function hitungDaftarDonaturLengkap(muatLebih = false) {
     const fPekRaw = filterBelumPekan.value;
     const fPek = fPekRaw === "Total" ? "Total" : fPekRaw.replace("Pekan ","");
     const fKat = filterJenisDonatur.value;
-    const fStat = filterStatusDonatur.value; // Filter Status Penjemputan Baru
+    const fStat = filterStatusDonatur.value; 
 
     dataSemuaMandiriLokal = [];
 
@@ -369,26 +353,13 @@ function hitungDaftarDonaturLengkap(muatLebih = false) {
 
     let dataAkhirTerfilter = dataSemuaMandiriLokal;
     
-    // Terapkan Filter Kategori
-    if(fKat !== "Semua") {
-        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.k === fKat);
-    }
+    if(fKat !== "Semua") { dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.k === fKat); }
+    if(fStat === "Sudah") { dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.selesai === true); } 
+    else if(fStat === "Belum") { dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.selesai === false); }
     
-    // Terapkan Filter Status Baru (Sudah / Belum)
-    if(fStat === "Sudah") {
-        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.selesai === true);
-    } else if(fStat === "Belum") {
-        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.selesai === false);
-    }
-    
-    // Terapkan Kolom Pencarian
     const kataKunci = document.getElementById('inputCariDonatur').value.toLowerCase().trim();
     if(kataKunci) {
-        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => 
-            String(d.n).toLowerCase().includes(kataKunci) || 
-            String(d.r).toLowerCase().includes(kataKunci) ||
-            String(d.a).toLowerCase().includes(kataKunci)
-        );
+        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => String(d.n).toLowerCase().includes(kataKunci) || String(d.r).toLowerCase().includes(kataKunci) || String(d.a).toLowerCase().includes(kataKunci));
     }
 
     document.getElementById('totalSemuaDonatur').innerText = dataAkhirTerfilter.length;
@@ -462,7 +433,6 @@ function drawGrafik(bR, b1, b2, bIns, sR, s1, s2) {
 
 window.downloadSisaRekap = function(petugas_param, kategori) {
     if (sesiRole !== "ADMIN") return; 
-    
     let finalPetugas = sesiRole === "ADMIN" ? petugas_param : sesiNama;
     let dataF = dataBelumDasborGlobal.filter(d => d.k === kategori && (finalPetugas === "Semua" || d.p === finalPetugas));
     if(dataF.length === 0) { tampilkanAlert('error', 'Kosong', "Tidak ada sisa " + kategori + " untuk pencarian ini."); return; }
@@ -477,7 +447,6 @@ window.downloadSisaRekap = function(petugas_param, kategori) {
 function bukaModalEdit(nama, reg, pekanSaatIni) {
     document.getElementById('namaDonaturEdit').innerText = nama;
     document.getElementById('regDonaturEdit').value = reg;
-    
     let sel = document.getElementById('pilihanPekanBaru');
     if(pekanSaatIni == "1" || pekanSaatIni == "2" || pekanSaatIni == "3" || pekanSaatIni == "4") { sel.value = pekanSaatIni; } else { sel.value = "1"; }
     document.getElementById('modalEditPekan').style.display = 'flex';
@@ -491,39 +460,27 @@ async function simpanPekanBaru() {
     const btn = document.getElementById('btnSimpanPekan');
 
     btn.innerText = "Menyimpan..."; btn.disabled = true;
-
     const idUser = localStorage.getItem('laz_id'); const pinUser = localStorage.getItem('laz_pin');
     const formData = new URLSearchParams(); formData.append('action', 'update_pekan'); formData.append('id', idUser); formData.append('pin', pinUser); formData.append('reg', reg); formData.append('pekan', pekanBaru);
 
     try {
         const res = await fetch(SCRIPT_URL, { method: 'POST', body: formData }); const json = await res.json();
-        
         if(json.status === "SUKSES") {
-            tutupModalEdit(); 
-            tampilkanAlert('sukses', 'Alhamdulillah', 'Jadwal penjemputan berhasil dipindah ke Pekan ' + pekanBaru + '!');
-            eksekusiMasuk(idUser, pinUser, false); 
-        } else { 
-            tutupModalEdit();
-            tampilkanAlert('error', 'Gagal', json.pesan);
-        }
-    } catch(e) { 
-        tutupModalEdit();
-        tampilkanAlert('error', 'Koneksi Bermasalah', 'Gagal menghubungi server. Pastikan internet Anda lancar.');
-    }
-    
+            tutupModalEdit(); tampilkanAlert('sukses', 'Alhamdulillah', 'Jadwal penjemputan berhasil dipindah ke Pekan ' + pekanBaru + '!'); eksekusiMasuk(idUser, pinUser, false); 
+        } else { tutupModalEdit(); tampilkanAlert('error', 'Gagal', json.pesan); }
+    } catch(e) { tutupModalEdit(); tampilkanAlert('error', 'Koneksi Bermasalah', 'Gagal menghubungi server. Pastikan internet Anda lancar.'); }
     btn.innerText = "Simpan"; btn.disabled = false;
 }
 
 // ==========================================
-// EVENT LISTENER FILTER (Memantau Select Asli yg Disembunyikan)
+// EVENT LISTENER FILTER 
 // ==========================================
 filterPetugas.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
 filterPekan.addEventListener('change', () => { setTimeout(() => { kalkulasiGlobalDasbor(); tampilkanRekap(); }, 50); });
 filterBelumPetugas.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
 filterBelumPekan.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
 filterJenisDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
-filterStatusDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); }); // Event Listener Status Baru
-
+filterStatusDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); }); 
 document.getElementById('inputCariDonatur').addEventListener('input', () => { hitungDaftarDonaturLengkap(false); });
 
 function inisialisasiAplikasi() {
@@ -531,5 +488,4 @@ function inisialisasiAplikasi() {
     const simpananId = localStorage.getItem('laz_id'); const simpananPin = localStorage.getItem('laz_pin');
     if (simpananId && simpananPin) { eksekusiMasuk(simpananId, simpananPin, false); } else { document.getElementById('layarLogin').style.display = 'flex'; }
 }
-
 inisialisasiAplikasi();
