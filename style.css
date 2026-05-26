@@ -6,48 +6,108 @@
     --hijau-lime: #B2C330;       /* Warna Berhasil & Pemasukan */
     --warna-hitam: #1A1A1A;
     --warna-abu: #E5E7EB;
+    --merah-bata: #EF4444;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-body { background-color: var(--warna-putih); color: var(--warna-hitam); }
+body { background-color: var(--warna-putih); color: var(--warna-hitam); min-height: 100vh; }
 
-/* Sidebar & Topbar */
+/* Layar Login Utama */
+.login-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--biru-petrol); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+.login-box { background: white; padding: 30px; border-radius: 16px; width: 100%; max-width: 360px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; }
+.login-box h2 { font-size: 18px; color: var(--biru-petrol); margin-bottom: 5px; font-weight: 800; letter-spacing: 0.5px; }
+.login-box p { font-size: 13px; color: #6B7280; margin-bottom: 20px; }
+.input-login { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--warna-abu); border-radius: 8px; outline: none; font-size: 14px; }
+.btn-masuk { width: 100%; padding: 12px; background: var(--hijau-lime); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
+.btn-masuk:hover { opacity: 0.9; }
+.pesan-error { color: var(--merah-bata); font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: left; }
+
+/* Konten Utama & Navigasi */
+.main-content { padding-bottom: 40px; }
 .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100vh; background: white; box-shadow: 4px 0 10px rgba(0,0,0,0.1); transition: 0.3s; z-index: 1000; }
 .sidebar.terbuka { left: 0; }
 .sidebar-header { display: flex; align-items: center; padding: 20px; border-bottom: 1px solid #eee; justify-content: space-between; }
+.close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #9CA3AF; }
 .menu-list { list-style: none; padding: 20px 0; }
-.menu-list li a { display: block; padding: 15px 20px; text-decoration: none; color: var(--warna-hitam); font-weight: 500; }
+.menu-list li a { display: block; padding: 15px 20px; text-decoration: none; color: var(--warna-hitam); font-weight: 500; font-size: 14px; }
+.menu-list li a i { margin-right: 10px; width: 20px; text-align: center; }
 .menu-list li a.aktif { background: var(--biru-petrol); color: white; }
 .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
 .overlay.terbuka { display: block; }
 .topbar { display: flex; align-items: center; padding: 15px 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .burger-btn { background: none; border: none; font-size: 24px; cursor: pointer; margin-right: 15px; color: var(--biru-petrol); }
+.page-title { font-size: 16px; font-weight: 800; color: var(--biru-petrol); }
 
-/* Filter */
-.filter-area { display: flex; gap: 10px; padding: 20px; }
-.dropdown-aksen { flex: 1; padding: 12px; background: var(--biru-petrol); color: white; border: none; border-radius: 8px; font-weight: bold; outline: none; }
+/* Filter Konten */
+.filter-area, .filter-area-lokal { display: flex; gap: 10px; padding: 20px; }
+.filter-area-lokal { padding: 20px 0 10px 0; }
+.dropdown-aksen, .dropdown-lokal { flex: 1; padding: 12px; background: var(--biru-petrol); color: white; border: none; border-radius: 8px; font-weight: bold; outline: none; font-size: 13px; }
+.dropdown-lokal { background: white; color: var(--biru-petrol); border: 1px solid var(--biru-petrol); }
 
-/* Summary Cards - Desain Warna Sesuai Request */
+/* Ringkasan Kartu Utama (Summary Cards) */
 .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px; margin-bottom: 25px; }
-.card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-top: 5px solid transparent; }
-.card h3 { font-size: 11px; color: #6B7280; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-.card h2 { font-size: 18px; font-weight: 800; }
+.card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-top: 5px solid transparent; position: relative; overflow: hidden; }
+.card h3 { font-size: 11px; color: #6B7280; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; position: relative; z-index: 2; }
+.card h2 { font-size: 18px; font-weight: 800; position: relative; z-index: 2; }
+.watermark-icon { position: absolute; right: -10px; bottom: -10px; font-size: 50px; color: rgba(0,0,0,0.03); z-index: 1; }
+.teks-baru { font-size: 11px; color: var(--hijau-lime); font-weight: bold; margin-top: 2px; }
+.teks-sisa-statis { font-size: 11px; color: var(--merah-bata); font-weight: bold; }
 
 .card-petrol { border-top-color: var(--biru-petrol); }
 .card-muda { border-top-color: var(--biru-muda); }
 .card-lime { border-top-color: var(--hijau-lime); }
 
-/* Charts */
+/* Grafik */
 .charts-area { padding: 0 20px; }
 .chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-.chart-container h3 { margin-bottom: 5px; font-size: 15px; text-align: center; color: var(--biru-petrol); }
+.chart-container h3 { margin-bottom: 15px; font-size: 15px; text-align: center; color: var(--biru-petrol); }
 
-/* Belum Berdonasi */
-.header-halaman { padding: 0 20px; margin: 10px 0 15px 0; display: flex; justify-content: space-between; align-items: center; }
-.dropdown-kecil { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--biru-petrol); color: var(--biru-petrol); font-weight: bold; }
-.kartu-belum { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-.badge { font-size: 9px; padding: 2px 8px; border-radius: 10px; color: white; font-weight: bold; }
-.badge-rutin { background: var(--biru-petrol); }
-.badge-ikp { background: var(--hijau-lime); }
-.badge-iip { background: var(--biru-muda); }
-.btn-wa { background: #25D366; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 20px; }
+/* Judul Sub-Halaman & Pencarian */
+.header-halaman { padding: 10px 20px; margin: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+.header-halaman h2 { font-size: 16px; color: var(--biru-petrol); font-weight: 700; }
+.flex-header { padding: 10px 0; }
+.dropdown-kecil { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--biru-petrol); color: var(--biru-petrol); font-weight: bold; background: white; font-size: 11px; outline: none; }
+
+.search-wrapper { position: relative; margin: 0 0 15px 0; }
+.search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF; }
+.input-cari { width: 100%; padding: 12px 12px 12px 40px; border: 1px solid var(--warna-abu); border-radius: 8px; outline: none; font-size: 14px; }
+
+/* Daftar Sisa Belum Berdonasi */
+.kartu-belum { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.info-donatur { flex: 1; }
+.info-donatur h4 { font-size: 14px; color: var(--warna-hitam); margin-bottom: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.nomor-urut { color: #9CA3AF; font-weight: normal; margin-right: 2px; }
+.info-donatur p { font-size: 12px; color: #6B7280; line-height: 1.4; }
+
+.grup-tombol { display: flex; gap: 8px; align-items: center; }
+.btn-edit { background: var(--warna-abu); color: var(--biru-petrol); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; font-size: 16px; transition: 0.2s; }
+.btn-edit:hover { background: #D1D5DB; }
+.btn-wa { background: #25D366; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 20px; transition: 0.2s; }
+.btn-wa:hover { opacity: 0.9; }
+
+.badge { font-size: 9px; padding: 2px 8px; border-radius: 10px; color: white; font-weight: bold; text-transform: uppercase; }
+.btn-muat-banyak { width: 100%; padding: 12px; background: white; color: var(--biru-petrol); border: 1px dashed var(--biru-petrol); border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
+
+/* Desain Tabel Rapor Petugas */
+.kartu-rekap { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
+.rekap-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--warna-abu); }
+.rekap-header h3 { font-size: 15px; color: var(--biru-petrol); font-weight: 700; }
+.persentase { font-weight: 800; font-size: 18px; }
+.rekap-body { overflow-x: auto; }
+.tabel-rekap { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; min-width: 450px; }
+.tabel-rekap th, .tabel-rekap td { padding: 10px; border-bottom: 1px solid #F3F4F6; }
+.tabel-rekap th { color: #6B7280; font-weight: 600; text-transform: uppercase; font-size: 10px; }
+.tabel-rekap .jumlah { font-weight: bold; background: #F9FAFB; }
+.btn-sisa-rekap { background: #FEF2F2; color: var(--merah-bata); padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; font-weight: bold; cursor: pointer; }
+
+/* Sistem Animasi Loading Skeleton */
+.skeleton { background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 50%, #f2f2f2 75%); background-size: 200% 100%; animation: loading-skeleton 1.5s infinite; }
+.skeleton-text { display: block; height: 14px; width: 100%; border-radius: 4px; }
+.skeleton-mode { pointer-events: none; position: relative; }
+.skeleton-mode * { visibility: hidden !important; }
+.skeleton-mode::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 200% 100%; animation: loading-skeleton 1.5s infinite; z-index: 10; }
+
+@keyframes loading-skeleton {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
