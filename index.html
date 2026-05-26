@@ -2,277 +2,177 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Dashboard Ala iOS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        // Anda bisa menyesuaikan kode warna utama di bawah ini jika ingin mengubah tone warnanya
-                        iosPrimary: '#10B981', // Hijau Emerald (bisa diganti sesuai warna lama Anda)
-                        iosBackground: '#F2F2F7', // Abu-abu terang khas latar belakang iOS
-                        iosCard: '#FFFFFF',
-                    },
-                    fontFamily: {
-                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* Menghilangkan scrollbar bawaan agar terlihat seperti aplikasi native */
-        ::-webkit-scrollbar {
-            display: none;
-        }
-        body {
-            -webkit-tap-highlight-color: transparent;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dasbor LAZ Sidogiri</title>
+    <meta name="theme-color" content="#2E5B72">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-iosBackground text-gray-900 font-sans antialiased min-h-screen pb-24">
-
-    <div class="max-w-md mx-auto min-h-screen relative px-4 pt-6">
-        
-        <div id="page-dasbor" class="tab-content block animate-fade-in">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Selamat Datang</p>
-                    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Ringkasan Dasbor</h1>
-                </div>
-                <div class="w-10 h-10 bg-iosPrimary/10 rounded-full flex items-center justify-center text-iosPrimary font-bold">
-                    U
-                </div>
+<body>
+    <div id="layarLogin" class="login-wrapper">
+        <div class="login-box">
+            <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                <img src="logo.png" alt="Logo LAZ Sidogiri" style="height: 65px; border-radius: 12px;">
             </div>
-
-            <div class="bg-iosPrimary text-white p-5 rounded-2xl shadow-sm mb-5 relative overflow-hidden">
-                <p class="text-sm text-white/80 font-medium">Total Donasi Terkumpul</p>
-                <p class="text-3xl font-bold mt-1 tracking-tight">Rp 124.500.000</p>
-                <div class="mt-4 flex justify-between items-center text-xs text-white/90 bg-white/10 p-2 rounded-xl backdrop-blur-sm">
-                    <span>Target Bulan Ini: Rp 150JT</span>
-                    <span class="font-bold">83% Tercapai</span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-iosCard p-4 rounded-2xl shadow-sm border border-gray-100">
-                    <p class="text-xs text-gray-400 font-medium">Petugas Aktif</p>
-                    <p class="text-xl font-bold mt-1">18 Orang</p>
-                </div>
-                <div class="bg-iosCard p-4 rounded-2xl shadow-sm border border-gray-100">
-                    <p class="text-xs text-gray-400 font-medium">Muzakki Baru</p>
-                    <p class="text-xl font-bold mt-1">+32 Pekan Ini</p>
-                </div>
-            </div>
-
-            <h2 class="text-sm font-semibold text-gray-500 mb-3 px-1">Aktivitas Terbaru</h2>
-            <div class="bg-iosCard rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-50 overflow-hidden">
-                <div class="p-4 flex justify-between items-center">
-                    <div>
-                        <p class="text-sm font-medium text-gray-800">Donasi hamba allah masuk</p>
-                        <p class="text-xs text-gray-400">Via Transfer • 10 menit lalu</p>
-                    </div>
-                    <span class="text-sm font-semibold text-iosPrimary">+Rp 500.000</span>
-                </div>
-                <div class="p-4 flex justify-between items-center">
-                    <div>
-                        <p class="text-sm font-medium text-gray-800">Laporan Rapor Andi S.</p>
-                        <p class="text-xs text-gray-400">Petugas Lapangan • 1 jam lalu</p>
-                    </div>
-                    <span class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-medium">Selesai</span>
-                </div>
-            </div>
+            <h2>SISTEM PETUGAS</h2>
+            <p>Silakan masukkan identitas Anda</p>
+            <input type="text" id="inputId" class="input-login" placeholder="ID Petugas (Contoh: 101)" autocomplete="off">
+            <input type="password" id="inputPin" class="input-login" placeholder="PIN Rahasia">
+            <div id="pesanError" class="pesan-error"></div>
+            <button id="btnMasuk" class="btn-masuk">MASUK</button>
         </div>
-
-        <div id="page-rapor" class="tab-content hidden">
-            <div class="mb-6">
-                <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Performa Tim</p>
-                <h1 class="text-2xl font-bold tracking-tight text-gray-900">Rapor Petugas</h1>
-            </div>
-
-            <div class="space-y-3">
-                <div class="bg-iosCard p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center font-bold text-gray-600">AH</div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-800">Ahmad Hidayat</h3>
-                            <p class="text-xs text-gray-400">Wilayah Sektor Timur</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <span class="inline-block text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">A+ (Sangat Baik)</span>
-                        <p class="text-[10px] text-gray-400 mt-1">98% Target Tercapai</p>
-                    </div>
-                </div>
-
-                <div class="bg-iosCard p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center font-bold text-gray-600">BR</div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-800">Budi Ramadhan</h3>
-                            <p class="text-xs text-gray-400">Wilayah Sektor Barat</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <span class="inline-block text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">A (Baik)</span>
-                        <p class="text-[10px] text-gray-400 mt-1">91% Target Tercapai</p>
-                    </div>
-                </div>
-
-                <div class="bg-iosCard p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center font-bold text-gray-600">S</div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-800">Siti Aminah</h3>
-                            <p class="text-xs text-gray-400">Wilayah Sektor Pusat</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <span class="inline-block text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg">B (Cukup)</span>
-                        <p class="text-[10px] text-gray-400 mt-1">82% Target Tercapai</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="page-belum-donasi" class="tab-content hidden">
-            <div class="mb-6">
-                <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Follow Up Prospek</p>
-                <h1 class="text-2xl font-bold tracking-tight text-gray-900">Belum Berdonasi</h1>
-            </div>
-
-            <div class="bg-white rounded-xl flex items-center px-3 py-2 mb-4 border border-gray-100 shadow-sm">
-                <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <input type="text" placeholder="Cari nama muzakki..." class="bg-transparent text-sm w-full focus:outline-none text-gray-700">
-            </div>
-
-            <div class="bg-iosCard rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-50 overflow-hidden">
-                <div class="p-4 flex justify-between items-center">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-800">H. Hendra Wijaya</h3>
-                        <p class="text-xs text-gray-400">Terakhir berkontribusi: 2 bulan lalu</p>
-                    </div>
-                    <button class="bg-iosPrimary/10 text-iosPrimary px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-iosPrimary/20 transition">Ingatkan</button>
-                </div>
-                <div class="p-4 flex justify-between items-center">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-800">Ibu Dian Sastro</h3>
-                        <p class="text-xs text-gray-400">Kategori: Donatur Rutin Bulanan</p>
-                    </div>
-                    <button class="bg-iosPrimary/10 text-iosPrimary px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-iosPrimary/20 transition">Ingatkan</button>
-                </div>
-                <div class="p-4 flex justify-between items-center">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-800">PT. Maju Bersama</h3>
-                        <p class="text-xs text-gray-400">Kategori: Corporate CSR</p>
-                    </div>
-                    <button class="bg-iosPrimary/10 text-iosPrimary px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-iosPrimary/20 transition">Ingatkan</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="page-profil" class="tab-content hidden">
-            <div class="mb-6">
-                <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Pengaturan Akun</p>
-                <h1 class="text-2xl font-bold tracking-tight text-gray-900">Profil Pengguna</h1>
-            </div>
-
-            <div class="bg-iosCard p-5 rounded-2xl shadow-sm border border-gray-100 text-center mb-5">
-                <div class="w-20 h-20 bg-iosPrimary/10 rounded-full flex items-center justify-center text-iosPrimary font-bold text-2xl mx-auto mb-3">
-                    U
-                </div>
-                <h2 class="text-lg font-bold text-gray-800">Ust. Rahmat Hidayat</h2>
-                <p class="text-xs text-gray-400">Super Administrator</p>
-            </div>
-
-            <div class="bg-iosCard rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-50 overflow-hidden mb-4">
-                <div class="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50">
-                    <span class="text-sm font-medium text-gray-700">Edit Informasi Akun</span>
-                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-                </div>
-                <div class="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50">
-                    <span class="text-sm font-medium text-gray-700">Keamanan & Kata Sandi</span>
-                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-                </div>
-                <div class="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50">
-                    <span class="text-sm font-medium text-gray-700">Notifikasi</span>
-                    <span class="text-xs text-gray-400">Aktif</span>
-                </div>
-            </div>
-
-            <button class="w-full bg-red-50 text-red-600 font-semibold p-3 rounded-2xl text-sm border border-red-100 hover:bg-red-100 transition">
-                Keluar Aplikasi
-            </button>
-        </div>
-
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200/60 pb-5 pt-2 px-4 shadow-lg z-50">
-        <div class="max-w-md mx-auto flex justify-between items-center">
+    <div class="main-content">
+        <header class="ios-header">
+            <h1 id="pageTitle" class="page-title">Dasbor Utama</h1>
+        </header>
+
+        <div id="areaDasbor">
+            <div id="areaFilterGlobal" class="filter-area">
+                <select id="filterPetugas" class="dropdown-aksen skeleton-mode"><option value="Semua">SEMUA PETUGAS</option></select>
+                <select id="filterPekan" class="dropdown-aksen skeleton-mode">
+                    <option value="Total">TOTAL BULAN INI</option>
+                    <option value="Pekan 1">PEKAN 1</option><option value="Pekan 2">PEKAN 2</option>
+                    <option value="Pekan 3">PEKAN 3</option><option value="Pekan 4">PEKAN 4</option>
+                </select>
+            </div>
+
+            <div class="summary-cards">
+                <div class="card card-lime skeleton-mode">
+                    <div class="card-icon-wrapper" style="color: var(--hijau-lime); background: #f3f7e6;"><i class="fas fa-chart-pie"></i></div>
+                    <h3>PERSENTASE</h3><h2 id="teksPersentase">0%</h2>
+                </div>
+                <div class="card card-lime skeleton-mode">
+                    <div class="card-icon-wrapper" style="color: var(--hijau-lime); background: #f3f7e6;"><i class="fas fa-hand-holding-heart"></i></div>
+                    <h3>TERJEMPUT</h3><h2 id="teksBerhasil">0</h2>
+                </div>
+                <div class="card card-lime card-full skeleton-mode">
+                    <div class="card-icon-wrapper" style="color: var(--hijau-lime); background: #f3f7e6;"><i class="fas fa-wallet"></i></div>
+                    <h3>PEMASUKAN</h3><h2 id="teksPemasukan">Rp 0</h2>
+                </div>
+                
+                <div class="card card-muda skeleton-mode">
+                    <div class="card-icon-wrapper" style="color: var(--biru-muda); background: #eaf6f8;"><i class="fas fa-user-clock"></i></div>
+                    <h3>RUTIN</h3>
+                    <h2 id="teksRutin">0</h2>
+                    <div class="keterangan-bawah"><span id="teksBaruRutin" class="teks-baru">+0</span> | <span id="teksSisaRutin" class="teks-sisa-statis">-0</span></div>
+                </div>
+                <div class="card card-muda skeleton-mode">
+                    <div class="card-icon-wrapper" style="color: var(--biru-muda); background: #eaf6f8;"><i class="fas fa-box"></i></div>
+                    <h3>IKP</h3>
+                    <h2 id="teksIKP">0</h2>
+                    <div class="keterangan-bawah"><span id="teksBaruIKP" class="teks-baru">+0</span> | <span id="teksSisaIKP" class="teks-sisa-statis">-0</span></div>
+                </div>
+                <div class="card card-muda card-full skeleton-mode">
+                    <div class="card-icon-wrapper" style="color: var(--biru-muda); background: #eaf6f8;"><i class="fas fa-store"></i></div>
+                    <h3>IIP</h3>
+                    <h2 id="teksIIP">0</h2>
+                    <div class="keterangan-bawah"><span id="teksBaruIIP" class="teks-baru">+0</span> | <span id="teksSisaIIP" class="teks-sisa-statis">-0</span></div>
+                </div>
+            </div>
             
-            <button onclick="switchTab('dasbor', this)" class="nav-btn flex flex-col items-center justify-center flex-1 text-iosPrimary">
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                </svg>
-                <span class="text-[10px] font-medium">Dasbor</span>
-            </button>
+            <div class="charts-area">
+                <div class="chart-container skeleton-mode">
+                    <h3>Realisasi Target & Insidental</h3>
+                    <div style="height: 300px; position: relative;"><canvas id="grafikUtama"></canvas></div>
+                </div>
+            </div>
+        </div>
 
-            <button onclick="switchTab('rapor', this)" class="nav-btn flex flex-col items-center justify-center flex-1 text-gray-400">
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <span class="text-[10px] font-medium">Rapor</span>
-            </button>
+        <div id="areaRekap" style="display: none; padding: 0 15px;">
+            <div id="wadahRekap" style="margin-top: 15px;"></div>
+        </div>
 
-            <button onclick="switchTab('belum-donasi', this)" class="nav-btn flex flex-col items-center justify-center flex-1 text-gray-400">
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span class="text-[10px] font-medium">Belum Donasi</span>
-            </button>
+        <div id="areaBelum" style="display: none; padding: 0 15px;">
+            <div class="filter-area-lokal" id="wadahFilterBelumPetugas" style="padding-top: 15px;">
+                <select id="filterBelumPetugas" class="dropdown-lokal"></select>
+                <select id="filterBelumPekan" class="dropdown-lokal">
+                    <option value="Total">TOTAL BULAN INI</option>
+                    <option value="Pekan 1">PEKAN 1</option><option value="Pekan 2">PEKAN 2</option>
+                    <option value="Pekan 3">PEKAN 3</option><option value="Pekan 4">PEKAN 4</option>
+                </select>
+            </div>
+            
+            <div class="search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="inputCariDonatur" class="input-cari" placeholder="Cari Donatur..." autocomplete="off">
+            </div>
+            
+            <div class="header-halaman flex-header">
+                <h2>Sisa: <span id="totalSisaBelum">0</span></h2>
+                <select id="filterJenisDonatur" class="dropdown-kecil">
+                    <option value="Semua">SEMUA KAT</option><option value="RUTIN">RUTIN</option>
+                    <option value="IKP">IKP</option><option value="IIP">IIP</option>
+                </select>
+            </div>
+            
+            <div id="wadahDaftarBelum"></div>
+            <div id="wadahTombolMuat" style="text-align: center; margin: 15px 0 20px 0;"></div>
+        </div>
 
-            <button onclick="switchTab('profil', this)" class="nav-btn flex flex-col items-center justify-center flex-1 text-gray-400">
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-                <span class="text-[10px] font-medium">Profil</span>
-            </button>
+        <div id="areaProfil" style="display: none; padding: 20px 15px;">
+            <div class="profil-card">
+                <div class="profil-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h2 id="namaPenggunaProfil" style="margin-bottom: 5px;">Nama Petugas</h2>
+                <p id="rolePenggunaProfil" style="font-size: 13px; color: #8E8E93; margin-bottom: 25px;">Jabatan</p>
 
+                <div class="menu-profil-list">
+                    <div class="menu-profil-item">
+                        <div class="mpi-left"><i class="fas fa-id-badge" style="color: var(--biru-petrol);"></i> ID Petugas</div>
+                        <div class="mpi-right" id="idPenggunaProfil">-</div>
+                    </div>
+                    <div class="menu-profil-item">
+                        <div class="mpi-left"><i class="fas fa-shield-alt" style="color: var(--hijau-lime);"></i> Status Sistem</div>
+                        <div class="mpi-right text-lime">Aktif</div>
+                    </div>
+                </div>
+
+                <button id="menuLogout" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Keluar Akun
+                </button>
+            </div>
         </div>
     </div>
 
-    <script>
-        function switchTab(tabId, element) {
-            // 1. Sembunyikan semua halaman konten lebih dulu
-            const contents = document.querySelectorAll('.tab-content');
-            contents.forEach(content => {
-                content.classList.add('hidden');
-                content.classList.remove('block');
-            });
+    <nav class="bottom-nav">
+        <a href="#" id="navDasbor" class="nav-item aktif">
+            <i class="fas fa-chart-pie"></i><span>Dasbor</span>
+        </a>
+        <a href="#" id="navRekap" class="nav-item">
+            <i class="fas fa-users"></i><span>Rapor</span>
+        </a>
+        <a href="#" id="navBelum" class="nav-item">
+            <i class="fas fa-list-ul"></i><span>Sisa</span>
+        </a>
+        <a href="#" id="navProfil" class="nav-item">
+            <i class="fas fa-user"></i><span>Profil</span>
+        </a>
+    </nav>
 
-            // 2. Tampilkan halaman yang dipilih
-            const activeContent = document.getElementById('page-' + tabId);
-            if (activeContent) {
-                activeContent.classList.remove('hidden');
-                activeContent.classList.add('block');
-            }
+    <div id="modalEditPekan" class="overlay" style="display: none;">
+        <div class="modal-box">
+            <h3>Pindah Jadwal</h3>
+            <p id="namaDonaturEdit" class="nama-donatur-modal"></p>
+            <input type="hidden" id="regDonaturEdit">
+            <div class="label-modal">Pilih Pekan Baru:</div>
+            <select id="pilihanPekanBaru" class="input-modal">
+                <option value="1">Pekan 1</option><option value="2">Pekan 2</option>
+                <option value="3">Pekan 3</option><option value="4">Pekan 4</option>
+            </select>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="tutupModalEdit()" class="btn-batal">Batal</button>
+                <button id="btnSimpanPekan" onclick="simpanPekanBaru()" class="btn-simpan">Simpan</button>
+            </div>
+        </div>
+    </div>
 
-            // 3. Reset semua warna tombol menu menjadi abu-abu kembali
-            const buttons = document.querySelectorAll('.nav-btn');
-            buttons.forEach(btn => {
-                btn.classList.remove('text-iosPrimary');
-                btn.classList.add('text-gray-400');
-            });
-
-            // 4. Ubah warna tombol yang sedang aktif menjadi warna utama aplikasi
-            element.classList.remove('text-gray-400');
-            element.classList.add('text-iosPrimary');
-
-            // Opsional: Gulir otomatis ke atas saat berpindah menu agar nyaman
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
