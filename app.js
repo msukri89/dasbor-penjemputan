@@ -130,7 +130,6 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
     } else { document.getElementById('layarLogin').style.display = 'none'; } 
 
     try {
-        // Mengirim inputan sebagai parameter 'id'. Pastikan GAS diatur untuk memproses No. HP jika inputan bukan format ID standar.
         const fetchUrl = SCRIPT_URL + `?id=${encodeURIComponent(idInput)}&pin=${encodeURIComponent(pinInput)}`;
         const res = await fetch(fetchUrl); const json = await res.json();
         
@@ -205,6 +204,12 @@ function kalkulasiGlobalDasbor() {
     const fPet = sesiRole === "ADMIN" ? filterPetugas.value : sesiNama;
     const fPekRaw = filterPekan.value; const fPek = fPekRaw === "Total" ? "Total" : fPekRaw.replace("Pekan ","");
     
+    // PEMETAAN JADWAL PEKAN MASTER 
+    // Mencegah data masuk salah kamar jika donatur bayar tidak sesuai jadwal pekannya
+    let masterPekanMap = {};
+    dataMaster.master_orang.forEach(b => masterPekanMap[String(b["Nomor Register"]).trim()] = String(b.Pekan).trim());
+    dataMaster.master_kotak.forEach(b => masterPekanMap[String(b["Nomor Register"]).trim()] = String(b.Pekan).trim());
+
     dataBelumDasborGlobal = []; let totalRp = 0, bIns = 0;
 
     let idR_Global = new Set(), idIKP_Global = new Set(), idIIP_Global = new Set();
@@ -215,11 +220,21 @@ function kalkulasiGlobalDasbor() {
 
     let bR_Pekan = 0, bK1_Pekan = 0, bK2_Pekan = 0;
     
-    dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { 
+    dataMaster.terima_orang.filter(b => {
+        if (fPet !== "Semua" && b["Nama User"] !== fPet) return false;
+        let idD = String(b["Kode Donatur"]).trim();
+        let pek = b.Pekan ? String(b.Pekan).trim() : (masterPekanMap[idD] || getPekan(b.Tanggal));
+        return (fPek === "Total" || pek === fPek);
+    }).forEach(b => { 
         totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("RUTIN")) bR_Pekan++; else if(sp.includes("INSIDEN")) bIns++; 
     });
     
-    dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet) && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { 
+    dataMaster.terima_kotak.filter(b => {
+        if (fPet !== "Semua" && b["Nama User"] !== fPet) return false;
+        let idD = String(b["Kode Donatur"]).trim();
+        let pek = b.Pekan ? String(b.Pekan).trim() : (masterPekanMap[idD] || getPekan(b.Tanggal));
+        return (fPek === "Total" || pek === fPek);
+    }).forEach(b => { 
         totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) bK1_Pekan++; if(sp.includes("IIP")) bK2_Pekan++; 
     });
 
@@ -236,8 +251,8 @@ function kalkulasiGlobalDasbor() {
     });
 
     let dBaruRutin = 0, dBaruIKP = 0, dBaruIIP = 0;
-    if(dataMaster.baru_orang) { dataMaster.baru_orang.forEach(b => { let pet = String(b.Kolektor || b["Nama User"] || "").trim(); let pek = b.Pekan ? String(b.Pekan).trim() : getPekan(b.Tanggal); if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) { if(String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase().includes("RUTIN")) dBaruRutin++; } }); }
-    if(dataMaster.baru_kotak) { dataMaster.baru_kotak.forEach(b => { let pet = String(b.Kolektor || b["Nama User"] || "").trim(); let pek = b.Pekan ? String(b.Pekan).trim() : getPekan(b.Tanggal); if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) { let sp = String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase(); if(sp.includes("IKP")) dBaruIKP++; if(sp.includes("IIP")) dBaruIIP++; } }); }
+    if(dataMaster.baru_orang) { dataMaster.baru_orang.forEach(b => { let pet = String(b.Kolektor || b["Nama User"] || "").trim(); let idD = String(b["Nomor Register"] || b["Kode Donatur"] || "").trim(); let pek = b.Pekan ? String(b.Pekan).trim() : (masterPekanMap[idD] || getPekan(b.Tanggal)); if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) { if(String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase().includes("RUTIN")) dBaruRutin++; } }); }
+    if(dataMaster.baru_kotak) { dataMaster.baru_kotak.forEach(b => { let pet = String(b.Kolektor || b["Nama User"] || "").trim(); let idD = String(b["Nomor Register"] || b["Kode Donatur"] || "").trim(); let pek = b.Pekan ? String(b.Pekan).trim() : (masterPekanMap[idD] || getPekan(b.Tanggal)); if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) { let sp = String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase(); if(sp.includes("IKP")) dBaruIKP++; if(sp.includes("IIP")) dBaruIIP++; } }); }
 
     let totalKewajiban = kR + kK1 + kK2, totalSisa = sisaRutin + sisaIKP + sisaIIP;
     
@@ -262,6 +277,11 @@ function tampilkanRekap() {
     const fPek = filterPekan.value === "Total" ? "Total" : filterPekan.value.replace("Pekan ","");
     const fPet = sesiRole === "ADMIN" ? filterPetugas.value : sesiNama; 
     
+    // PEMETAAN JADWAL PEKAN MASTER
+    let masterPekanMap = {};
+    dataMaster.master_orang.forEach(b => masterPekanMap[String(b["Nomor Register"]).trim()] = String(b.Pekan).trim());
+    dataMaster.master_kotak.forEach(b => masterPekanMap[String(b["Nomor Register"]).trim()] = String(b.Pekan).trim());
+
     let petugasSet = new Set();
     dataMaster.master_orang.forEach(b => { let p = String(b.Kolektor).trim(); if(p && (fPet === "Semua" || p === fPet)) petugasSet.add(p); });
     dataMaster.master_kotak.forEach(b => { let p = String(b.Kolektor).trim(); if(p && (fPet === "Semua" || p === fPet)) petugasSet.add(p); });
@@ -285,12 +305,36 @@ function tampilkanRekap() {
         let mK = dataMaster.master_kotak.filter(b => String(b.Kolektor).trim()===petugas && (fPek==="Total" || String(b.Pekan)===fPek));
         kW.r = mR.length; kW.k1 = mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IKP")).length; kW.k2 = mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IIP")).length; kW.tot = kW.r + kW.k1 + kW.k2;
 
-        dataMaster.terima_orang.filter(b => b["Nama User"]===petugas && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { let sp = String(b.Spesifikasi||"").toUpperCase(); let nom = Number(b.Nominal||0); if(sp.includes("RUTIN")) { bD.r++; nO.r += nom; } else if(sp.includes("INSIDEN")) { bD.ins++; nO.ins += nom; } });
-        dataMaster.terima_kotak.filter(b => b["Nama User"]===petugas && (fPek==="Total" || getPekan(b.Tanggal)===fPek)).forEach(b => { let sp = String(b.Spesifikasi||"").toUpperCase(); let nom = Number(b.Nominal||0); if(sp.includes("IKP")) { bD.k1++; nO.k1 += nom; } if(sp.includes("IIP")) { bD.k2++; nO.k2 += nom; } });
+        dataMaster.terima_orang.filter(b => {
+            if (b["Nama User"] !== petugas) return false;
+            let idD = String(b["Kode Donatur"]).trim();
+            let pek = b.Pekan ? String(b.Pekan).trim() : (masterPekanMap[idD] || getPekan(b.Tanggal));
+            return (fPek === "Total" || pek === fPek);
+        }).forEach(b => { let sp = String(b.Spesifikasi||"").toUpperCase(); let nom = Number(b.Nominal||0); if(sp.includes("RUTIN")) { bD.r++; nO.r += nom; } else if(sp.includes("INSIDEN")) { bD.ins++; nO.ins += nom; } });
+        
+        dataMaster.terima_kotak.filter(b => {
+            if (b["Nama User"] !== petugas) return false;
+            let idD = String(b["Kode Donatur"]).trim();
+            let pek = b.Pekan ? String(b.Pekan).trim() : (masterPekanMap[idD] || getPekan(b.Tanggal));
+            return (fPek === "Total" || pek === fPek);
+        }).forEach(b => { let sp = String(b.Spesifikasi||"").toUpperCase(); let nom = Number(b.Nominal||0); if(sp.includes("IKP")) { bD.k1++; nO.k1 += nom; } if(sp.includes("IIP")) { bD.k2++; nO.k2 += nom; } });
+        
         bD.tot = bD.r + bD.k1 + bD.k2 + bD.ins; nO.tot = nO.r + nO.k1 + nO.k2 + nO.ins;
 
-        if(dataMaster.baru_orang) { dataMaster.baru_orang.filter(b => (String(b.Kolektor || b["Nama User"] || "").trim()===petugas) && (fPek==="Total" || (b.Pekan ? String(b.Pekan).trim() : getPekan(b.Tanggal))===fPek)).forEach(b => { if(String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase().includes("RUTIN")) bR.r++; else if(String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase().includes("INSIDEN")) bR.ins++; }); }
-        if(dataMaster.baru_kotak) { dataMaster.baru_kotak.filter(b => (String(b.Kolektor || b["Nama User"] || "").trim()===petugas) && (fPek==="Total" || (b.Pekan ? String(b.Pekan).trim() : getPekan(b.Tanggal))===fPek)).forEach(b => { let sp = String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase(); if(sp.includes("IKP")) bR.k1++; if(sp.includes("IIP")) bR.k2++; }); }
+        if(dataMaster.baru_orang) { dataMaster.baru_orang.filter(b => {
+            if(String(b.Kolektor || b["Nama User"] || "").trim() !== petugas) return false;
+            let idD = String(b["Nomor Register"] || b["Kode Donatur"] || "").trim();
+            let pek = b.Pekan ? String(b.Pekan).trim() : (masterPekanMap[idD] || getPekan(b.Tanggal));
+            return (fPek === "Total" || pek === fPek);
+        }).forEach(b => { if(String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase().includes("RUTIN")) bR.r++; else if(String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase().includes("INSIDEN")) bR.ins++; }); }
+        
+        if(dataMaster.baru_kotak) { dataMaster.baru_kotak.filter(b => {
+            if(String(b.Kolektor || b["Nama User"] || "").trim() !== petugas) return false;
+            let idD = String(b["Nomor Register"] || b["Kode Donatur"] || "").trim();
+            let pek = b.Pekan ? String(b.Pekan).trim() : (masterPekanMap[idD] || getPekan(b.Tanggal));
+            return (fPek === "Total" || pek === fPek);
+        }).forEach(b => { let sp = String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase(); if(sp.includes("IKP")) bR.k1++; if(sp.includes("IIP")) bR.k2++; }); }
+        
         bR.tot = bR.r + bR.k1 + bR.k2 + bR.ins;
 
         let sisaR = 0, sisaK1 = 0, sisaK2 = 0;
