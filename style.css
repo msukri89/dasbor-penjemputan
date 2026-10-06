@@ -157,3 +157,12 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); min-heig
 .skeleton-mode * { visibility: hidden !important; }
 .skeleton-mode::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 16px; background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 200% 100%; animation: loading-skeleton 1.5s infinite; z-index: 10; }
 @keyframes loading-skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Status Donatur - tambahan fitur, tidak mengubah komponen lama */
+.btn-nonaktif, .btn-aktifkan { width:38px; height:38px; border-radius:12px; display:flex; justify-content:center; align-items:center; border:none; cursor:pointer; font-size:15px; }
+.btn-nonaktif { background:#FFF0F0; color:var(--merah-bata); }
+.btn-aktifkan { background:#EEF8E8; color:var(--hijau-lime); }
+.btn-nonaktif:active, .btn-aktifkan:active { transform:scale(0.95); }
+.badge.status-nonaktif { background:#8E8E93 !important; }
+.info-nonaktif { color:#8E8E93 !important; font-size:11px !important; margin-top:5px; line-height:1.35; }
+.input-modal { resize:vertical; }
