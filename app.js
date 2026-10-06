@@ -460,7 +460,7 @@ function renderDaftarKeLayar(dataList) {
         let tombolWA = (d.selesai || d.nonaktif) ? "" : `<a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>`;
         let tombolStatus = d.nonaktif
             ? `<button class="btn-aktifkan" title="Aktifkan kembali" onclick="bukaModalAktifkan('${encodeURIComponent(d.n)}', '${d.r}')"><i class="fas fa-user-check"></i></button>`
-            : `<button class="btn-nonaktif" title="Nonaktifkan donatur" onclick="bukaModalNonaktif('${encodeURIComponent(d.n)}', '${d.r}')"><i class="fas fa-user-slash"></i></button>`;
+            : `<button class="btn-nonaktif" title="Nonaktifkan donatur" onclick="bukaModalNonaktif('${encodeURIComponent(d.n)}', '${d.r}')"><i class="fas fa-trash-alt"></i></button>`;
         let infoNonaktif = d.nonaktif ? `<p class="info-nonaktif"><i class="fas fa-info-circle"></i> ${escHtml(d.alasanNonaktif || "Tidak ada alasan")} • ${escHtml(d.tanggalNonaktif || "-")}${d.keteranganNonaktif ? " • " + escHtml(d.keteranganNonaktif) : ""}</p>` : "";
 
         teksBufferHTML += `
@@ -498,6 +498,7 @@ function bukaModalNonaktif(nama, reg) {
     document.getElementById('pilihanAlasanNonaktif').value = "";
     document.getElementById('keteranganNonaktif').value = "";
     document.getElementById('wadahKeteranganNonaktif').style.display = 'none';
+    document.getElementById('uiPilihanAlasanNonaktif').innerHTML = `<span>Pilih alasan...</span> <i class="fas fa-chevron-down" style="font-size:10px;"></i>`;
     document.getElementById('modalNonaktif').style.display = 'flex';
 }
 
