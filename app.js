@@ -5,6 +5,45 @@ let dataBelumDasborGlobal = [];
 let dataSemuaMandiriLokal = []; 
 let limitTampil = 50;
 
+let cacheTurunan = {
+    masterPekanMap: null,
+    daftarDonatur: { key: null, data: null },
+    transaksiPerPetugas: {}
+};
+
+function resetCacheTurunan() {
+    cacheTurunan.masterPekanMap = null;
+    cacheTurunan.daftarDonatur = { key: null, data: null };
+    cacheTurunan.transaksiPerPetugas = {};
+}
+
+function getMasterPekanMap() {
+    if (cacheTurunan.masterPekanMap) return cacheTurunan.masterPekanMap;
+    const map = {};
+    dataMaster.master_orang.forEach(b => map[String(b["Nomor Register"]).trim()] = String(b.Pekan).trim());
+    dataMaster.master_kotak.forEach(b => map[String(b["Nomor Register"]).trim()] = String(b.Pekan).trim());
+    cacheTurunan.masterPekanMap = map;
+    return map;
+}
+
+function getTransaksiSelesaiPerPetugas(fPet) {
+    const key = fPet || "Semua";
+    if (cacheTurunan.transaksiPerPetugas[key]) return cacheTurunan.transaksiPerPetugas[key];
+    const hasil = { rutin: new Set(), ikp: new Set(), iip: new Set() };
+    dataMaster.terima_orang.forEach(b => {
+        if (fPet !== "Semua" && b["Nama User"] !== fPet) return;
+        if (String(b.Spesifikasi || "").toUpperCase().includes("RUTIN")) hasil.rutin.add(String(b["Kode Donatur"]).trim());
+    });
+    dataMaster.terima_kotak.forEach(b => {
+        if (fPet !== "Semua" && b["Nama User"] !== fPet) return;
+        const sp = String(b.Spesifikasi || "").toUpperCase();
+        if (sp.includes("IKP")) hasil.ikp.add(String(b["Kode Donatur"]).trim());
+        if (sp.includes("IIP")) hasil.iip.add(String(b["Kode Donatur"]).trim());
+    });
+    cacheTurunan.transaksiPerPetugas[key] = hasil;
+    return hasil;
+}
+
 let sesiRole = ""; let sesiNama = "";
 let historyPushed = false; 
 
@@ -28,7 +67,8 @@ const filterPekan = document.getElementById('filterPekan');
 const filterBelumPetugas = document.getElementById('filterBelumPetugas');
 const filterBelumPekan = document.getElementById('filterBelumPekan');
 const filterJenisDonatur = document.getElementById('filterJenisDonatur');
-const filterStatusDonatur = document.getElementById('filterStatusDonatur'); 
+const filterStatusDonatur = document.getElementById('filterStatusDonatur');
+const filterStatusMaster = document.getElementById('filterStatusMaster'); 
 
 // ==========================================
 // LOGIKA CUSTOM DROPDOWN
@@ -140,6 +180,7 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
         }
 
         dataMaster = json.data; sesiRole = json.role; sesiNama = json.nama;
+        resetCacheTurunan();
         localStorage.setItem('laz_id', idInput); localStorage.setItem('laz_pin', pinInput);
         
         document.getElementById('layarLogin').style.display = 'none'; 
@@ -190,6 +231,19 @@ function isiOpsiPetugas() {
     }
 }
 
+function isDonaturNonaktif(b) {
+    return String(b["Status"] || "").trim().toUpperCase() === "NONAKTIF";
+}
+
+function escHtml(value) {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 function getPekan(t) {
     if(!t) return "0"; let s=String(t), h=0;
     if(s.includes('/')) h=parseInt(s.split('/')[0],10); else if(s.includes('-')) h=parseInt(s.split('T')[0].split('-')[2],10); else h=new Date(s).getDate();
@@ -206,17 +260,14 @@ function kalkulasiGlobalDasbor() {
     
     // PEMETAAN JADWAL PEKAN MASTER 
     // Mencegah data masuk salah kamar jika donatur bayar tidak sesuai jadwal pekannya
-    let masterPekanMap = {};
-    dataMaster.master_orang.forEach(b => masterPekanMap[String(b["Nomor Register"]).trim()] = String(b.Pekan).trim());
-    dataMaster.master_kotak.forEach(b => masterPekanMap[String(b["Nomor Register"]).trim()] = String(b.Pekan).trim());
+    let masterPekanMap = getMasterPekanMap();
 
     dataBelumDasborGlobal = []; let totalRp = 0, bIns = 0;
 
-    let idR_Global = new Set(), idIKP_Global = new Set(), idIIP_Global = new Set();
-    dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => { if(String(b.Spesifikasi||"").toUpperCase().includes("RUTIN")) idR_Global.add(String(b["Kode Donatur"]).trim()); });
-    dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => {
-        let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) idIKP_Global.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Global.add(String(b["Kode Donatur"]).trim());
-    });
+    const selesaiGlobal = getTransaksiSelesaiPerPetugas(fPet);
+    const idR_Global = selesaiGlobal.rutin;
+    const idIKP_Global = selesaiGlobal.ikp;
+    const idIIP_Global = selesaiGlobal.iip;
 
     let bR_Pekan = 0, bK1_Pekan = 0, bK2_Pekan = 0;
     
@@ -238,8 +289,8 @@ function kalkulasiGlobalDasbor() {
         totalRp += Number(b.Nominal||0); let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) bK1_Pekan++; if(sp.includes("IIP")) bK2_Pekan++; 
     });
 
-    let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
-    let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
+    let mR = dataMaster.master_orang.filter(b => !isDonaturNonaktif(b) && (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
+    let mK = dataMaster.master_kotak.filter(b => !isDonaturNonaktif(b) && (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
     let kR = mR.length, kK1 = mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IKP")).length, kK2 = mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IIP")).length;
 
     let sisaRutin = 0, sisaIKP = 0, sisaIIP = 0;
@@ -278,9 +329,7 @@ function tampilkanRekap() {
     const fPet = sesiRole === "ADMIN" ? filterPetugas.value : sesiNama; 
     
     // PEMETAAN JADWAL PEKAN MASTER
-    let masterPekanMap = {};
-    dataMaster.master_orang.forEach(b => masterPekanMap[String(b["Nomor Register"]).trim()] = String(b.Pekan).trim());
-    dataMaster.master_kotak.forEach(b => masterPekanMap[String(b["Nomor Register"]).trim()] = String(b.Pekan).trim());
+    let masterPekanMap = getMasterPekanMap();
 
     let petugasSet = new Set();
     dataMaster.master_orang.forEach(b => { let p = String(b.Kolektor).trim(); if(p && (fPet === "Semua" || p === fPet)) petugasSet.add(p); });
@@ -296,13 +345,13 @@ function tampilkanRekap() {
 
     petugasSet.forEach(petugas => {
         let kW = { r:0, k1:0, k2:0, tot:0 }, bD = { ins:0, r:0, k1:0, k2:0, tot:0 }, bR = { ins:0, r:0, k1:0, k2:0, tot:0 }, nO = { ins:0, r:0, k1:0, k2:0, tot:0 };
-        let idR_Glob = new Set(), idIKP_Glob = new Set(), idIIP_Glob = new Set();
-        
-        dataMaster.terima_orang.filter(b => b["Nama User"]===petugas).forEach(b => { if(String(b.Spesifikasi||"").toUpperCase().includes("RUTIN")) idR_Glob.add(String(b["Kode Donatur"]).trim()); });
-        dataMaster.terima_kotak.filter(b => b["Nama User"]===petugas).forEach(b => { let sp = String(b.Spesifikasi||"").toUpperCase(); if(sp.includes("IKP")) idIKP_Glob.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Glob.add(String(b["Kode Donatur"]).trim()); });
+        const selesaiPetugas = getTransaksiSelesaiPerPetugas(petugas);
+        const idR_Glob = selesaiPetugas.rutin;
+        const idIKP_Glob = selesaiPetugas.ikp;
+        const idIIP_Glob = selesaiPetugas.iip;
 
-        let mR = dataMaster.master_orang.filter(b => String(b.Kolektor).trim()===petugas && (fPek==="Total" || String(b.Pekan)===fPek));
-        let mK = dataMaster.master_kotak.filter(b => String(b.Kolektor).trim()===petugas && (fPek==="Total" || String(b.Pekan)===fPek));
+        let mR = dataMaster.master_orang.filter(b => !isDonaturNonaktif(b) && String(b.Kolektor).trim()===petugas && (fPek==="Total" || String(b.Pekan)===fPek));
+        let mK = dataMaster.master_kotak.filter(b => !isDonaturNonaktif(b) && String(b.Kolektor).trim()===petugas && (fPek==="Total" || String(b.Pekan)===fPek));
         kW.r = mR.length; kW.k1 = mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IKP")).length; kW.k2 = mK.filter(b=>String(b.Spesifikasi).toUpperCase().includes("IIP")).length; kW.tot = kW.r + kW.k1 + kW.k2;
 
         dataMaster.terima_orang.filter(b => {
@@ -358,58 +407,57 @@ function tampilkanRekap() {
 // ==========================================
 function hitungDaftarDonaturLengkap(muatLebih = false) {
     if(!dataMaster) return;
-    if(!muatLebih) limitTampil = 50; 
+    if(!muatLebih) limitTampil = 50;
 
     const fPet = sesiRole === "ADMIN" ? filterBelumPetugas.value : sesiNama;
     const fPekRaw = filterBelumPekan.value;
     const fPek = fPekRaw === "Total" ? "Total" : fPekRaw.replace("Pekan ","");
     const fKat = filterJenisDonatur.value;
-    const fStat = filterStatusDonatur.value; 
+    const fStat = filterStatusDonatur.value;
+    const fStatusMaster = filterStatusMaster.value;
 
-    dataSemuaMandiriLokal = [];
+    const cacheKey = fPet + "|" + fPek;
+    let baseData = null;
 
-    let idR_Lokal = new Set(), idIKP_Lokal = new Set(), idIIP_Lokal = new Set();
-    dataMaster.terima_orang.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => { if(String(b.Spesifikasi||"").toUpperCase().includes("RUTIN")) idR_Lokal.add(String(b["Kode Donatur"]).trim()); });
-    dataMaster.terima_kotak.filter(b => (fPet==="Semua" || b["Nama User"]===fPet)).forEach(b => {
-        let sp = String(b.Spesifikasi||"").toUpperCase();
-        if(sp.includes("IKP")) idIKP_Lokal.add(String(b["Kode Donatur"]).trim()); if(sp.includes("IIP")) idIIP_Lokal.add(String(b["Kode Donatur"]).trim());
-    });
+    if (cacheTurunan.daftarDonatur.key === cacheKey && cacheTurunan.daftarDonatur.data) {
+        baseData = cacheTurunan.daftarDonatur.data;
+    } else {
+        const selesaiLokal = getTransaksiSelesaiPerPetugas(fPet);
+        const mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
+        const mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
 
-    let mR = dataMaster.master_orang.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
-    let mK = dataMaster.master_kotak.filter(b => (fPet==="Semua" || String(b.Kolektor).trim()===fPet) && (fPek==="Total" || String(b.Pekan)===fPek));
+        baseData = [];
 
-    mR.forEach(b => { 
-        let isSelesai = idR_Lokal.has(String(b["Nomor Register"]).trim());
-        dataSemuaMandiriLokal.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:String(b["Nomor Register"]).trim(), pek:String(b.Pekan).trim(), selesai: isSelesai}); 
-    });
-    
-    mK.forEach(b => {
-        let id=String(b["Nomor Register"]).trim(), sp=String(b.Spesifikasi).toUpperCase();
-        if(sp.includes("IKP")) { 
-            let isSelesai = idIKP_Lokal.has(id);
-            dataSemuaMandiriLokal.push({n:b["Nama Donatur"], k:"IKP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim(), selesai: isSelesai}); 
-        } 
-        else if(sp.includes("IIP")) { 
-            let isSelesai = idIIP_Lokal.has(id);
-            dataSemuaMandiriLokal.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim(), selesai: isSelesai}); 
-        }
-    });
+        mR.forEach(b => {
+            const id = String(b["Nomor Register"]).trim();
+            baseData.push({n:b["Nama Donatur"], k:"RUTIN", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim(), selesai:selesaiLokal.rutin.has(id), nonaktif:isDonaturNonaktif(b), tanggalNonaktif:b["Tanggal Nonaktif"] || "", alasanNonaktif:b["Alasan Nonaktif"] || "", keteranganNonaktif:b["Keterangan Nonaktif"] || ""});
+        });
 
-    let dataAkhirTerfilter = dataSemuaMandiriLokal;
-    
-    if(fKat !== "Semua") { dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.k === fKat); }
-    if(fStat === "Sudah") { dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.selesai === true); } 
-    else if(fStat === "Belum") { dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.selesai === false); }
-    
-    const kataKunci = document.getElementById('inputCariDonatur').value.toLowerCase().trim();
-    if(kataKunci) {
-        dataAkhirTerfilter = dataAkhirTerfilter.filter(d => String(d.n).toLowerCase().includes(kataKunci) || String(d.r).toLowerCase().includes(kataKunci) || String(d.a).toLowerCase().includes(kataKunci));
+        mK.forEach(b => {
+            const id = String(b["Nomor Register"]).trim();
+            const sp = String(b.Spesifikasi).toUpperCase();
+            if(sp.includes("IKP")) baseData.push({n:b["Nama Donatur"], k:"IKP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim(), selesai:selesaiLokal.ikp.has(id), nonaktif:isDonaturNonaktif(b), tanggalNonaktif:b["Tanggal Nonaktif"] || "", alasanNonaktif:b["Alasan Nonaktif"] || "", keteranganNonaktif:b["Keterangan Nonaktif"] || ""});
+            else if(sp.includes("IIP")) baseData.push({n:b["Nama Donatur"], k:"IIP", a:b.Alamat, h:b.Hp, p:String(b.Kolektor).trim(), r:id, pek:String(b.Pekan).trim(), selesai:selesaiLokal.iip.has(id), nonaktif:isDonaturNonaktif(b), tanggalNonaktif:b["Tanggal Nonaktif"] || "", alasanNonaktif:b["Alasan Nonaktif"] || "", keteranganNonaktif:b["Keterangan Nonaktif"] || ""});
+        });
+
+        cacheTurunan.daftarDonatur = { key: cacheKey, data: baseData };
     }
 
+    let dataAkhirTerfilter = baseData;
+    if(fStatusMaster === "Aktif") dataAkhirTerfilter = dataAkhirTerfilter.filter(d => !d.nonaktif);
+    else if(fStatusMaster === "Nonaktif") dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.nonaktif);
+
+    if(fKat !== "Semua") dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.k === fKat);
+    if(fStat === "Sudah") dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.selesai === true);
+    else if(fStat === "Belum") dataAkhirTerfilter = dataAkhirTerfilter.filter(d => d.selesai === false);
+
+    const kataKunci = document.getElementById('inputCariDonatur').value.toLowerCase().trim();
+    if(kataKunci) dataAkhirTerfilter = dataAkhirTerfilter.filter(d => String(d.n).toLowerCase().includes(kataKunci) || String(d.r).toLowerCase().includes(kataKunci) || String(d.a).toLowerCase().includes(kataKunci));
+
+    dataSemuaMandiriLokal = baseData;
     document.getElementById('totalSemuaDonatur').innerText = dataAkhirTerfilter.length;
     renderDaftarKeLayar(dataAkhirTerfilter);
 }
-
 function renderDaftarKeLayar(dataList) {
     const wadah = document.getElementById('wadahDaftarBelum');
     const wadahTombol = document.getElementById('wadahTombolMuat');
@@ -434,10 +482,15 @@ function renderDaftarKeLayar(dataList) {
         let labelPekan = (d.pek && d.pek !== "0" && d.pek !== "undefined" && d.pek !== "") ? `Pekan ${d.pek}` : "Pekan -";
         
         let kelasSelesai = d.selesai ? "selesai" : "";
-        let styleBorder = d.selesai ? "border-left: 5px solid #E5E5EA;" : `border-left: 5px solid ${c}`;
+        let styleBorder = d.nonaktif ? "border-left: 5px solid #8E8E93;" : (d.selesai ? "border-left: 5px solid #E5E5EA;" : `border-left: 5px solid ${c}`);
         let badgeSelesai = d.selesai ? `<span class="badge status-selesai"><i class="fas fa-check"></i> SELESAI</span>` : "";
-        let badgeKatStyle = d.selesai ? "background:#8E8E93" : `background:${c}`;
-        let tombolWA = d.selesai ? "" : `<a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>`;
+        let badgeNonaktif = d.nonaktif ? `<span class="badge status-nonaktif"><i class="fas fa-user-slash"></i> NONAKTIF</span>` : "";
+        let badgeKatStyle = d.nonaktif || d.selesai ? "background:#8E8E93" : `background:${c}`;
+        let tombolWA = (d.selesai || d.nonaktif) ? "" : `<a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>`;
+        let tombolStatus = d.nonaktif
+            ? `<button class="btn-aktifkan" title="Aktifkan kembali" onclick="bukaModalAktifkan('${encodeURIComponent(d.n)}', '${d.r}')"><i class="fas fa-user-check"></i></button>`
+            : `<button class="btn-nonaktif" title="Nonaktifkan donatur" onclick="bukaModalNonaktif('${encodeURIComponent(d.n)}', '${d.r}')"><i class="fas fa-trash-alt"></i></button>`;
+        let infoNonaktif = d.nonaktif ? `<p class="info-nonaktif"><i class="fas fa-info-circle"></i> ${escHtml(d.alasanNonaktif || "Tidak ada alasan")} • ${escHtml(d.tanggalNonaktif || "-")}${d.keteranganNonaktif ? " • " + escHtml(d.keteranganNonaktif) : ""}</p>` : "";
 
         teksBufferHTML += `
             <div class="kartu-belum ${kelasSelesai}" style="${styleBorder}">
@@ -447,12 +500,15 @@ function renderDaftarKeLayar(dataList) {
                         <span class="badge" style="${badgeKatStyle}">${d.k}</span>
                         <span class="badge" style="background:#8E8E93; margin-left:3px;">${labelPekan}</span>
                         ${badgeSelesai}
+                        ${badgeNonaktif}
                     </h4>
                     <p>${d.a}</p>
+                    ${infoNonaktif}
                 </div>
                 <div class="grup-tombol">
-                    <button class="btn-edit" onclick="bukaModalEdit('${namaBersih}', '${d.r}', '${d.pek}')"><i class="fas fa-calendar-alt"></i></button>
+                    ${d.nonaktif ? "" : `<button class="btn-edit" title="Pindah jadwal" onclick="bukaModalEdit('${namaBersih}', '${d.r}', '${d.pek}')"><i class="fas fa-calendar-alt"></i></button>`}
                     ${tombolWA}
+                    ${tombolStatus}
                 </div>
             </div>`;
     });
@@ -463,6 +519,77 @@ function renderDaftarKeLayar(dataList) {
 }
 
 function aksiMuatLebihBanyak() { limitTampil += 50; hitungDaftarDonaturLengkap(true); }
+
+function bukaModalNonaktif(nama, reg) {
+    nama = decodeURIComponent(nama);
+    document.getElementById('namaDonaturNonaktif').innerText = nama;
+    document.getElementById('regDonaturNonaktif').value = reg;
+    document.getElementById('pilihanAlasanNonaktif').value = "";
+    document.getElementById('keteranganNonaktif').value = "";
+    document.getElementById('wadahKeteranganNonaktif').style.display = 'none';
+    document.getElementById('uiPilihanAlasanNonaktif').innerHTML = `<span>Pilih alasan...</span> <i class="fas fa-chevron-down" style="font-size:10px;"></i>`;
+    document.getElementById('modalNonaktif').style.display = 'flex';
+}
+
+function tutupModalNonaktif() { document.getElementById('modalNonaktif').style.display = 'none'; }
+
+function perubahanAlasanNonaktif() {
+    const alasan = document.getElementById('pilihanAlasanNonaktif').value;
+    document.getElementById('wadahKeteranganNonaktif').style.display = alasan === "Alasan lainnya" ? 'block' : 'none';
+}
+
+function bukaModalAktifkan(nama, reg) {
+    nama = decodeURIComponent(nama);
+    document.getElementById('namaDonaturAktifkan').innerText = nama;
+    document.getElementById('regDonaturAktifkan').value = reg;
+    document.getElementById('modalAktifkan').style.display = 'flex';
+}
+
+function tutupModalAktifkan() { document.getElementById('modalAktifkan').style.display = 'none'; }
+
+async function simpanStatusDonatur(action, reg, alasan, keterangan, tombolId, pesanSukses) {
+    const btn = document.getElementById(tombolId);
+    btn.innerText = "Menyimpan...";
+    btn.disabled = true;
+    const idUser = localStorage.getItem('laz_id');
+    const pinUser = localStorage.getItem('laz_pin');
+    const formData = new URLSearchParams();
+    formData.append('action', action);
+    formData.append('id', idUser);
+    formData.append('pin', pinUser);
+    formData.append('reg', reg);
+    if(alasan) formData.append('alasan', alasan);
+    if(keterangan) formData.append('keterangan', keterangan);
+
+    try {
+        const res = await fetch(SCRIPT_URL, { method:'POST', body:formData });
+        const json = await res.json();
+        if(json.status === "SUKSES") {
+            if(action === "nonaktifkan_donatur") tutupModalNonaktif();
+            else tutupModalAktifkan();
+            tampilkanAlert('sukses', 'Alhamdulillah', pesanSukses);
+            await eksekusiMasuk(idUser, pinUser, false);
+        } else {
+            tampilkanAlert('error', 'Gagal', json.pesan || "Perubahan status gagal.");
+        }
+    } catch(e) {
+        tampilkanAlert('error', 'Koneksi Bermasalah', 'Gagal menghubungi server. Pastikan internet Anda lancar.');
+    }
+    btn.innerText = action === "nonaktifkan_donatur" ? "Nonaktifkan" : "Aktifkan Kembali";
+    btn.disabled = false;
+}
+
+async function simpanNonaktifkan() {
+    const alasan = document.getElementById('pilihanAlasanNonaktif').value;
+    const keterangan = document.getElementById('keteranganNonaktif').value.trim();
+    if(!alasan) { tampilkanAlert('error', 'Belum Lengkap', 'Silakan pilih alasan nonaktif.'); return; }
+    if(alasan === "Alasan lainnya" && !keterangan) { tampilkanAlert('error', 'Belum Lengkap', 'Silakan isi keterangan untuk alasan lainnya.'); return; }
+    await simpanStatusDonatur("nonaktifkan_donatur", document.getElementById('regDonaturNonaktif').value, alasan, keterangan, 'btnSimpanNonaktif', 'Donatur berhasil dinonaktifkan.');
+}
+
+async function simpanAktifkan() {
+    await simpanStatusDonatur("aktifkan_donatur", document.getElementById('regDonaturAktifkan').value, "", "", 'btnSimpanAktifkan', 'Donatur berhasil diaktifkan kembali.');
+}
 
 // ==========================================
 // UTILITAS (GRAFIK, UNDUH, EDIT)
@@ -524,8 +651,13 @@ filterPekan.addEventListener('change', () => { setTimeout(() => { kalkulasiGloba
 filterBelumPetugas.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
 filterBelumPekan.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
 filterJenisDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
-filterStatusDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); }); 
-document.getElementById('inputCariDonatur').addEventListener('input', () => { hitungDaftarDonaturLengkap(false); });
+filterStatusDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
+filterStatusMaster.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); }); 
+let timerCariDonatur = null;
+document.getElementById('inputCariDonatur').addEventListener('input', () => {
+    clearTimeout(timerCariDonatur);
+    timerCariDonatur = setTimeout(() => hitungDaftarDonaturLengkap(false), 180);
+});
 
 function inisialisasiAplikasi() {
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Registration Skip:', err)); }
