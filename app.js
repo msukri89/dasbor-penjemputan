@@ -459,8 +459,8 @@ function renderDaftarKeLayar(dataList) {
         let badgeKatStyle = d.nonaktif || d.selesai ? "background:#8E8E93" : `background:${c}`;
         let tombolWA = (d.selesai || d.nonaktif) ? "" : `<a href="${l}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>`;
         let tombolStatus = d.nonaktif
-            ? `<button class="btn-aktifkan" title="Aktifkan kembali" onclick="bukaModalAktifkan('${escHtml(d.n)}', '${d.r}')"><i class="fas fa-user-check"></i></button>`
-            : `<button class="btn-nonaktif" title="Nonaktifkan donatur" onclick="bukaModalNonaktif('${escHtml(d.n)}', '${d.r}')"><i class="fas fa-user-slash"></i></button>`;
+            ? `<button class="btn-aktifkan" title="Aktifkan kembali" onclick="bukaModalAktifkan('${encodeURIComponent(d.n)}', '${d.r}')"><i class="fas fa-user-check"></i></button>`
+            : `<button class="btn-nonaktif" title="Nonaktifkan donatur" onclick="bukaModalNonaktif('${encodeURIComponent(d.n)}', '${d.r}')"><i class="fas fa-user-slash"></i></button>`;
         let infoNonaktif = d.nonaktif ? `<p class="info-nonaktif"><i class="fas fa-info-circle"></i> ${escHtml(d.alasanNonaktif || "Tidak ada alasan")} • ${escHtml(d.tanggalNonaktif || "-")}${d.keteranganNonaktif ? " • " + escHtml(d.keteranganNonaktif) : ""}</p>` : "";
 
         teksBufferHTML += `
@@ -491,6 +491,7 @@ function renderDaftarKeLayar(dataList) {
 function aksiMuatLebihBanyak() { limitTampil += 50; hitungDaftarDonaturLengkap(true); }
 
 function bukaModalNonaktif(nama, reg) {
+    nama = decodeURIComponent(nama);
     document.getElementById('namaDonaturNonaktif').innerText = nama;
     document.getElementById('regDonaturNonaktif').value = reg;
     document.getElementById('pilihanAlasanNonaktif').value = "";
@@ -507,6 +508,7 @@ function perubahanAlasanNonaktif() {
 }
 
 function bukaModalAktifkan(nama, reg) {
+    nama = decodeURIComponent(nama);
     document.getElementById('namaDonaturAktifkan').innerText = nama;
     document.getElementById('regDonaturAktifkan').value = reg;
     document.getElementById('modalAktifkan').style.display = 'flex';
