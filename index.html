@@ -140,7 +140,14 @@
             <div class="header-halaman flex-header">
                 <h2>Total: <span id="totalSemuaDonatur">0</span></h2>
                 
-                <div style="display: flex; gap: 6px;">
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+                    <select id="filterStatusMaster" style="display:none;">
+                        <option value="Aktif">DONATUR AKTIF</option>
+                        <option value="Nonaktif">DONATUR NONAKTIF</option>
+                        <option value="Semua">SEMUA DONATUR</option>
+                    </select>
+                    <div id="uiFilterStatusMaster" class="dropdown-kecil custom-select-trigger lokal" style="flex:none; padding:6px 10px; font-size:11px; border-radius:10px;" onclick="bukaModalPilih('filterStatusMaster', 'Status Donatur', 'uiFilterStatusMaster')"><span>DONATUR AKTIF</span> <i class="fas fa-chevron-down" style="font-size:10px;"></i></div>
+
                     <select id="filterStatusDonatur" style="display:none;">
                         <option value="Semua">SEMUA STATUS</option>
                         <option value="Belum">BELUM SELESAI</option>
@@ -218,6 +225,49 @@
         </div>
     </div>
     
+    <div id="modalNonaktif" class="overlay" style="display: none; z-index: 10004;">
+        <div class="modal-box">
+            <h3>Nonaktifkan Donatur</h3>
+            <p id="namaDonaturNonaktif" class="nama-donatur-modal"></p>
+            <input type="hidden" id="regDonaturNonaktif">
+            <div class="label-modal">Alasan Nonaktif:</div>
+            <select id="pilihanAlasanNonaktif" class="input-modal" onchange="perubahanAlasanNonaktif()">
+                <option value="">Pilih alasan...</option>
+                <option value="Berhenti berdonasi">Berhenti berdonasi</option>
+                <option value="Tidak bersedia dijemput lagi">Tidak bersedia dijemput lagi</option>
+                <option value="Pindah alamat">Pindah alamat</option>
+                <option value="Pindah tempat tinggal/daerah">Pindah tempat tinggal/daerah</option>
+                <option value="Donasi dialihkan ke tempat lain">Donasi dialihkan ke tempat lain</option>
+                <option value="Kondisi keluarga/keuangan">Kondisi keluarga/keuangan</option>
+                <option value="Donatur meninggal dunia">Donatur meninggal dunia</option>
+                <option value="Nomor/kontak tidak dapat dihubungi">Nomor/kontak tidak dapat dihubungi</option>
+                <option value="Permintaan donatur">Permintaan donatur</option>
+                <option value="Alasan lainnya">Alasan lainnya</option>
+            </select>
+            <div id="wadahKeteranganNonaktif" style="display:none; margin-top:12px;">
+                <div class="label-modal">Keterangan:</div>
+                <textarea id="keteranganNonaktif" class="input-modal" rows="3" placeholder="Tulis alasan lainnya..."></textarea>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button onclick="tutupModalNonaktif()" class="btn-batal">Batal</button>
+                <button id="btnSimpanNonaktif" onclick="simpanNonaktifkan()" class="btn-simpan">Nonaktifkan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalAktifkan" class="overlay" style="display: none; z-index: 10004;">
+        <div class="modal-box">
+            <h3>Aktifkan Donatur</h3>
+            <p id="namaDonaturAktifkan" class="nama-donatur-modal"></p>
+            <input type="hidden" id="regDonaturAktifkan">
+            <p style="font-size:13px; color:#8E8E93; margin-bottom:20px;">Donatur akan kembali masuk dalam target penjemputan.</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="tutupModalAktifkan()" class="btn-batal">Batal</button>
+                <button id="btnSimpanAktifkan" onclick="simpanAktifkan()" class="btn-simpan">Aktifkan Kembali</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalPilihan" class="overlay" style="display: none; z-index: 10002;">
         <div class="modal-box custom-pilihan-box" style="padding: 25px 15px;">
             <h3 id="judulModalPilihan" style="margin-bottom: 15px; text-align: left; padding-left: 10px;">Pilih</h3>
