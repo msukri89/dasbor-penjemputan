@@ -227,11 +227,12 @@
     
     <div id="modalNonaktif" class="overlay" style="display: none; z-index: 10004;">
         <div class="modal-box">
+            <div class="modal-icon-danger"><i class="fas fa-trash-alt"></i></div>
             <h3>Nonaktifkan Donatur</h3>
             <p id="namaDonaturNonaktif" class="nama-donatur-modal"></p>
             <input type="hidden" id="regDonaturNonaktif">
             <div class="label-modal">Alasan Nonaktif:</div>
-            <select id="pilihanAlasanNonaktif" class="input-modal" onchange="perubahanAlasanNonaktif()">
+            <select id="pilihanAlasanNonaktif" style="display:none;">
                 <option value="">Pilih alasan...</option>
                 <option value="Berhenti berdonasi">Berhenti berdonasi</option>
                 <option value="Tidak bersedia dijemput lagi">Tidak bersedia dijemput lagi</option>
@@ -244,19 +245,23 @@
                 <option value="Permintaan donatur">Permintaan donatur</option>
                 <option value="Alasan lainnya">Alasan lainnya</option>
             </select>
+            <div id="uiPilihanAlasanNonaktif" class="custom-select-trigger lokal input-modal-trigger" onclick="bukaModalPilih('pilihanAlasanNonaktif', 'Pilih Alasan Nonaktif', 'uiPilihanAlasanNonaktif')">
+                <span>Pilih alasan...</span> <i class="fas fa-chevron-down" style="font-size:10px;"></i>
+            </div>
             <div id="wadahKeteranganNonaktif" style="display:none; margin-top:12px;">
                 <div class="label-modal">Keterangan:</div>
                 <textarea id="keteranganNonaktif" class="input-modal" rows="3" placeholder="Tulis alasan lainnya..."></textarea>
             </div>
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button onclick="tutupModalNonaktif()" class="btn-batal">Batal</button>
-                <button id="btnSimpanNonaktif" onclick="simpanNonaktifkan()" class="btn-simpan">Nonaktifkan</button>
+                <button id="btnSimpanNonaktif" onclick="simpanNonaktifkan()" class="btn-danger-modal">Nonaktifkan</button>
             </div>
         </div>
     </div>
 
     <div id="modalAktifkan" class="overlay" style="display: none; z-index: 10004;">
         <div class="modal-box">
+            <div class="modal-icon-success"><i class="fas fa-user-check"></i></div>
             <h3>Aktifkan Donatur</h3>
             <p id="namaDonaturAktifkan" class="nama-donatur-modal"></p>
             <input type="hidden" id="regDonaturAktifkan">
@@ -268,7 +273,7 @@
         </div>
     </div>
 
-    <div id="modalPilihan" class="overlay" style="display: none; z-index: 10002;">
+    <div id="modalPilihan" class="overlay" style="display: none; z-index: 10006;">
         <div class="modal-box custom-pilihan-box" style="padding: 25px 15px;">
             <h3 id="judulModalPilihan" style="margin-bottom: 15px; text-align: left; padding-left: 10px;">Pilih</h3>
             <div id="wadahDaftarPilihan" class="daftar-pilihan-modal"></div>
