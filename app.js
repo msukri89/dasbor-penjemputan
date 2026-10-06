@@ -166,12 +166,21 @@ document.getElementById('btnMasuk').addEventListener('click', () => {
 });
 
 async function eksekusiMasuk(idInput, pinInput, isManual) {
+    const perfMulai = performance.now();
+    window.__lazPerf = { mulai: perfMulai };
     if(isManual) { document.getElementById('btnMasuk').innerText = "Memeriksa Data..."; document.getElementById('pesanError').innerText = "";
     } else { document.getElementById('layarLogin').style.display = 'none'; } 
 
     try {
         const fetchUrl = SCRIPT_URL + `?id=${encodeURIComponent(idInput)}&pin=${encodeURIComponent(pinInput)}`;
-        const res = await fetch(fetchUrl); const json = await res.json();
+        const res = await fetch(fetchUrl);
+        const perfResponse = performance.now();
+        const json = await res.json();
+        const perfJson = performance.now();
+        window.__lazPerf.fetch = perfResponse - perfMulai;
+        window.__lazPerf.parse = perfJson - perfResponse;
+        window.__lazPerf.data = perfJson - perfMulai;
+        console.log('[LAZ PERF] Network:', Math.round(window.__lazPerf.fetch), 'ms | Parse JSON:', Math.round(window.__lazPerf.parse), 'ms');
         
         if(json.status === "ERROR") {
             if(isManual) { document.getElementById('pesanError').innerText = json.pesan; document.getElementById('btnMasuk').innerText = "MASUK APLIKASI";
@@ -199,9 +208,17 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
             document.getElementById('uiFilterBelumPetugas').style.display = 'flex';
         }
 
+        const perfSiap = performance.now();
         isiOpsiPetugas(); 
+        const perfOpsi = performance.now();
         areaFilterGlobal.style.display = 'flex'; 
-        kalkulasiGlobalDasbor(); 
+        kalkulasiGlobalDasbor();
+        const perfSelesai = performance.now();
+        window.__lazPerf.setup = perfSiap - perfJson;
+        window.__lazPerf.options = perfOpsi - perfSiap;
+        window.__lazPerf.calculate = perfSelesai - perfOpsi;
+        window.__lazPerf.total = perfSelesai - perfMulai;
+        console.log('[LAZ PERF] Setup:', Math.round(window.__lazPerf.setup), 'ms | Opsi:', Math.round(window.__lazPerf.options), 'ms | Kalkulasi+Grafik:', Math.round(window.__lazPerf.calculate), 'ms | TOTAL:', Math.round(window.__lazPerf.total), 'ms'); 
 
     } catch (e) { 
         if(isManual){ document.getElementById('pesanError').innerText = "Gagal terhubung ke jaringan."; document.getElementById('btnMasuk').innerText = "MASUK APLIKASI"; }
