@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dasbor-v3';
+const CACHE_NAME = 'dasbor-v4-nonaktif-donatur';
 const urlsToCache = [
   './',
   './index.html',
