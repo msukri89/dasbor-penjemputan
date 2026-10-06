@@ -547,6 +547,27 @@ function bukaModalAktifkan(nama, reg) {
 
 function tutupModalAktifkan() { document.getElementById('modalAktifkan').style.display = 'none'; }
 
+function terapkanStatusLokalDonatur(reg, action, alasan, keterangan) {
+    const regTarget = String(reg).trim();
+    const statusBaru = action === "nonaktifkan_donatur" ? "NONAKTIF" : "AKTIF";
+    const tanggalBaru = new Date().toISOString();
+
+    const daftarSheet = [dataMaster.master_orang, dataMaster.master_kotak];
+    daftarSheet.forEach(daftar => {
+        if(!Array.isArray(daftar)) return;
+        daftar.forEach(d => {
+            if(String(d["Nomor Register"] || "").trim() !== regTarget) return;
+            d["Status"] = statusBaru;
+
+            if(action === "nonaktifkan_donatur") {
+                d["Tanggal Nonaktif"] = tanggalBaru;
+                d["Alasan Nonaktif"] = alasan || "";
+                d["Keterangan Nonaktif"] = keterangan || "";
+            }
+        });
+    });
+}
+
 async function simpanStatusDonatur(action, reg, alasan, keterangan, tombolId, pesanSukses) {
     const btn = document.getElementById(tombolId);
     btn.innerText = "Menyimpan...";
@@ -565,10 +586,19 @@ async function simpanStatusDonatur(action, reg, alasan, keterangan, tombolId, pe
         const res = await fetch(SCRIPT_URL, { method:'POST', body:formData });
         const json = await res.json();
         if(json.status === "SUKSES") {
+            terapkanStatusLokalDonatur(reg, action, alasan, keterangan);
+            resetCacheTurunan();
+
             if(action === "nonaktifkan_donatur") tutupModalNonaktif();
             else tutupModalAktifkan();
+
             tampilkanAlert('sukses', 'Alhamdulillah', pesanSukses);
-            await eksekusiMasuk(idUser, pinUser, false);
+
+            // Tidak perlu login ulang / mengunduh seluruh dataset.
+            // Cukup hitung ulang tampilan dari data lokal yang sudah diperbarui.
+            hitungDaftarDonaturLengkap(false);
+            if(areaDasbor.style.display !== 'none') kalkulasiGlobalDasbor();
+            if(areaRekap.style.display !== 'none') tampilkanRekap();
         } else {
             tampilkanAlert('error', 'Gagal', json.pesan || "Perubahan status gagal.");
         }
