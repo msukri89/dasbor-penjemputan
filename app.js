@@ -471,6 +471,7 @@ function renderDaftarKeLayar(dataList) {
                         <span class="badge" style="${badgeKatStyle}">${d.k}</span>
                         <span class="badge" style="background:#8E8E93; margin-left:3px;">${labelPekan}</span>
                         ${badgeSelesai}
+                        ${badgeNonaktif}
                     </h4>
                     <p>${d.a}</p>
                     ${infoNonaktif}
