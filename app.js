@@ -653,7 +653,11 @@ filterBelumPekan.addEventListener('change', () => { setTimeout(() => { hitungDaf
 filterJenisDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
 filterStatusDonatur.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); });
 filterStatusMaster.addEventListener('change', () => { setTimeout(() => { hitungDaftarDonaturLengkap(false); }, 50); }); 
-document.getElementById('inputCariDonatur').addEventListener('input', () => { hitungDaftarDonaturLengkap(false); });
+let timerCariDonatur = null;
+document.getElementById('inputCariDonatur').addEventListener('input', () => {
+    clearTimeout(timerCariDonatur);
+    timerCariDonatur = setTimeout(() => hitungDaftarDonaturLengkap(false), 180);
+});
 
 function inisialisasiAplikasi() {
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Registration Skip:', err)); }
