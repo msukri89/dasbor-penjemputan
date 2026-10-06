@@ -160,9 +160,47 @@ body { background-color: var(--warna-putih); color: var(--warna-hitam); min-heig
 
 /* Status Donatur - tambahan fitur, tidak mengubah komponen lama */
 .btn-nonaktif, .btn-aktifkan { width:38px; height:38px; border-radius:12px; display:flex; justify-content:center; align-items:center; border:none; cursor:pointer; font-size:15px; }
-.btn-nonaktif { background:#FFF0F0; color:var(--merah-bata); }
+.btn-nonaktif { background:var(--merah-bata); color:#FFFFFF; box-shadow:0 4px 10px rgba(255,59,48,0.20); }
 .btn-aktifkan { background:#EEF8E8; color:var(--hijau-lime); }
 .btn-nonaktif:active, .btn-aktifkan:active { transform:scale(0.95); }
 .badge.status-nonaktif { background:#8E8E93 !important; }
 .info-nonaktif { color:#8E8E93 !important; font-size:11px !important; margin-top:5px; line-height:1.35; }
 .input-modal { resize:vertical; }
+
+/* Modal status donatur - mengikuti komponen modal iOS yang sudah ada */
+.modal-icon-danger, .modal-icon-success {
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 12px auto;
+    font-size:21px;
+}
+.modal-icon-danger { background:#FFF0F0; color:var(--merah-bata); }
+.modal-icon-success { background:#EEF8E8; color:var(--hijau-lime); }
+.input-modal-trigger {
+    width:100%;
+    min-height:44px;
+    padding:12px 15px;
+    font-size:14px;
+    font-weight:500;
+    border:1px solid var(--warna-abu);
+    border-radius:12px;
+    box-shadow:none;
+    justify-content:space-between;
+}
+.btn-danger-modal {
+    flex:1;
+    padding:12px;
+    background:var(--merah-bata);
+    color:#FFFFFF;
+    border:none;
+    border-radius:12px;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    transition:0.2s;
+}
+.btn-danger-modal:active { transform:scale(0.97); opacity:0.92; }
