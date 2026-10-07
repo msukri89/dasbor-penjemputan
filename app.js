@@ -125,6 +125,10 @@ function switchTab(activeNav, activeArea, titleText, isBackAction = false) {
     activeArea.style.display = 'block'; activeNav.classList.add('aktif'); pageTitle.innerText = titleText;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    // Saat kembali ke Dasbor, hitung ulang dari data lokal terbaru.
+    // Penting agar perubahan NONAKTIF/AKTIF langsung terlihat tanpa F5.
+    if (titleText === "Dasbor Utama" && dataMaster) kalkulasiGlobalDasbor();
+
     if (titleText !== "Dasbor Utama" && !isBackAction) {
         if (!historyPushed) { window.history.pushState({ page: 'internal' }, "", ""); historyPushed = true; }
     } else if (titleText === "Dasbor Utama") { historyPushed = false; }
