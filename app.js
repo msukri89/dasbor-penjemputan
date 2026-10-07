@@ -136,11 +136,11 @@ window.addEventListener('popstate', (e) => {
         switchTab(navDasbor, areaDasbor, "Dasbor Utama", true);
         areaFilterGlobal.style.display = 'flex'; 
         if(sesiRole === "ADMIN") document.getElementById('uiFilterPetugas').style.display = 'flex'; 
-        if(dashboardPerluRefresh) { kalkulasiGlobalDasbor(); dashboardPerluRefresh = false; }
+        setTimeout(() => { kalkulasiGlobalDasbor(); dashboardPerluRefresh = false; }, 50);
     }
 });
 
-navDasbor.addEventListener('click', (e) => { e.preventDefault(); switchTab(navDasbor, areaDasbor, "Dasbor Utama"); areaFilterGlobal.style.display = 'flex'; if(dashboardPerluRefresh) { kalkulasiGlobalDasbor(); dashboardPerluRefresh = false; } });
+navDasbor.addEventListener('click', (e) => { e.preventDefault(); switchTab(navDasbor, areaDasbor, "Dasbor Utama"); areaFilterGlobal.style.display = 'flex'; setTimeout(() => { kalkulasiGlobalDasbor(); dashboardPerluRefresh = false; }, 50); });
 navRekap.addEventListener('click', (e) => {
     e.preventDefault(); switchTab(navRekap, areaRekap, "Rapor Petugas"); areaFilterGlobal.style.display = 'flex'; 
     document.getElementById('wadahRekap').innerHTML = `<div class="kartu-rekap"><div class="rekap-header"><span class="skeleton skeleton-text"></span></div><div class="rekap-body"><span class="skeleton" style="width:100%; height:100px; display:block; border-radius:8px;"></span></div></div>`.repeat(3);
