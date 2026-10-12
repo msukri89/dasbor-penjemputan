@@ -212,44 +212,31 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
 }
 
 function isiOpsiPetugas() {
-    // Kolom Kolektor pada master donatur tidak selalu bersih; jangan jadikan
-    // nilainya satu-satunya sumber daftar petugas karena alamat bisa ikut muncul.
-    // Validasi kandidat Kolektor terhadap Nama User yang tercatat pada transaksi.
-    const namaPetugasValid = new Set();
-    const tambahNamaUser = (daftar) => {
-        (Array.isArray(daftar) ? daftar : []).forEach(b => {
-            const nama = String((b && b["Nama User"]) || "").trim();
-            if (nama && !["undefined", "null"].includes(nama.toLowerCase())) namaPetugasValid.add(nama);
-        });
-    };
-    tambahNamaUser(dataMaster.terima_orang);
-    tambahNamaUser(dataMaster.terima_kotak);
-    tambahNamaUser(dataMaster.baru_orang);
-    tambahNamaUser(dataMaster.baru_kotak);
-    if (sesiRole !== "ADMIN" && sesiNama) namaPetugasValid.add(String(sesiNama).trim());
+    // Sumber resmi dropdown adalah daftar yang dikirim backend dari sheet Data_Petugas.
+    // Jangan pernah membangun daftar petugas dari kolom Kolektor/Nama User milik data donatur.
+    const sumberPetugas = Array.isArray(dataMaster.petugas) ? dataMaster.petugas : [];
+    const daftarPetugas = Array.from(new Set(
+        sumberPetugas
+            .map(n => String(n || "").trim())
+            .filter(n => n && !["undefined", "null"].includes(n.toLowerCase()))
+    )).sort((a, b) => a.localeCompare(b, "id"));
 
-    const daftar = new Set();
-    (Array.isArray(dataMaster.master_orang) ? dataMaster.master_orang : []).forEach(b => {
-        const nama = String((b && b.Kolektor) || "").trim();
-        if (nama && namaPetugasValid.has(nama)) daftar.add(nama);
-    });
-    (Array.isArray(dataMaster.master_kotak) ? dataMaster.master_kotak : []).forEach(b => {
-        const nama = String((b && b.Kolektor) || "").trim();
-        if (nama && namaPetugasValid.has(nama)) daftar.add(nama);
-    });
-    // Nama pengguna transaksi juga bisa menjadi petugas meski belum memiliki
-    // donatur yang ditugaskan pada bulan berjalan.
-    namaPetugasValid.forEach(nama => daftar.add(nama));
+    // Petugas non-admin hanya melihat dirinya sendiri pada filter.
+    const daftarUntukFilter = sesiRole === "ADMIN"
+        ? daftarPetugas
+        : (sesiNama ? [String(sesiNama).trim()] : []);
 
-    let html = sesiRole === "ADMIN" ? '<option value="Semua">SEMUA PETUGAS</option>' : '';
-    Array.from(daftar).filter(n => n && !["undefined", "null"].includes(n.toLowerCase()))
-        .sort((a, b) => a.localeCompare(b, "id"))
-        .forEach(n => {
+    const buatOpsi = () => {
+        let html = sesiRole === "ADMIN" ? '<option value="Semua">SEMUA PETUGAS</option>' : '';
+        daftarUntukFilter.forEach(n => {
             const aman = escHtml(n);
             html += `<option value="${aman}">${aman}</option>`;
         });
-    filterPetugas.innerHTML = html;
-    filterBelumPetugas.innerHTML = html;
+        return html;
+    };
+
+    filterPetugas.innerHTML = buatOpsi();
+    filterBelumPetugas.innerHTML = buatOpsi();
 
     if (sesiRole !== "ADMIN") {
         filterPetugas.value = sesiNama;
@@ -263,7 +250,6 @@ function isiOpsiPetugas() {
         document.getElementById('uiFilterBelumPetugas').innerHTML = `<span>SEMUA PETUGAS</span> <i class="fas fa-chevron-down"></i>`;
     }
 }
-
 function isDonaturNonaktif(b) {
     return String(b["Status"] || "").trim().toUpperCase() === "NONAKTIF";
 }
