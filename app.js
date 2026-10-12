@@ -212,22 +212,53 @@ async function eksekusiMasuk(idInput, pinInput, isManual) {
 }
 
 function isiOpsiPetugas() {
-    let s = new Set();
-    dataMaster.master_orang.forEach(b => { if(b.Kolektor) s.add(String(b.Kolektor).trim()); });
-    dataMaster.master_kotak.forEach(b => { if(b.Kolektor) s.add(String(b.Kolektor).trim()); });
-    
-    let htmlGlobal = sesiRole === "ADMIN" ? '<option value="Semua">SEMUA PETUGAS</option>' : '';
-    let htmlLokal = sesiRole === "ADMIN" ? '<option value="Semua">SEMUA PETUGAS</option>' : '';
-    
-    Array.from(s).sort().forEach(n => { if(n && n!=="undefined") { htmlGlobal += `<option value="${n}">${n}</option>`; htmlLokal += `<option value="${n}">${n}</option>`; } });
-    
-    filterPetugas.innerHTML = htmlGlobal; filterBelumPetugas.innerHTML = htmlLokal;
-    
-    if(sesiRole !== "ADMIN") { 
-        filterPetugas.value = sesiNama; filterBelumPetugas.value = sesiNama; 
-        document.getElementById('uiFilterPetugas').innerHTML = `<span>${sesiNama}</span> <i class="fas fa-chevron-down"></i>`;
-        document.getElementById('uiFilterBelumPetugas').innerHTML = `<span>${sesiNama}</span> <i class="fas fa-chevron-down"></i>`;
+    // Kolom Kolektor pada master donatur tidak selalu bersih; jangan jadikan
+    // nilainya satu-satunya sumber daftar petugas karena alamat bisa ikut muncul.
+    // Validasi kandidat Kolektor terhadap Nama User yang tercatat pada transaksi.
+    const namaPetugasValid = new Set();
+    const tambahNamaUser = (daftar) => {
+        (Array.isArray(daftar) ? daftar : []).forEach(b => {
+            const nama = String((b && b["Nama User"]) || "").trim();
+            if (nama && !["undefined", "null"].includes(nama.toLowerCase())) namaPetugasValid.add(nama);
+        });
+    };
+    tambahNamaUser(dataMaster.terima_orang);
+    tambahNamaUser(dataMaster.terima_kotak);
+    tambahNamaUser(dataMaster.baru_orang);
+    tambahNamaUser(dataMaster.baru_kotak);
+    if (sesiRole !== "ADMIN" && sesiNama) namaPetugasValid.add(String(sesiNama).trim());
+
+    const daftar = new Set();
+    (Array.isArray(dataMaster.master_orang) ? dataMaster.master_orang : []).forEach(b => {
+        const nama = String((b && b.Kolektor) || "").trim();
+        if (nama && namaPetugasValid.has(nama)) daftar.add(nama);
+    });
+    (Array.isArray(dataMaster.master_kotak) ? dataMaster.master_kotak : []).forEach(b => {
+        const nama = String((b && b.Kolektor) || "").trim();
+        if (nama && namaPetugasValid.has(nama)) daftar.add(nama);
+    });
+    // Nama pengguna transaksi juga bisa menjadi petugas meski belum memiliki
+    // donatur yang ditugaskan pada bulan berjalan.
+    namaPetugasValid.forEach(nama => daftar.add(nama));
+
+    let html = sesiRole === "ADMIN" ? '<option value="Semua">SEMUA PETUGAS</option>' : '';
+    Array.from(daftar).filter(n => n && !["undefined", "null"].includes(n.toLowerCase()))
+        .sort((a, b) => a.localeCompare(b, "id"))
+        .forEach(n => {
+            const aman = escHtml(n);
+            html += `<option value="${aman}">${aman}</option>`;
+        });
+    filterPetugas.innerHTML = html;
+    filterBelumPetugas.innerHTML = html;
+
+    if (sesiRole !== "ADMIN") {
+        filterPetugas.value = sesiNama;
+        filterBelumPetugas.value = sesiNama;
+        document.getElementById('uiFilterPetugas').innerHTML = `<span>${escHtml(sesiNama)}</span> <i class="fas fa-chevron-down"></i>`;
+        document.getElementById('uiFilterBelumPetugas').innerHTML = `<span>${escHtml(sesiNama)}</span> <i class="fas fa-chevron-down"></i>`;
     } else {
+        filterPetugas.value = "Semua";
+        filterBelumPetugas.value = "Semua";
         document.getElementById('uiFilterPetugas').innerHTML = `<span>SEMUA PETUGAS</span> <i class="fas fa-chevron-down"></i>`;
         document.getElementById('uiFilterBelumPetugas').innerHTML = `<span>SEMUA PETUGAS</span> <i class="fas fa-chevron-down"></i>`;
     }
