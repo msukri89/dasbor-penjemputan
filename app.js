@@ -324,6 +324,17 @@ function kalkulasiGlobalDasbor() {
     if(dataMaster.baru_orang) { dataMaster.baru_orang.forEach(b => { let pet = String(b.Kolektor || b["Nama User"] || "").trim(); let idD = String(b["Nomor Register"] || b["Kode Donatur"] || "").trim(); let pek = b.Pekan ? String(b.Pekan).trim() : (masterPekanMap[idD] || getPekan(b.Tanggal)); if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) { if(String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase().includes("RUTIN")) dBaruRutin++; } }); }
     if(dataMaster.baru_kotak) { dataMaster.baru_kotak.forEach(b => { let pet = String(b.Kolektor || b["Nama User"] || "").trim(); let idD = String(b["Nomor Register"] || b["Kode Donatur"] || "").trim(); let pek = b.Pekan ? String(b.Pekan).trim() : (masterPekanMap[idD] || getPekan(b.Tanggal)); if((fPet === "Semua" || pet === fPet) && (fPek === "Total" || pek === fPek)) { let sp = String(b.Spesifikasi || b["Jenis Donatur"] || "").toUpperCase(); if(sp.includes("IKP")) dBaruIKP++; if(sp.includes("IIP")) dBaruIIP++; } }); }
 
+    // Hitung donatur nonaktif dari kedua master. Mengikuti filter petugas,
+    // tetapi tidak mengikuti filter pekan karena status nonaktif adalah kondisi saat ini.
+    const daftarNonaktif = [
+        ...(Array.isArray(dataMaster.master_orang) ? dataMaster.master_orang : []),
+        ...(Array.isArray(dataMaster.master_kotak) ? dataMaster.master_kotak : [])
+    ].filter(b =>
+        isDonaturNonaktif(b) &&
+        (fPet === "Semua" || String(b.Kolektor || "").trim() === fPet)
+    );
+    document.getElementById('teksDonaturNonaktif').innerText = daftarNonaktif.length.toLocaleString('id-ID');
+
     let totalKewajiban = kR + kK1 + kK2, totalSisa = sisaRutin + sisaIKP + sisaIIP;
     
     document.getElementById('teksPersentase').innerText = totalKewajiban > 0 ? Math.round(((totalKewajiban - totalSisa) / totalKewajiban) * 100) + "%" : "0%";
